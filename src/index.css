@@ -1,2 +1,10 @@
 @import "tailwindcss";
 
+@theme{
+  --color-oniria_blue: #214d72;
+  --color-oniria_purple: #9675bc;
+  --color-oniria_pink: #f1b3be;
+  --color-oniria_lightpink: #ffe0db;
+  --color-oniria_darkblue: #252c3e;
+
+}
