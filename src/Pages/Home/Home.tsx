@@ -1,6 +1,7 @@
 import React from 'react'
 import Header from '../../Components/Header/Header'
-import Feature from '../../Components/Header/feature'
+import Feature from '../../Components/Header/Components/Feature'
+
 const Home = () => {
   return (
     < >
