@@ -1,59 +1,51 @@
 import React from "react";
-import {Link} from 'react-router-dom'
-import { LuBrain } from "react-icons/lu";
-import { FiInfo } from "react-icons/fi";
-import { RiUserCommunityLine } from "react-icons/ri";
-import { MdEmojiEmotions } from "react-icons/md";
 
-const features = [
-  {
-    Icon: LuBrain,
-    title: "Análisis de sueños",
-    description:
-      "Descubre patrones ocultos en tus sueños con nuestro análisis avanzado en IA.",
-    Icon2: FiInfo
-  },
-  {
-    Icon: RiUserCommunityLine,
-    title: "Comunidad",
-    description:
-      "Comparte tus experiencias y conecta con personas que tienen sueños similiares",
-    Icon2: FiInfo
-  },
-  {
-    Icon: MdEmojiEmotions,
-    title: "Emociones",
-    description:
-      "Mapea las emociones presentes en tus sueños y comprende su impacto en tu vida.",
-    Icon2: FiInfo
-  },
-];
+interface FeatureProps {
+  number: number;
+  title: string;
+  color: string;
+  description: string;
+  Icon: React.ElementType;
+}
 
-const Feature: React.FC = () => {
+const Feature: React.FC<FeatureProps> = ({
+  number,
+  title,
+  description,
+  color,
+  Icon,
+}) => {
   return (
-    <section className="bg-white py-16 px-6">
-      <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-4xl font-bold text-gray-900 mb-12">Descubre nuestras funciones</h2>
-        <div className="grid md:grid-cols-3 gap-10">
-          {features.map(({ Icon, title, description, Icon2 }, idx) => (
-            <div
-              key={idx}
-              className="bg-oniria_lightpink p-8 min-h-[320px] rounded-lg shadow-md hover:shadow-lg transition" >
-              <div className="flex justify-center mb-4">
-                <Icon className="h-10 w-10 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-oniria_darkblue mb-2">{title}</h3>
-              <p className="text-gray-600 text-base">{description}</p>
-             <div className="flex justify-center mb-4 mt-15 bg-oniria_pink rounded-lg opacity-50">
-                <ul>
-                 <li><Link to={'/signup'}><Icon2 className="h-12 w-10 text-blue-600" /></Link></li>
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="bg-[#FEEFE8] p-4 min-h-[320px] w-full md:w-1/3 rounded-3xl shadow-md hover:shadow-lg transition text-center flex flex-col items-center justify-between">
+      
+      {/* Número en círculo */}
+      <div 
+        className="text-white font-bold w-16 h-16 rounded-full flex items-center justify-center text-lg mb-4"
+        style={{ backgroundColor: color }}
+      >
+        {number.toString().padStart(2, '0')}
       </div>
-    </section>
+
+      {/* Título */}
+      <h3 className="text-2xl font-semibold italic text-oniria_darkblue mb-2">
+        {title}
+      </h3>
+
+      {/* Descripción */}
+      <div className="w-4/5 md:w-2/3">
+        <p className="text-gray-700 text-base mb-6">
+          {description}
+        </p>
+      </div>
+      
+      {/* Ícono en recuadro */}
+      <div className="bg-oniria_lightpink bg-opacity-30 p-4 rounded-lg min-w-36 flex items-center justify-center">
+        <Icon 
+          className="w-10 h-10" 
+          style={{ color: color }}
+        />
+      </div>
+    </div>
   );
 };
 
