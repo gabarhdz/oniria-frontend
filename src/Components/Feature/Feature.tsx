@@ -27,13 +27,13 @@ const Feature: React.FC<FeatureProps> = ({
       </div>
 
       {/* Título */}
-      <h3 className="text-2xl font-semibold italic text-oniria_darkblue mb-2">
+      <h3 className="text-2xl font-semibold italic text-oniria_darkblue mb-2 font-inter">
         {title}
       </h3>
 
       {/* Descripción */}
       <div className="w-4/5 md:w-2/3">
-        <p className="text-gray-700 text-base mb-6">
+        <p className="text-gray-700 text-base mb-6 font-playfair">
           {description}
         </p>
       </div>

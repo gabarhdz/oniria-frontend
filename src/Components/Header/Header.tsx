@@ -7,13 +7,13 @@ const Header = () => {
     const [menu, setMenu] = useState(false);
   return (
     <>
-    <nav className='bg-oniria_blue text-oniria_lightpink h-[80px]'>
+    <nav className='bg-oniria_blue text-oniria_lightpink h-[80px] font-playfair'>
         <div className='flex md:hidden justify-between items-center p-4 h-full relative'>
     {/* Logo y botón del menú */}
     <div>
         <ul className='flex gap-4'>
             <li><Link to={'/'}>Logo</Link></li>
-            <li className='font-black italic text-3xl'><Link to={'/'}>ONIRIA</Link></li>
+            <li className='font-playfair font-black italic text-3xl'><Link to={'/'}>ONIRIA</Link></li>
         </ul>     
     </div>
     
