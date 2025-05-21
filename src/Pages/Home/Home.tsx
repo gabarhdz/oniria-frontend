@@ -1,6 +1,7 @@
 import React from 'react'
 import Header from '../../Components/Header/Header'
 import Feature from '../../Components/Feature/Feature'
+
 import { getfeatureData } from '../../data/featureData';
 
 const featureData = getfeatureData();
@@ -21,6 +22,7 @@ const Home = () => {
           />
         ))} 
       </div>
+
     </>
   )
 }
