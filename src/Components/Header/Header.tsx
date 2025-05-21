@@ -1,4 +1,4 @@
-import {React,useState} from 'react'
+import {useState} from 'react'
 import {Link} from 'react-router-dom'
 import { IoClose } from "react-icons/io5";
 import { MdOutlineMenu } from "react-icons/md";
@@ -96,14 +96,14 @@ const Header = () => {
             </ul>     
         </div>
         <div className='flex items-center'>
-            <ul className='flex gap-20'>
+            <ul className='flex gap-20 text-[16px] font-inter'>
                 <li><Link to={'/'}>Chatbot</Link></li>
                 <li><Link to={'/'}>Análisis</Link></li>
                 <li><Link to={'/'}>Psicólogos</Link></li>
                 <li><Link to={'/'}>Comunidad</Link></li>
             </ul>
         </div>
-        <div>
+        <div className='flex items-center mr-12'>
             <ul className='flex gap-4'>
                 <li className='bg-oniria_lightpink text-oniria_blue'>
                     <Link className='w-7 h-2 px-4 py-1 rounded border-2 hover:bg-oniria_darkblue duration-300 ease-in-out border-oniria_darkblue bg-oniria_lightpink text-oniria_purple' to={'/signup'}>Sign Up</Link>
