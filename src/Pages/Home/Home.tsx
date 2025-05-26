@@ -24,6 +24,14 @@ const Home = () => {
           />
         ))} 
       </div>
+        <div className="flex flex-col items-center justify-center  text-center">
+          <h2 className="font-playfair text-oniria_darkblue text-5xl font-bold italic">
+            Mapea tus emociones
+          </h2>
+          <div>
+            <img src="../../../public/img/emotions.svg" alt="Emociones" className="w-[650px]" />
+          </div>
+        </div>
 
         <Footer />
     </>
