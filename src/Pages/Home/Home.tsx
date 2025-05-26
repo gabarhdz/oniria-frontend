@@ -29,12 +29,12 @@ const Home = () => {
           />
         ))} 
       </div>
-      <Timeline />
-        
-
 
         <OniriaChatbot />
-  <div className="flex flex-col items-center justify-center  text-center">
+        
+        <Timeline />
+
+       <div className="flex flex-col items-center justify-center  text-center">
           <h2 className="font-playfair text-oniria_darkblue text-5xl font-bold italic mt-10 mb-8">
             Mapea tus emociones
           </h2>
