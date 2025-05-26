@@ -14,7 +14,10 @@ const Home = () => {
     <>
       <Header /> 
       <HeroSection />
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-center min-h-screen p-4 md:p-16">
+       <h2 className="italic text-5xl font-playfair text-center text-oniria_darkblue mt-30">
+        Descubre nuestras funciones
+      </h2>
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-center min-h-screen p-4 md:p-16 -mt-22 -mb-10">
         {featureData.map((feature) => (
           <Feature
             key={feature.number}
@@ -32,11 +35,11 @@ const Home = () => {
 
         <OniriaChatbot />
   <div className="flex flex-col items-center justify-center  text-center">
-          <h2 className="font-playfair text-oniria_darkblue text-5xl font-bold italic">
+          <h2 className="font-playfair text-oniria_darkblue text-5xl font-bold italic mt-10 mb-8">
             Mapea tus emociones
           </h2>
           <div>
-            <img src="../../../public/img/emotions.svg" alt="Emociones" className="w-[650px]" />
+            <img src="../../../public/img/emotions.svg" alt="Emociones" className="w-[650px] mb-8" />
           </div>
         </div>
         <Footer />

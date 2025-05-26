@@ -8,11 +8,11 @@ const timeline = [
 export default function Timeline() {
   return (
     <div className="w-full bg-[#fae5df] py-16 px-4 text-center">
-      <h2 className="text-4xl font-playfair text-oniria_darkblue mb-12">
+      <h2 className="text-4xl font-playfair text-oniria_darkblue mb-12 mt-5">
         Sigue tu progreso
       </h2>
 
-      <div className="relative flex justify-between items-start max-w-6xl mx-auto">
+      <div className="relative flex justify-between items-start max-w-6xl mx-auto mb-20 mt-16 font-inter">
         {/* Línea central */}
         <div className="absolute top-8 left-0 right-0 h-1 bg-[#c29cd9] z-0" />
 
