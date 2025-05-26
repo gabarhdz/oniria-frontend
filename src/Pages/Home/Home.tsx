@@ -4,6 +4,7 @@ import Feature from '../../Components/Feature/Feature'
 import Footer from '../../Components/Footer/Footer';
 import { getfeatureData } from '../../data/featureData';
 import HeroSection from '../../Components/Hero/Hero';
+import OniriaChatbot from '../../Components/Chatbot/Chatbot';
 
 const featureData = getfeatureData();
 
@@ -24,7 +25,7 @@ const Home = () => {
           />
         ))} 
       </div>
-
+        <OniriaChatbot />
         <Footer />
     </>
   )
