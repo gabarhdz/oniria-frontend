@@ -5,6 +5,7 @@ import Footer from '../../Components/Footer/Footer';
 import { getfeatureData } from '../../data/featureData';
 import HeroSection from '../../Components/Hero/Hero';
 import OniriaChatbot from '../../Components/Chatbot/Chatbot';
+import Timeline from '../../Components/TimeLine/TimeLine';
 
 const featureData = getfeatureData();
 
@@ -25,7 +26,7 @@ const Home = () => {
           />
         ))} 
       </div>
-
+      <Timeline />
         
 
 
