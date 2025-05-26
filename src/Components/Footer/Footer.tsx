@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
             <a href="#" className="text-sm hover:text-oniria_purple font-inter">Contactos</a>
             <a href="#" className="text-sm hover:text-oniria_purple font-inter">Emociones</a>
             <a href="#" className="text-sm hover:text-oniria_purple font-inter">Sugerencias</a>
-            <a href="#" className="text-sm hover:text-oniria_purple font-inter">Emociones</a>
+            <a href="#" className="text-sm hover:text-oniria_purple font-inter">Timeline</a>
           </div>
           
           <div className="flex space-x-4">
