@@ -7,12 +7,16 @@ const Header = () => {
     const [menu, setMenu] = useState(false);
   return (
     <>
-    <nav className='bg-oniria_blue text-oniria_lightpink h-[80px] font-playfair'>
+    <nav className='bg-oniria_darkblue text-oniria_lightpink h-[90px] font-playfair'>
         <div className='flex md:hidden justify-between items-center p-4 h-full relative'>
     {/* Logo y botón del menú */}
     <div>
-        <ul className='flex gap-4'>
-            <li><Link to={'/'}>Logo</Link></li>
+        <ul className='flex gap-4 items-center'>
+            <li>
+                <Link to={'/'}>
+                    <img src="/img/Logo.svg" alt="ONIRIA Logo" className="w-full h-full object-contain" />
+                </Link>
+            </li>
             <li className='font-playfair font-black italic text-3xl'><Link to={'/'}>ONIRIA</Link></li>
         </ul>     
     </div>
@@ -90,9 +94,16 @@ const Header = () => {
 </div>
     <div className='hidden md:flex md:justify-between md:items-center md:p-4 h-full'> 
         <div>
-            <ul className='flex gap-4'>
-                <li><Link to={'/'}>Logo</Link></li>
-                <li className='font-black italic text-3xl'><Link to={'/'}>ONIRIA</Link></li>
+            <ul className='flex gap-4 items-center'>
+                <li>
+                    <Link to={'/'}>
+                       <img 
+                  src="../../public/img/LogoA.svg" 
+                  className="w-90 h-90 z-10 transition-all duration-300 group-hover:brightness-110 ml-6 -mr-15 mt-2"
+                />
+                    </Link>
+                </li>
+              
             </ul>     
         </div>
         <div className='flex items-center'>
