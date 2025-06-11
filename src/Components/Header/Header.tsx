@@ -14,7 +14,7 @@ const Header = () => {
         <ul className='flex gap-4 items-center'>
             <li>
                 <Link to={'/'}>
-                    <img src="/img/Logo.svg" alt="ONIRIA Logo" className="w-full h-full object-contain" />
+                    <img src="/img/Oniria.svg" alt="ONIRIA Logo" className="w-20 h-20" />
                 </Link>
             </li>
             <li className='font-playfair font-black italic text-3xl'><Link to={'/'}>ONIRIA</Link></li>
@@ -93,17 +93,17 @@ const Header = () => {
     )}
 </div>
     <div className='hidden md:flex md:justify-between md:items-center md:p-4 h-full'> 
-        <div>
+        <div className="ml-6">
             <ul className='flex gap-4 items-center'>
                 <li>
-                    <Link to={'/'}>
+                    <Link to={'/'} className="flex items-center">
                        <img 
-                  src="../../public/img/LogoA.svg" 
-                  className="w-90 h-90 z-10 transition-all duration-300 group-hover:brightness-110 ml-6 -mr-15 mt-2"
+                  src="../../public/img/Oniria.svg" 
+                  className="w-25 h-25 object-contain"
                 />
+                        <span className="font-playfair font-black italic text-2xl ml-3 text-oniria_lightpink">ONIRIA</span>
                     </Link>
                 </li>
-              
             </ul>     
         </div>
         <div className='flex items-center'>
@@ -116,11 +116,11 @@ const Header = () => {
         </div>
         <div className='flex items-center mr-12'>
             <ul className='flex gap-4'>
-                <li className='bg-oniria_lightpink text-oniria_blue'>
-                    <Link className='w-7 h-2 px-4 py-1 rounded border-2 hover:bg-oniria_darkblue duration-300 ease-in-out border-oniria_darkblue bg-oniria_lightpink text-oniria_purple' to={'/signup'}>Sign Up</Link>
+                <li>
+                    <Link className='inline-block px-4 py-2 rounded border-2 hover:bg-oniria_darkblue duration-300 ease-in-out border-oniria_darkblue bg-oniria_lightpink text-oniria_purple' to={'/signup'}>Sign Up</Link>
                 </li>
-                <li className='bg-oniria_blue'>
-                    <Link className='w-7 h-2 px-4 py-1 rounded border-2 hover:bg-oniria_lightpink hover:text-oniria_darkblue duration-300 ease-in-out border-oniria_lightpink' to={'/login'}>Log In</Link>
+                <li>
+                    <Link className='inline-block px-4 py-2 rounded border-2 hover:bg-oniria_lightpink hover:text-oniria_darkblue duration-300 ease-in-out border-oniria_lightpink bg-oniria_darkblue text-oniria_lightpink' to={'/login'}>Log In</Link>
                 </li>
             </ul>
             </div>

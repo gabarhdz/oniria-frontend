@@ -16,8 +16,8 @@ const Feature: React.FC<FeatureProps> = ({
   Icon,
 }) => {
   return (
-    <div className="bg-[#FEEFE8] p-4 min-h-[320px] w-full md:w-1/3 rounded-3xl shadow-md hover:shadow-lg transition text-center flex flex-col items-center justify-between">
-      
+    <div className="bg-[#FEEFE8] p-4 min-h-[320px] w-full md:w-1/3 rounded-3xl shadow-md hover:shadow-lg transition text-center flex flex-col items-center justify-between mb-10 md:mb-0">
+             
       {/* Número en círculo */}
       <div 
         className="text-white font-bold w-16 h-16 rounded-full flex items-center justify-center text-lg mb-4"
@@ -37,11 +37,11 @@ const Feature: React.FC<FeatureProps> = ({
           {description}
         </p>
       </div>
-      
+             
       {/* Ícono en recuadro */}
       <div className="bg-oniria_lightpink bg-opacity-30 p-4 rounded-lg min-w-36 flex items-center justify-center">
         <Icon 
-          className="w-10 h-10" 
+          className="w-10 h-10"
           style={{ color: color }}
         />
       </div>

@@ -14,9 +14,9 @@ const Home = () => {
     <>
       <Header /> 
       <HeroSection />
-       <h2 className="italic text-5xl font-playfair text-center text-oniria_darkblue mt-30">
+       <h2 className="italic text-3xl md:text-5xl font-playfair text-center text-oniria_darkblue mt-10 md:mt-30 pb-8 md:pb-45 mb-25 md:-mb-60">
         Descubre nuestras funciones
-      </h2>
+       </h2>
       <div className="flex flex-col md:flex-row gap-4 items-center justify-center min-h-screen p-4 md:p-16 -mt-22 -mb-10">
         {featureData.map((feature) => (
           <Feature
