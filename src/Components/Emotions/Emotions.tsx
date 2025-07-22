@@ -2,28 +2,28 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Heart, Zap, CloudRain, Sun, Moon, Sparkles, Wind, Star } from 'lucide-react';
 
 const emotionConfig = {
-  joy: { color: 'var(--color-oniria_lightpink)', icon: Sun, textColor: 'var(--color-oniria_darkblue)' },
-  sadness: { color: 'var(--color-oniria_blue)', icon: CloudRain, textColor: 'white' },
-  anger: { color: '#e74c3c', icon: Zap, textColor: 'white' },
-  fear: { color: 'var(--color-oniria_darkblue)', icon: Moon, textColor: 'white' },
-  love: { color: 'var(--color-oniria_pink)', icon: Heart, textColor: 'var(--color-oniria_darkblue)' },
-  excitement: { color: '#ff6b6b', icon: Sparkles, textColor: 'white' },
-  calm: { color: 'var(--color-oniria_purple)', icon: Wind, textColor: 'white' },
-  anxiety: { color: '#6c5ce7', icon: Star, textColor: 'white' }
+  diversion: { color: 'var(--color-oniria_lightpink)', icon: Sun, textColor: 'var(--color-oniria_darkblue)' },
+  tristeza: { color: 'var(--color-oniria_blue)', icon: CloudRain, textColor: 'white' },
+  ira: { color: '#e74c3c', icon: Zap, textColor: 'white' },
+  miedo: { color: 'var(--color-oniria_darkblue)', icon: Moon, textColor: 'white' },
+  amor: { color: 'var(--color-oniria_pink)', icon: Heart, textColor: 'var(--color-oniria_darkblue)' },
+  emocion: { color: '#ff6b6b', icon: Sparkles, textColor: 'white' },
+  calma: { color: 'var(--color-oniria_purple)', icon: Wind, textColor: 'white' },
+  ansiedad: { color: '#6c5ce7', icon: Star, textColor: 'white' }
 } as const;
 
 type EmotionKey = keyof typeof emotionConfig;
 
 const Emotions = () => {
   const [emotions, setEmotions] = useState({
-    joy: 50,
-    sadness: 30,
-    anger: 20,
-    fear: 10,
-    love: 60,
-    excitement: 40,
-    calm: 70,
-    anxiety: 25
+    diversion: 50,
+    tristeza: 30,
+    ira: 20,
+    miedo: 10,
+    amor: 60,
+    emocion: 40,
+    calma: 70,
+    ansiedad: 25
   });
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -145,7 +145,7 @@ const Emotions = () => {
               backgroundClip: 'text'
             }}
           >
-            Dream State Emotions
+            Mapea tus emociones
           </h1>
           <p 
             className="text-lg sm:text-xl opacity-90 px-4"
@@ -378,9 +378,9 @@ const Emotions = () => {
                   fontFamily: 'var(--font-inter)'
                 }}
               >
-                {emotions.joy > 70 && emotions.calm > 60 
+                {emotions.diversion > 70 && emotions.calma > 60 
                   ? "Tu estado onírico refleja armonía y serenidad. Los sueños pueden ser particularmente vividos y positivos."
-                  : emotions.sadness > 50 || emotions.anxiety > 60
+                  : emotions.tristeza > 50 || emotions.ansiedad > 60
                   ? "Detectamos cierta turbulencia emocional. Considera técnicas de relajación antes de dormir."
                   : "Tu equilibrio emocional es estable. Estado ideal para sueños reparadores y creativos."
                 }
