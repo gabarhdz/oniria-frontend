@@ -6,6 +6,7 @@ import { getfeatureData } from '../../data/featureData';
 import HeroSection from '../../Components/Hero/Hero';
 import OniriaChatbot from '../../Components/Chatbot/Chatbot';
 import Timeline from '../../Components/TimeLine/TimeLine';
+import Emotions from '../../Components/Emotions/Emotions';
 
 const featureData = getfeatureData();
 
@@ -34,14 +35,7 @@ const Home = () => {
         
         <Timeline />
 
-       <div className="flex flex-col items-center justify-center  text-center">
-          <h2 className="font-playfair text-oniria_darkblue text-5xl font-bold italic mt-10 mb-8">
-            Mapea tus emociones
-          </h2>
-          <div>
-            <img src="../../../public/img/emotions.svg" alt="Emociones" className="w-[650px] mb-8" />
-          </div>
-        </div>
+       <Emotions />
         <Footer />
     </>
   )
