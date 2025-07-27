@@ -465,13 +465,15 @@ const HeroSection: React.FC = () => {
 
             {/* Botón con efecto shimmer */}
             <FadeIn delay={0.5} direction="up">
-              <ShimmerButton 
-                className={`${theme.buttonBg} text-white font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-lg text-lg sm:text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300`}
+            <Link to="/signup">
+              <ShimmerButton  className={`${theme.buttonBg} text-white font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-lg text-lg sm:text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300`}
                 isDarkMode={isDarkMode}
               >
-                Comenzar ahora
-              </ShimmerButton>
-            </FadeIn>
+              Comenzar ahora
+             </ShimmerButton>
+          </Link>
+          </FadeIn>
+
           </div>
 
           {/* Right Content */}
