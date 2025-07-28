@@ -329,7 +329,7 @@ const LogIn: React.FC = () => {
     setShowAlert({
       type: 'error',
       title: 'Recuperación de contraseña',
-      message: 'La funcionalidad de recuperación de contraseña estará disponible próximamente.\n\n¿Necesitas ayuda? Contacta con nuestro equipo de soporte.'
+      message: 'No hay.\n\n.'
     });
   };
 
@@ -386,16 +386,11 @@ const LogIn: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full blur-2xl opacity-15 animate-breath-slow group-hover:opacity-30 transition-opacity duration-1000"></div>
             <div className="absolute inset-3 bg-gradient-to-r from-[#f1b3be] via-[#ffe0db] to-[#9675bc] rounded-full blur-xl opacity-25 animate-breath-slow group-hover:opacity-40 transition-opacity duration-1000" style={{ animationDelay: '1s' }}></div>
             
-             <Link to="/">
-                <div className="relative bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-3xl p-2 shadow-2xl group-hover:scale-105 transition-transform duration-500 w-32 h-32 flex items-center justify-center">
-                   <img 
-                     src='/img/Oniria.svg' 
-                     alt="Oniria Logo" 
-                     className="w-28 h-28 object-contain drop-shadow-2xl filter" 
-                    style={{ filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 8px rgba(150, 117, 188, 0.4))' }} 
-                     />
+              <Link to='/'>
+                <div className="relative bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-3xl p-2 shadow-2xl group-hover:scale-105 transition-transform duration-500 w-40 h-40 flex items-center justify-center">
+                  <img src='/img/Oniria.svg' alt="Oniria Logo" className="w-36 h-36 object-contain drop-shadow-2xl filter" style={{ filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 8px rgba(150, 117, 188, 0.4))' }} />
                 </div>
-             </Link>
+              </Link>
             
             <div className="absolute -top-2 -right-2 w-3 h-3 bg-[#ffe0db] rounded-full animate-float-gentle opacity-80"></div>
             <div className="absolute -bottom-3 -left-3 w-2 h-2 bg-[#f1b3be] rounded-full animate-float-gentle opacity-70" style={{ animationDelay: '1s' }}></div>
@@ -644,7 +639,7 @@ const LogIn: React.FC = () => {
             <div className="relative bg-white/30 backdrop-blur-md rounded-lg border border-[#f1b3be]/20 p-4">
               <div className="text-center text-xs text-[#252c3e]/70">
                 <p className="mb-2 flex items-center justify-center space-x-2">
-                  <Lock className="w-3 h-3 text-[#9675bc]" />
+                  <Lock className="w-3 h-3 text-[#9466c9]" />
                   <span>Al iniciar sesión, confirmas que aceptas nuestros</span>
                 </p>
                 <div className="space-x-1 flex items-center justify-center flex-wrap">
@@ -677,7 +672,7 @@ const LogIn: React.FC = () => {
                 <div className="flex items-center justify-center mt-3 space-x-4 text-[#252c3e]/60">
                   <div className="flex items-center space-x-1">
                     <Moon className="w-3 h-3 animate-pulse" />
-                    <span>Noctiria 2024</span>
+                    <span>Noctiria 2025</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <Heart className="w-3 h-3 text-[#f1b3be] animate-pulse" />

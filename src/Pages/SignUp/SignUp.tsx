@@ -458,7 +458,7 @@ const SignUp: React.FC = () => {
     const requirements = [
       { test: password.length >= 12, text: 'Mínimo 12 caracteres' },
       { test: /[A-Z]/.test(password), text: 'Al menos 1 mayúscula' },
-      { test: /\d.*\d.*\d/.test(password), text: 'Al menos 3 números' },
+      { test: /\d/.test(password), text: 'Al menos 1 número' },
       { test: /[!@#$%^&*()_+\-=\[\]{}|;:'",.<>\/?]/.test(password), text: 'Al menos 1 carácter especial' }
     ];
     return requirements;
@@ -603,8 +603,8 @@ const SignUp: React.FC = () => {
                     {...registerField('password', { 
                       required: 'Tu llave secreta es esencial para proteger tus sueños',
                       pattern: {
-                        value: /^(?=(.*[A-Z]){1,})(?=(.*\d){3,})(?=(.*[!@#$%^&*()_+\-=\[\]{}|;:'",.<>\/?]){1,}).{12,}$/,
-                        message: 'Tu llave debe ser poderosa: 12+ caracteres, 1 mayúscula, 3 números y 1 símbolo mágico'
+                        value: /^(?=(.*[A-Z]){1,})(?=(.*\d){1,})(?=(.*[!@#$%^&*()_+\-=\[\]{}|;:'",.<>\/?]){1,}).{12,}$/,
+                        message: 'Tu llave debe ser poderosa: 12+ caracteres, 1 mayúscula, 1 número y 1 símbolo mágico'
                       }
                     })}
                     type={showPassword ? "text" : "password"}
