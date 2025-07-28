@@ -10,7 +10,7 @@ import Emotions from '../../Components/Emotions/Emotions';
 
 const featureData = getfeatureData();
 
-const Home = () => {
+const Home1 = () => {
   return (
     <>
       <Header /> 
@@ -41,4 +41,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Home1;

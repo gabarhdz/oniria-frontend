@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { User, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Moon, Shield, LogIn as LoginIcon, Sparkles, Star, Heart } from 'lucide-react';
 
 interface LoginData {
@@ -157,13 +159,6 @@ const EnhancedBackgroundEffects: React.FC = () => {
 const DreamAlert: React.FC<{ type: 'success' | 'error'; message: string; title: string; onClose: () => void }> = ({ 
   type, message, title, onClose 
 }) => {
-  const handleClose = () => {
-    onClose();
-    if (type === 'success') {
-      window.location.href = '/';
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
       <div className="relative max-w-md w-full mx-4">
@@ -197,7 +192,7 @@ const DreamAlert: React.FC<{ type: 'success' | 'error'; message: string; title: 
           
           <div className="flex justify-end mt-6">
             <button
-              onClick={handleClose}
+              onClick={onClose}
               className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${
                 type === 'success'
                   ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white'
@@ -220,6 +215,9 @@ const DreamAlert: React.FC<{ type: 'success' | 'error'; message: string; title: 
 };
 
 const LogIn: React.FC = () => {
+  const navigate = useNavigate();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -230,12 +228,10 @@ const LogIn: React.FC = () => {
     type: 'success' | 'error'; 
     message: string; 
     title: string; 
-    userData?: { username: string; profile_pic?: string; }; 
   } | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const API_LOGIN_URL = 'http://127.0.0.1:8000/auth/jwt/create';
-  const API_USER_URL = 'http://127.0.0.1:8000/api/users/me'; // Endpoint para obtener datos del usuario
+  const API_LOGIN_URL = 'http://127.0.0.1:8000/api/auth/jwt/create';
 
   const {
     register: registerField,
@@ -248,6 +244,13 @@ const LogIn: React.FC = () => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Redirigir si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const loginUser = async (loginData: LoginData) => {
     setIsLoading(true);
@@ -263,23 +266,6 @@ const LogIn: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        if (data.access) {
-          localStorage.setItem('authToken', data.access);
-          localStorage.setItem('accessToken', data.access);
-        }
-        
-        if (data.refresh) {
-          localStorage.setItem('refreshToken', data.refresh);
-        }
-        
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-        }
-        
-        if (data.token) {
-          localStorage.setItem('authToken', data.token);
-        }
-        
         return data;
       } else {
         const errorMessage = data.non_field_errors?.[0] || 
@@ -305,12 +291,27 @@ const LogIn: React.FC = () => {
     
     try {
       const result = await loginUser(data);
-      setShowAlert({
-        type: 'success',
-        title: '¡Bienvenido de vuelta!',
-        message: `Hola de nuevo, soñador. Tu sesión ha sido iniciada exitosamente.\n\nTus sueños te esperan en Noctiria...`
-      });
-      reset();
+      
+      // Usar el método login del contexto de autenticación
+      const token = result.access || result.token;
+      if (token) {
+        await login(token, result.user);
+        
+        setShowAlert({
+          type: 'success',
+          title: '¡Bienvenido de vuelta!',
+          message: `Hola de nuevo, soñador. Tu sesión ha sido iniciada exitosamente.\n\nTus sueños te esperan en Noctiria...`
+        });
+        
+        reset();
+        
+        // Redirigir después de un pequeño delay para mostrar el mensaje
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 2000);
+      } else {
+        throw new Error('No se recibió el token de autenticación');
+      }
       
     } catch (err) {
       console.error('Error de login:', err);
@@ -330,6 +331,24 @@ const LogIn: React.FC = () => {
     });
   };
 
+  const handleSignUpRedirect = () => {
+    navigate('/signup');
+  };
+
+  // Si está cargando la autenticación, mostrar pantalla de carga
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <img src="/img/Oniria.svg" alt="Oniria" className="w-12 h-12 object-contain" />
+          </div>
+          <p className="text-[#ffe0db] text-lg">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
@@ -347,7 +366,12 @@ const LogIn: React.FC = () => {
           type={showAlert.type}
           title={showAlert.title}
           message={showAlert.message}
-          onClose={() => setShowAlert(null)}
+          onClose={() => {
+            setShowAlert(null);
+            if (showAlert.type === 'success') {
+              navigate('/dashboard', { replace: true });
+            }
+          }}
         />
       )}
 
@@ -389,7 +413,7 @@ const LogIn: React.FC = () => {
           
           <div className="relative bg-gradient-to-br from-[#ffe0db]/85 via-white/80 to-[#f1b3be]/85 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#f1b3be]/20 p-8 group-hover:shadow-3xl transition-shadow duration-500">
             
-            <div className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               
               <div className="group/field animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
                 <label className="block text-sm font-semibold text-[#252c3e] mb-2 flex items-center transition-all duration-300 group-hover/field:text-[#214d72]">
@@ -409,6 +433,7 @@ const LogIn: React.FC = () => {
                     onBlur={() => setFocusedField('')}
                     className="relative w-full pl-12 pr-4 py-4 border-2 border-[#9675bc]/20 rounded-xl focus:ring-2 focus:ring-[#9675bc]/40 focus:border-[#9675bc] transition-all duration-300 bg-white/70 backdrop-blur-sm hover:bg-white/90 hover:border-[#9675bc]/40 hover:shadow-lg focus:shadow-xl focus:scale-[1.02] placeholder-[#252c3e]/50"
                     placeholder="Ingresa tu nombre de soñador"
+                    disabled={isLoading}
                   />
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                     <Sparkles className="w-4 h-4 text-[#f1b3be]/60 animate-pulse" />
@@ -439,11 +464,13 @@ const LogIn: React.FC = () => {
                     onBlur={() => setFocusedField('')}
                     className="relative w-full pl-12 pr-16 py-4 border-2 border-[#214d72]/20 rounded-xl focus:ring-2 focus:ring-[#214d72]/40 focus:border-[#214d72] transition-all duration-300 bg-white/70 backdrop-blur-sm hover:bg-white/90 hover:border-[#214d72]/40 hover:shadow-lg focus:shadow-xl focus:scale-[1.02] placeholder-[#252c3e]/50"
                     placeholder="Ingresa tu llave mágica"
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#214d72]/60 hover:text-[#214d72] transition-colors duration-200 p-1 rounded-full hover:bg-[#214d72]/10 cursor-pointer z-10"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#214d72]/60 hover:text-[#214d72] transition-colors duration-200 p-1 rounded-full hover:bg-[#214d72]/10 z-10"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -465,13 +492,14 @@ const LogIn: React.FC = () => {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-5 w-5 text-[#9675bc] focus:ring-[#9675bc]/40 border-[#9675bc]/30 rounded transition-all duration-200 cursor-pointer"
+                      className="h-5 w-5 text-[#9675bc] focus:ring-[#9675bc]/40 border-[#9675bc]/30 rounded transition-all duration-200"
+                      disabled={isLoading}
                     />
                     {rememberMe && (
                       <CheckCircle className="absolute inset-0 w-5 h-5 text-[#9675bc] animate-check-in pointer-events-none" />
                     )}
                   </div>
-                  <label htmlFor="remember-me" className="ml-3 block text-sm text-[#252c3e]/80 group-hover/check:text-[#252c3e] transition-colors cursor-pointer">
+                  <label htmlFor="remember-me" className="ml-3 block text-sm text-[#252c3e]/80 group-hover/check:text-[#252c3e] transition-colors">
                     Recordar mi sesión onírica
                   </label>
                 </div>
@@ -480,7 +508,8 @@ const LogIn: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="group/forgot font-medium text-[#9675bc] hover:text-[#214d72] transition-all duration-300 relative cursor-pointer"
+                    className="group/forgot font-medium text-[#9675bc] hover:text-[#214d72] transition-all duration-300 relative"
+                    disabled={isLoading}
                   >
                     <span className="relative z-10">¿Olvidaste tu llave?</span>
                     <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#9675bc] to-[#214d72] group-hover/forgot:w-full transition-all duration-300"></div>
@@ -491,10 +520,9 @@ const LogIn: React.FC = () => {
 
               <div className="pt-4 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
                 <button
-                  type="button"
-                  onClick={handleSubmit(onSubmit)}
+                  type="submit"
                   disabled={isLoading}
-                  className="group/btn relative w-full overflow-hidden bg-gradient-to-r from-[#214d72] via-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:via-[#9675bc] hover:to-[#214d72] text-white font-bold py-5 px-8 rounded-xl transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-2xl hover:shadow-3xl text-lg cursor-pointer"
+                  className="group/btn relative w-full overflow-hidden bg-gradient-to-r from-[#214d72] via-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:via-[#9675bc] hover:to-[#214d72] text-white font-bold py-5 px-8 rounded-xl transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-2xl hover:shadow-3xl text-lg"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
                   
@@ -534,64 +562,66 @@ const LogIn: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </form>
 
-              <div className="relative animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gradient-to-r from-transparent via-[#f1b3be]/30 to-transparent" style={{
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(241, 179, 190, 0.3) 50%, transparent 100%)',
-                    height: '1px'
-                  }} />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-gradient-to-r from-white/80 via-white/90 to-white/80 text-[#252c3e]/60 rounded-full backdrop-blur-sm border border-[#f1b3be]/20">
-                    o descubre Noctiria
-                  </span>
-                </div>
+            <div className="relative animate-fade-in-up mt-6" style={{ animationDelay: '0.5s' }}>
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gradient-to-r from-transparent via-[#f1b3be]/30 to-transparent" style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(241, 179, 190, 0.3) 50%, transparent 100%)',
+                  height: '1px'
+                }} />
               </div>
-
-              <div className="animate-slide-in-up" style={{ animationDelay: '0.6s' }}>
-                <button
-                  type="button"
-                  onClick={() => window.location.href = '/signup'}
-                  className="group/signup relative w-full overflow-hidden bg-gradient-to-r from-white/80 via-white/90 to-white/80 backdrop-blur-sm border-2 border-[#9675bc]/20 hover:border-[#9675bc]/40 text-[#252c3e] font-medium py-4 px-8 rounded-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl cursor-pointer"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/5 via-[#f1b3be]/5 to-[#ffe0db]/5 opacity-0 group-hover/signup:opacity-100 transition-opacity duration-300"></div>
-                  
-                  <div className="relative flex items-center justify-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-md group-hover/signup:scale-110 transition-transform duration-300">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-base font-semibold">Crear mi primera cuenta de sueños</span>
-                    <Sparkles className="w-5 h-5 text-[#9675bc] group-hover/signup:text-[#f1b3be] transition-colors duration-300" />
-                  </div>
-                  
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center opacity-0 group-hover/signup:opacity-100 transition-opacity duration-300 animate-pulse">
-                    <Star className="w-3 h-3 text-white" />
-                  </div>
-                </button>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-gradient-to-r from-white/80 via-white/90 to-white/80 text-[#252c3e]/60 rounded-full backdrop-blur-sm border border-[#f1b3be]/20">
+                  o descubre Noctiria
+                </span>
               </div>
+            </div>
 
-              <div className="text-center pt-6 animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
-                <div className="relative inline-block group/support">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-lg blur-sm opacity-0 group-hover/support:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative bg-white/40 backdrop-blur-sm px-6 py-3 rounded-lg border border-[#f1b3be]/20">
-                    <p className="text-sm text-[#252c3e]/80">
-                      ¿Problemas para acceder a tu mundo de sueños?{' '}
-                      <button
-                        type="button"
-                        onClick={() => setShowAlert({
-                          type: 'error',
-                          title: 'Soporte de Noctiria',
-                          message: 'Nuestro equipo de guías oníricas está aquí para ayudarte.\n\nContacta con nosotros y te ayudaremos a recuperar el acceso a tu mundo de sueños.'
-                        })}
-                        className="group/link font-semibold text-[#9675bc] hover:text-[#214d72] transition-all duration-300 relative cursor-pointer"
-                      >
-                        <span className="relative z-10">Contacta con nuestros guías</span>
-                        <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#9675bc] to-[#214d72] group-hover/link:w-full transition-all duration-300"></div>
-                        <Shield className="inline w-3 h-3 ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
-                      </button>
-                    </p>
+            <div className="animate-slide-in-up mt-6" style={{ animationDelay: '0.6s' }}>
+              <button
+                type="button"
+                onClick={handleSignUpRedirect}
+                disabled={isLoading}
+                className="group/signup relative w-full overflow-hidden bg-gradient-to-r from-white/80 via-white/90 to-white/80 backdrop-blur-sm border-2 border-[#9675bc]/20 hover:border-[#9675bc]/40 text-[#252c3e] font-medium py-4 px-8 rounded-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/5 via-[#f1b3be]/5 to-[#ffe0db]/5 opacity-0 group-hover/signup:opacity-100 transition-opacity duration-300"></div>
+                
+                <div className="relative flex items-center justify-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-md group-hover/signup:scale-110 transition-transform duration-300">
+                    <User className="w-4 h-4 text-white" />
                   </div>
+                  <span className="text-base font-semibold">Crear mi primera cuenta de sueños</span>
+                  <Sparkles className="w-5 h-5 text-[#9675bc] group-hover/signup:text-[#f1b3be] transition-colors duration-300" />
+                </div>
+                
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center opacity-0 group-hover/signup:opacity-100 transition-opacity duration-300 animate-pulse">
+                  <Star className="w-3 h-3 text-white" />
+                </div>
+              </button>
+            </div>
+
+            <div className="text-center pt-6 animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
+              <div className="relative inline-block group/support">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-lg blur-sm opacity-0 group-hover/support:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-white/40 backdrop-blur-sm px-6 py-3 rounded-lg border border-[#f1b3be]/20">
+                  <p className="text-sm text-[#252c3e]/80">
+                    ¿Problemas para acceder a tu mundo de sueños?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowAlert({
+                        type: 'error',
+                        title: 'Soporte de Noctiria',
+                        message: 'Nuestro equipo de guías oníricas está aquí para ayudarte.\n\nContacta con nosotros y te ayudaremos a recuperar el acceso a tu mundo de sueños.'
+                      })}
+                      className="group/link font-semibold text-[#9675bc] hover:text-[#214d72] transition-all duration-300 relative"
+                      disabled={isLoading}
+                    >
+                      <span className="relative z-10">Contacta con nuestros guías</span>
+                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#9675bc] to-[#214d72] group-hover/link:w-full transition-all duration-300"></div>
+                      <Shield className="inline w-3 h-3 ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                    </button>
+                  </p>
                 </div>
               </div>
             </div>
@@ -617,6 +647,7 @@ const LogIn: React.FC = () => {
                       message: 'Los términos de servicio de Noctiria están diseñados para proteger tu experiencia onírica.\n\nEsta funcionalidad estará disponible próximamente.'
                     })}
                     className="text-[#9675bc] hover:text-[#214d72] transition-colors duration-200 underline decoration-dotted underline-offset-2"
+                    disabled={isLoading}
                   >
                     Términos de Servicio
                   </button>
@@ -629,6 +660,7 @@ const LogIn: React.FC = () => {
                       message: 'Tu privacidad y la seguridad de tus sueños son nuestra prioridad.\n\nEsta funcionalidad estará disponible próximamente.'
                     })}
                     className="text-[#9675bc] hover:text-[#214d72] transition-colors duration-200 underline decoration-dotted underline-offset-2"
+                    disabled={isLoading}
                   >
                     Política de Privacidad
                   </button>
