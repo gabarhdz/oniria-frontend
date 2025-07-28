@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Upload, User, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Moon, Shield, UserPlus, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 
 interface RegisterData {
   username: string;
@@ -492,9 +494,11 @@ const SignUp: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full blur-2xl opacity-15 animate-breath-slow group-hover:opacity-30 transition-opacity duration-1000"></div>
             <div className="absolute inset-3 bg-gradient-to-r from-[#f1b3be] via-[#ffe0db] to-[#9675bc] rounded-full blur-xl opacity-25 animate-breath-slow group-hover:opacity-40 transition-opacity duration-1000" style={{ animationDelay: '1s' }}></div>
             
-            <div className="relative bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-3xl p-2 shadow-2xl group-hover:scale-105 transition-transform duration-500 w-40 h-40 flex items-center justify-center">
-              <img src='/img/Oniria.svg' alt="Oniria Logo" className="w-36 h-36 object-contain drop-shadow-2xl filter" style={{ filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 8px rgba(150, 117, 188, 0.4))' }} />
-            </div>
+            <Link to='/'>
+             <div className="relative bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-3xl p-2 shadow-2xl group-hover:scale-105 transition-transform duration-500 w-40 h-40 flex items-center justify-center">
+                <img src='/img/Oniria.svg' alt="Oniria Logo" className="w-36 h-36 object-contain drop-shadow-2xl filter" style={{ filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 8px rgba(150, 117, 188, 0.4))' }} />
+             </div>
+            </Link>
             
             <div className="absolute -top-2 -right-2 w-3 h-3 bg-[#ffe0db] rounded-full animate-float-gentle opacity-80"></div>
             <div className="absolute -bottom-3 -left-3 w-2 h-2 bg-[#f1b3be] rounded-full animate-float-gentle opacity-70" style={{ animationDelay: '1s' }}></div>
