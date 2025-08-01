@@ -1,6 +1,6 @@
 // components/UserDashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth, authApiClient } from '../../contexts/AuthContext';
 import { 
   User, 
   Mail, 
@@ -20,12 +20,20 @@ import {
   Palette,
   RefreshCw
 } from 'lucide-react';
+import axios from 'axios';
 
 interface UserStats {
   dreamsLogged: number;
   daysSinceJoined: number;
   favoriteTime: string;
   dreamCategories: number;
+}
+
+interface DreamData {
+  total_dreams: number;
+  dream_categories: number;
+  favorite_time: string;
+  recent_dreams: any[];
 }
 
 const TwinklingStars: React.FC<{ count?: number }> = ({ count = 20 }) => {
@@ -127,81 +135,172 @@ export const UserDashboard: React.FC = () => {
   const { user, logout, refreshUserData } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userStats, setUserStats] = useState<UserStats>({
-    dreamsLogged: 42,
-    daysSinceJoined: 15,
-    favoriteTime: "03:00 AM",
-    dreamCategories: 7
+    dreamsLogged: 0,
+    daysSinceJoined: 0,
+    favoriteTime: "00:00",
+    dreamCategories: 0
   });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
-  // Calcular días desde que se unió (simulado)
-  useEffect(() => {
+  // Función para obtener estadísticas del usuario usando axios
+  const fetchUserStats = async () => {
+    try {
+      setIsLoadingStats(true);
+      setStatsError(null);
+
+      const response = await authApiClient.get('/user/stats/');
+      
+      if (response.status === 200 && response.data) {
+        const data: DreamData = response.data;
+        setUserStats({
+          dreamsLogged: data.total_dreams || 0,
+          daysSinceJoined: calculateDaysSinceJoined(),
+          favoriteTime: data.favorite_time || "00:00",
+          dreamCategories: data.dream_categories || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          // Si no hay estadísticas disponibles, usar valores por defecto
+          setUserStats({
+            dreamsLogged: 0,
+            daysSinceJoined: calculateDaysSinceJoined(),
+            favoriteTime: "00:00",
+            dreamCategories: 0
+          });
+        } else if (error.response?.status === 401) {
+          setStatsError('Sesión expirada. Por favor, inicia sesión nuevamente.');
+          logout();
+        } else {
+          setStatsError('Error al cargar las estadísticas. Intenta de nuevo más tarde.');
+        }
+      } else {
+        setStatsError('Error de conexión. Verifica tu conexión a internet.');
+      }
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
+  // Calcular días desde que se unió
+  const calculateDaysSinceJoined = (): number => {
     if (user) {
+      // Si el backend proporciona fecha de registro, usarla
+      // Por ahora, usamos un cálculo simulado
       const joinDate = new Date();
       joinDate.setDate(joinDate.getDate() - Math.floor(Math.random() * 100 + 1));
-      const daysSince = Math.floor((Date.now() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      setUserStats(prev => ({
-        ...prev,
-        daysSinceJoined: daysSince
-      }));
+      return Math.floor((Date.now() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
     }
-  }, [user]);
+    return 0;
+  };
 
+  // Función para refrescar datos del usuario y estadísticas
   const handleRefreshData = async () => {
     setIsRefreshing(true);
     try {
+      // Refrescar datos del usuario del contexto
       await refreshUserData();
-      // Simular actualización de estadísticas
-      setUserStats(prev => ({
-        ...prev,
-        dreamsLogged: prev.dreamsLogged + Math.floor(Math.random() * 3),
-      }));
+      
+      // Refrescar estadísticas
+      await fetchUserStats();
+      
+      console.log('Datos actualizados correctamente');
     } catch (error) {
       console.error('Error refreshing data:', error);
+      setStatsError('Error al actualizar los datos. Intenta de nuevo.');
     } finally {
       setIsRefreshing(false);
     }
   };
 
+  // Función para manejar logout con confirmación
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que quieres cerrar tu sesión onírica?')) {
       logout();
     }
   };
 
+  // Función para actualizar perfil
+  const handleUpdateProfile = async () => {
+    try {
+      // Implementar lógica para actualizar perfil
+      const response = await authApiClient.patch('/user/profile/', {
+        // datos del perfil a actualizar
+      });
+      
+      if (response.status === 200) {
+        await refreshUserData();
+        console.log('Perfil actualizado correctamente');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  // Cargar estadísticas al montar el componente
+  useEffect(() => {
+    if (user) {
+      fetchUserStats();
+    }
+  }, [user]);
+
+  // Acciones disponibles para el usuario
   const mockActions = [
     {
       icon: <BookOpen className="w-5 h-5" />,
       title: "Diario de Sueños",
       description: "Registra y explora tus experiencias oníricas",
       gradient: "from-[#9675bc] to-[#7c3aed]",
-      onClick: () => alert('Próximamente: Acceso al diario de sueños')
+      onClick: () => {
+        // Navegar al diario de sueños
+        window.location.href = '/dreams';
+      }
     },
     {
       icon: <Palette className="w-5 h-5" />,
       title: "Análisis de Patrones",
       description: "Descubre los patrones ocultos en tus sueños",
       gradient: "from-[#f1b3be] to-[#ec4899]",
-      onClick: () => alert('Próximamente: Análisis de patrones oníricos')
+      onClick: () => {
+        // Navegar al análisis de patrones
+        window.location.href = '/analysis';
+      }
     },
     {
       icon: <Award className="w-5 h-5" />,
       title: "Logros Oníricos",
       description: "Ve tus logros como explorador de sueños",
       gradient: "from-[#ffe0db] to-[#f97316]",
-      onClick: () => alert('Próximamente: Sistema de logros')
+      onClick: () => {
+        // Navegar a logros
+        window.location.href = '/achievements';
+      }
     },
     {
       icon: <Settings className="w-5 h-5" />,
       title: "Configuración",
       description: "Personaliza tu experiencia en Noctiria",
       gradient: "from-[#214d72] to-[#0f172a]",
-      onClick: () => alert('Próximamente: Panel de configuración')
+      onClick: () => {
+        // Navegar a configuración
+        window.location.href = '/settings';
+      }
     }
   ];
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#f1b3be] border-t-transparent mx-auto"></div>
+          <p className="text-[#ffe0db]">Cargando tu perfil onírico...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -233,6 +332,7 @@ export const UserDashboard: React.FC = () => {
                   onClick={handleRefreshData}
                   disabled={isRefreshing}
                   className="p-2 rounded-lg bg-white/20 backdrop-blur-sm border border-[#f1b3be]/20 hover:bg-white/30 transition-all duration-200 disabled:opacity-50"
+                  title="Actualizar datos"
                 >
                   <RefreshCw className={`w-5 h-5 text-[#ffe0db] ${isRefreshing ? 'animate-spin' : ''}`} />
                 </button>
@@ -278,14 +378,13 @@ export const UserDashboard: React.FC = () => {
                 ¡Bienvenido, {user.username}!
               </h1>
               <div className="flex items-center justify-center space-x-2 text-[#ffe0db]/80">
-                {user.is_psychologist && (
+                {user.is_psychologist ? (
                   <>
                     <Crown className="w-5 h-5 text-yellow-400" />
                     <span className="text-sm font-medium">Psicólogo Certificado</span>
                     <Crown className="w-5 h-5 text-yellow-400" />
                   </>
-                )}
-                {!user.is_psychologist && (
+                ) : (
                   <>
                     <Moon className="w-5 h-5 text-[#f1b3be]" />
                     <span className="text-sm">Explorador de Sueños</span>
@@ -358,51 +457,75 @@ export const UserDashboard: React.FC = () => {
               <p className="text-[#ffe0db]/70">Estadísticas de tu exploración en Noctiria</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard
-                icon={<BookOpen className="w-6 h-6" />}
-                title="Sueños Registrados"
-                value={userStats.dreamsLogged}
-                subtitle="experiencias oníricas"
-                gradient="from-[#9675bc] to-[#7c3aed]"
-              />
-              
-              <StatCard
-                icon={<Clock className="w-6 h-6" />}
-                title="Días en Noctiria"
-                value={userStats.daysSinceJoined}
-                subtitle="días explorando"
-                gradient="from-[#f1b3be] to-[#ec4899]"
-              />
-              
-              <StatCard
-                icon={<Moon className="w-6 h-6" />}
-                title="Hora Favorita"
-                value={userStats.favoriteTime}
-                subtitle="momento onírico"
-                gradient="from-[#ffe0db] to-[#f97316]"
-              />
-              
-              <StatCard
-                icon={<Sparkles className="w-6 h-6" />}
-                title="Categorías"
-                value={userStats.dreamCategories}
-                subtitle="tipos de sueños"
-                gradient="from-[#214d72] to-[#0f172a]"
-              />
-            </div>
+            {/* Error message */}
+            {statsError && (
+              <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/20 rounded-lg p-4 text-center">
+                <p className="text-red-200">{statsError}</p>
+                <button
+                  onClick={fetchUserStats}
+                  className="mt-2 px-4 py-2 bg-red-500/30 hover:bg-red-500/50 rounded-lg text-red-100 transition-colors duration-200"
+                >
+                  Reintentar
+                </button>
+              </div>
+            )}
+
+            {/* Loading state */}
+            {isLoadingStats && !statsError && (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#f1b3be] border-t-transparent mx-auto mb-4"></div>
+                <p className="text-[#ffe0db]/70">Cargando estadísticas...</p>
+              </div>
+            )}
+
+            {/* Statistics cards */}
+            {!isLoadingStats && !statsError && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard
+                  icon={<BookOpen className="w-6 h-6" />}
+                  title="Sueños Registrados"
+                  value={userStats.dreamsLogged}
+                  subtitle="experiencias oníricas"
+                  gradient="from-[#9675bc] to-[#7c3aed]"
+                />
+                
+                <StatCard
+                  icon={<Clock className="w-6 h-6" />}
+                  title="Días en Noctiria"
+                  value={userStats.daysSinceJoined}
+                  subtitle="días explorando"
+                  gradient="from-[#f1b3be] to-[#ec4899]"
+                />
+                
+                <StatCard
+                  icon={<Moon className="w-6 h-6" />}
+                  title="Hora Favorita"
+                  value={userStats.favoriteTime}
+                  subtitle="momento onírico"
+                  gradient="from-[#ffe0db] to-[#f97316]"
+                />
+                
+                <StatCard
+                  icon={<Sparkles className="w-6 h-6" />}
+                  title="Categorías"
+                  value={userStats.dreamCategories}
+                  subtitle="tipos de sueños"
+                  gradient="from-[#214d72] to-[#0f172a]"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Actions */}
+          {/* Action buttons */}
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent mb-2">
-                ¿Qué quieres hacer hoy?
+                Explorar Noctiria
               </h2>
-              <p className="text-[#ffe0db]/70">Explora las funcionalidades de tu mundo onírico</p>
+              <p className="text-[#ffe0db]/70">Descubre todas las herramientas disponibles</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {mockActions.map((action, index) => (
                 <ActionButton
                   key={index}
@@ -416,63 +539,28 @@ export const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Recent activity placeholder */}
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent mb-2">
-                Actividad Reciente
-              </h2>
-              <p className="text-[#ffe0db]/70">Tus últimas exploraciones oníricas</p>
-            </div>
-
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#9675bc]/10 via-[#f1b3be]/10 to-[#ffe0db]/10 rounded-3xl blur-xl opacity-60"></div>
-              <div className="relative bg-gradient-to-br from-white/80 via-white/70 to-[#ffe0db]/80 backdrop-blur-xl rounded-3xl p-8 border border-[#f1b3be]/20 shadow-xl">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-2xl flex items-center justify-center shadow-lg">
-                    <Sparkles className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#252c3e]">
-                    Tu aventura está comenzando
-                  </h3>
-                  <p className="text-[#252c3e]/70 max-w-md mx-auto">
-                    Pronto verás aquí tus sueños registrados, análisis de patrones y logros desbloqueados mientras exploras Noctiria.
-                  </p>
-                  <div className="flex items-center justify-center space-x-2 pt-4">
-                    <Heart className="w-5 h-5 text-[#f1b3be] animate-pulse" />
-                    <span className="text-sm text-[#252c3e]/60">Bienvenido a tu mundo de sueños</span>
-                    <Star className="w-5 h-5 text-[#ffe0db] animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="mt-16 py-8 border-t border-[#f1b3be]/20 bg-white/5 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center space-x-6">
-                <div className="flex items-center space-x-2 text-[#ffe0db]/60">
-                  <Shield className="w-4 h-4" />
-                  <span className="text-sm">Conexión Segura</span>
-                </div>
-                <div className="flex items-center space-x-2 text-[#f1b3be]/60">
-                  <Heart className="w-4 h-4" />
-                  <span className="text-sm">Datos Protegidos</span>
-                </div>
-                <div className="flex items-center space-x-2 text-[#9675bc]/60">
-                  <Moon className="w-4 h-4" />
-                  <span className="text-sm">Noctiria 2024</span>
-                </div>
-              </div>
-              <p className="text-xs text-[#ffe0db]/50">
-                Tu privacidad y la seguridad de tus sueños son nuestra prioridad
+          {/* Footer */}
+          <footer className="text-center py-8 border-t border-[#f1b3be]/20">
+            <div className="space-y-2">
+              <p className="text-[#ffe0db]/60 text-sm">
+                © 2024 Noctiria - Tu compañero en la exploración onírica
               </p>
+              <div className="flex items-center justify-center space-x-4 text-[#ffe0db]/50">
+                <button className="hover:text-[#f1b3be] transition-colors duration-200">
+                  Privacidad
+                </button>
+                <span>•</span>
+                <button className="hover:text-[#f1b3be] transition-colors duration-200">
+                  Términos
+                </button>
+                <span>•</span>
+                <button className="hover:text-[#f1b3be] transition-colors duration-200">
+                  Soporte
+                </button>
+              </div>
             </div>
-          </div>
-        </footer>
+          </footer>
+        </main>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Upload, User, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Moon, Shield, UserPlus, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import axios, { AxiosError } from 'axios';
 
 interface RegisterData {
   username: string;
@@ -24,6 +24,29 @@ interface User {
   description?: string;
   profile_pic?: string;
 }
+
+// Configuración de axios
+const apiClient = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api',
+  timeout: 10000, // 10 segundos de timeout
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
+
+// Interceptor para manejo de errores globales
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    // Logging de errores para debugging
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    return Promise.reject(error);
+  }
+);
 
 const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ count = 25, className = '' }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
@@ -280,8 +303,6 @@ const SignUp: React.FC = () => {
   const [focusedField, setFocusedField] = useState<string>('');
   const [showAlert, setShowAlert] = useState<{ type: 'success' | 'error'; message: string; title: string } | null>(null);
 
-  const API_BASE_URL = 'http://127.0.0.1:8000/api/users'; 
-
   const {
     register: registerField,
     handleSubmit,
@@ -302,10 +323,12 @@ const SignUp: React.FC = () => {
     try {
       const formData = new FormData();
       
+      // Agregar campos obligatorios
       formData.append('username', registerData.username);
       formData.append('email', registerData.email);
       formData.append('password', registerData.password);
       
+      // Agregar campos opcionales solo si tienen valor
       if (registerData.description && registerData.description.trim()) {
         formData.append('description', registerData.description);
       }
@@ -316,75 +339,105 @@ const SignUp: React.FC = () => {
       
       formData.append('is_psychologist', 'false');
 
-      const response = await fetch(`${API_BASE_URL}/`, {
-        method: 'POST',
-        body: formData,
+      // Realizar petición con axios
+      // Timeout más largo si hay archivo adjunto
+      const timeoutDuration = registerData.profile_pic ? 60000 : 15000; // 60s con foto, 15s sin foto
+      
+      const response = await apiClient.post('/users/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: timeoutDuration,
+        // Callback opcional para mostrar progreso de subida
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`Subiendo archivo: ${percentCompleted}%`);
+            // Aquí podrías actualizar una barra de progreso si quisieras
+          }
+        },
       });
 
-      const data = await response.json();
+      return response.data;
 
-      if (response.ok) {
-        return data;
-      } else {
-        // Manejo específico para diferentes tipos de errores
-        if (response.status === 400 && data) {
-          let errorMessage = '';
-          
-          // Verificar si es un error de email duplicado
-          if (data.email && Array.isArray(data.email)) {
-            const emailErrors = data.email;
-            if (emailErrors.some((err: any) => 
-              String(err).includes('already exists') || 
-              String(err).includes('ya existe') || 
-              String(err).includes('unique')
-            )) {
-              errorMessage = '💫 Este email ya pertenece a otro soñador en Noctiria.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión o usa un email diferente para comenzar tu nueva aventura onírica.';
-            } else {
-              errorMessage = `Email: ${emailErrors.join(', ')}`;
-            }
-          }
-          
-          // Verificar si es un error de username duplicado
-          if (data.username && Array.isArray(data.username)) {
-            const usernameErrors = data.username;
-            if (usernameErrors.some((err: any) => 
-              String(err).includes('already exists') || 
-              String(err).includes('ya existe') || 
-              String(err).includes('unique')
-            )) {
-              errorMessage += (errorMessage ? '\n\n' : '') + '🌙 Este nombre de soñador ya está en uso.\n\nElige un nombre único para tu identidad en el mundo de los sueños.';
-            } else {
-              errorMessage += (errorMessage ? '\n\n' : '') + `Usuario: ${usernameErrors.join(', ')}`;
-            }
-          }
-          
-          // Manejar otros errores de campos
-          if (data.password && Array.isArray(data.password)) {
-            errorMessage += (errorMessage ? '\n\n' : '') + `Contraseña: ${data.password.join(', ')}`;
-          }
-          
-          // Si no hay errores específicos, mostrar mensaje genérico
-          if (!errorMessage) {
-            errorMessage = Object.entries(data)
-              .map(([key, value]) => {
-                const fieldName = key === 'password' ? 'Contraseña' : 
-                                 key === 'username' ? 'Usuario' :
-                                 key === 'email' ? 'Email' : key;
-                return `${fieldName}: ${Array.isArray(value) ? value.join(', ') : value}`;
-              })
-              .join('\n');
-          }
-          
-          throw new Error(errorMessage || 'Error en el registro');
-        } else {
-          throw new Error('Error inesperado en el servidor. Por favor intenta nuevamente.');
-        }
-      }
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Error de conexión. Verifica que el servidor esté funcionando.');
+      if (axios.isAxiosError(error)) {
+        // Error de respuesta del servidor
+        if (error.response) {
+          const { status, data } = error.response;
+          
+          if (status === 400 && data) {
+            let errorMessage = '';
+            
+            // Verificar si es un error de email duplicado
+            if (data.email && Array.isArray(data.email)) {
+              const emailErrors = data.email;
+              if (emailErrors.some((err: any) => 
+                String(err).includes('already exists') || 
+                String(err).includes('ya existe') || 
+                String(err).includes('unique')
+              )) {
+                errorMessage = '💫 Este email ya pertenece a otro soñador en Noctiria.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión o usa un email diferente para comenzar tu nueva aventura onírica.';
+              } else {
+                errorMessage = `Email: ${emailErrors.join(', ')}`;
+              }
+            }
+            
+            // Verificar si es un error de username duplicado
+            if (data.username && Array.isArray(data.username)) {
+              const usernameErrors = data.username;
+              if (usernameErrors.some((err: any) => 
+                String(err).includes('already exists') || 
+                String(err).includes('ya existe') || 
+                String(err).includes('unique')
+              )) {
+                errorMessage += (errorMessage ? '\n\n' : '') + '🌙 Este nombre de soñador ya está en uso.\n\nElige un nombre único para tu identidad en el mundo de los sueños.';
+              } else {
+                errorMessage += (errorMessage ? '\n\n' : '') + `Usuario: ${usernameErrors.join(', ')}`;
+              }
+            }
+            
+            // Manejar otros errores de campos
+            if (data.password && Array.isArray(data.password)) {
+              errorMessage += (errorMessage ? '\n\n' : '') + `Contraseña: ${data.password.join(', ')}`;
+            }
+            
+            // Si no hay errores específicos, mostrar mensaje genérico
+            if (!errorMessage) {
+              errorMessage = Object.entries(data)
+                .map(([key, value]) => {
+                  const fieldName = key === 'password' ? 'Contraseña' : 
+                                   key === 'username' ? 'Usuario' :
+                                   key === 'email' ? 'Email' : key;
+                  return `${fieldName}: ${Array.isArray(value) ? value.join(', ') : value}`;
+                })
+                .join('\n');
+            }
+            
+            throw new Error(errorMessage || 'Error en el registro');
+
+          } else if (status >= 500) {
+            throw new Error('Error interno del servidor. Por favor intenta más tarde.');
+          } else {
+            throw new Error(`Error del servidor (${status}). Por favor intenta nuevamente.`);
+          }
+        }
+        // Error de red o timeout
+        else if (error.request) {
+          if (error.code === 'ECONNABORTED') {
+            throw new Error('La operación ha tardado demasiado tiempo. Si estás subiendo una foto, intenta con una imagen más pequeña o verifica tu conexión a internet.');
+          } else {
+            throw new Error('Error de conexión. Verifica que el servidor esté funcionando y tu conexión a internet.');
+          }
+        }
+        // Error en la configuración de la petición
+        else {
+          throw new Error('Error al configurar la petición. Por favor intenta nuevamente.');
+        }
+      } else {
+        // Error no relacionado con axios
+        throw new Error('Error inesperado. Por favor intenta nuevamente.');
       }
-      throw error;
     } finally {
       setIsLoading(false);
     }

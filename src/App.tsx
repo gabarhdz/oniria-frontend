@@ -1,59 +1,14 @@
 // App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
 import Home1 from './Pages/Home/Home';
 import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
 import UserDashboard from './Pages/Dashboard/Dashboard';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
-
-function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Rutas públicas */}
-          <Route path="/" element={<Home1 />} />
-          <Route path="/login" element={<PublicRoute><LogIn /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
-          
-          {/* Rutas protegidas para usuarios autenticados */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Ruta protegida solo para psicólogos */}
-          <Route 
-            path="/psychologist" 
-            element={
-              <ProtectedRoute requiredRole="psychologist">
-                <PsychologistDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Ruta 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
-  );
-}
+import { Loader2, Crown, Home, Moon } from 'lucide-react';
 
 // Componente para rutas públicas que redirige si ya está autenticado
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -188,9 +143,51 @@ const NotFound: React.FC = () => {
   );
 };
 
-// Importaciones necesarias para los iconos
-import { useAuth } from './contexts/AuthContext';
-import { Loader2, Crown, Home, Moon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Rutas públicas */}
+          <Route path="/" element={<Home1 />} />
+          <Route path="/login" element={<PublicRoute><LogIn /></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+          
+          {/* Rutas protegidas para usuarios autenticados */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Ruta protegida solo para psicólogos */}
+          <Route 
+            path="/psychologist" 
+            element={
+              <ProtectedRoute requiredRole="psychologist">
+                <PsychologistDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Ruta 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;

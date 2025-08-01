@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { User, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Moon, Shield, LogIn as LoginIcon, Sparkles, Star, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import axios, { AxiosError } from 'axios';
 
 interface LoginData {
   username: string;
@@ -25,6 +25,29 @@ interface LoginResponse {
     profile_pic?: string;
   };
 }
+
+// Configuración de axios para login
+const apiClient = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api',
+  timeout: 15000, // 15 segundos de timeout
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para manejo de errores globales
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    // Logging de errores para debugging
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    return Promise.reject(error);
+  }
+);
 
 const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ count = 25, className = '' }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
@@ -233,8 +256,6 @@ const LogIn: React.FC = () => {
   } | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const API_LOGIN_URL = 'http://127.0.0.1:8000/api/auth/jwt/create';
-
   const {
     register: registerField,
     handleSubmit,
@@ -257,31 +278,70 @@ const LogIn: React.FC = () => {
   const loginUser = async (loginData: LoginData) => {
     setIsLoading(true);
     try {
-      const response = await fetch(API_LOGIN_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
-      });
+      // Realizar petición con axios
+      const response = await apiClient.post('/auth/jwt/create', loginData);
+      return response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
-        return data;
-      } else {
-        const errorMessage = data.non_field_errors?.[0] || 
-                           data.detail || 
-                           data.message ||
-                           Object.values(data).flat().join(', ') ||
-                           'Credenciales incorrectas';
-        throw new Error(errorMessage);
-      }
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Error de conexión. Verifica que el servidor esté funcionando.');
+      if (axios.isAxiosError(error)) {
+        // Error de respuesta del servidor
+        if (error.response) {
+          const { status, data } = error.response;
+          
+          if (status === 400 || status === 401) {
+            // Errores de autenticación
+            let errorMessage = '';
+            
+            if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
+              errorMessage = data.non_field_errors[0];
+            } else if (data.detail) {
+              errorMessage = data.detail;
+            } else if (data.message) {
+              errorMessage = data.message;
+            } else if (data.username && Array.isArray(data.username)) {
+              errorMessage = `Usuario: ${data.username.join(', ')}`;
+            } else if (data.password && Array.isArray(data.password)) {
+              errorMessage = `Contraseña: ${data.password.join(', ')}`;
+            } else {
+              // Intentar extraer cualquier mensaje de error
+              const errorValues = Object.values(data).flat();
+              errorMessage = errorValues.length > 0 ? errorValues.join(', ') : 'Credenciales incorrectas';
+            }
+            
+            // Personalizar mensajes de error comunes
+            if (errorMessage.toLowerCase().includes('invalid credentials') || 
+                errorMessage.toLowerCase().includes('unable to log in') ||
+                errorMessage.toLowerCase().includes('credenciales inválidas')) {
+              errorMessage = '🌙 Las credenciales ingresadas no son correctas.\n\nVerifica tu nombre de soñador y tu llave secreta, o contacta con nuestros guías si necesitas ayuda para recuperar el acceso a tu mundo onírico.';
+            } else if (errorMessage.toLowerCase().includes('account disabled') ||
+                      errorMessage.toLowerCase().includes('cuenta deshabilitada')) {
+              errorMessage = '🔒 Tu cuenta de soñador ha sido temporalmente suspendida.\n\nContacta con nuestros guías oníricas para obtener más información y restaurar el acceso a Noctiria.';
+            }
+            
+            throw new Error(errorMessage || 'Error de autenticación');
+
+          } else if (status >= 500) {
+            throw new Error('Error interno del servidor. Por favor intenta más tarde.');
+          } else {
+            throw new Error(`Error del servidor (${status}). Por favor intenta nuevamente.`);
+          }
+        }
+        // Error de red o timeout
+        else if (error.request) {
+          if (error.code === 'ECONNABORTED') {
+            throw new Error('La conexión ha tardado demasiado tiempo. Verifica tu conexión a internet e intenta nuevamente.');
+          } else {
+            throw new Error('Error de conexión. Verifica que el servidor esté funcionando y tu conexión a internet.');
+          }
+        }
+        // Error en la configuración de la petición
+        else {
+          throw new Error('Error al configurar la petición. Por favor intenta nuevamente.');
+        }
+      } else {
+        // Error no relacionado con axios
+        throw new Error('Error inesperado durante el login. Por favor intenta nuevamente.');
       }
-      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -312,7 +372,7 @@ const LogIn: React.FC = () => {
           navigate('/dashboard', { replace: true });
         }, 2000);
       } else {
-        throw new Error('No se recibió el token de autenticación');
+        throw new Error('No se recibió el token de autenticación del servidor');
       }
       
     } catch (err) {
@@ -329,7 +389,7 @@ const LogIn: React.FC = () => {
     setShowAlert({
       type: 'error',
       title: 'Recuperación de contraseña',
-      message: 'No hay.\n\n.'
+      message: 'La funcionalidad de recuperación de contraseña estará disponible próximamente.\n\nMientras tanto, contacta con nuestros guías oníricas si necesitas ayuda para recuperar el acceso a tu cuenta.'
     });
   };
 
@@ -530,7 +590,7 @@ const LogIn: React.FC = () => {
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
                   
-                  <div className="relative flex items-center justify-center space-x-3">
+                  <div className="relative flex items-center justify-center space-x-3 cursor-pointer">
                     {isLoading ? (
                       <>
                         <Loader2 className="w-6 h-6 animate-spin" />
@@ -591,7 +651,7 @@ const LogIn: React.FC = () => {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/5 via-[#f1b3be]/5 to-[#ffe0db]/5 opacity-0 group-hover/signup:opacity-100 transition-opacity duration-300"></div>
                 
-                <div className="relative flex items-center justify-center space-x-3">
+                <div className="relative flex items-center justify-center space-x-3 cursor-pointer">
                   <div className="w-8 h-8 bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-md group-hover/signup:scale-110 transition-transform duration-300">
                     <User className="w-4 h-4 text-white" />
                   </div>
@@ -621,7 +681,7 @@ const LogIn: React.FC = () => {
                       className="group/link font-semibold text-[#9675bc] hover:text-[#214d72] transition-all duration-300 relative"
                       disabled={isLoading}
                     >
-                      <span className="relative z-10">Contacta con nuestros guías</span>
+                      <span className="relative z-10 cursor-pointer">Contacta con nuestros guías</span>
                       <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#9675bc] to-[#214d72] group-hover/link:w-full transition-all duration-300"></div>
                       <Shield className="inline w-3 h-3 ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
                     </button>
@@ -650,7 +710,7 @@ const LogIn: React.FC = () => {
                       title: 'Términos de Servicio',
                       message: 'Los términos de servicio de Noctiria están diseñados para proteger tu experiencia onírica.\n\nEsta funcionalidad estará disponible próximamente.'
                     })}
-                    className="text-[#9675bc] hover:text-[#214d72] transition-colors duration-200 underline decoration-dotted underline-offset-2"
+                    className="text-[#9675bc] hover:text-[#214d72] transition-colors duration-200 underline decoration-dotted underline-offset-2 cursor-pointer"
                     disabled={isLoading}
                   >
                     Términos de Servicio
@@ -663,7 +723,7 @@ const LogIn: React.FC = () => {
                       title: 'Política de Privacidad',
                       message: 'Tu privacidad y la seguridad de tus sueños son nuestra prioridad.\n\nEsta funcionalidad estará disponible próximamente.'
                     })}
-                    className="text-[#9675bc] hover:text-[#214d72] transition-colors duration-200 underline decoration-dotted underline-offset-2"
+                    className="text-[#9675bc] hover:text-[#214d72] transition-colors duration-200 underline decoration-dotted underline-offset-2 cursor-pointer"
                     disabled={isLoading}
                   >
                     Política de Privacidad
