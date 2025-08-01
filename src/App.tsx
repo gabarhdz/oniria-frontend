@@ -5,7 +5,7 @@ import './App.css';
 import Home1 from './Pages/Home/Home';
 import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
-import UserDashboard from './Pages/Dashboard/Dashboard';
+import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
