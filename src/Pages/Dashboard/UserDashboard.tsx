@@ -1,7 +1,6 @@
 // Pages/Dashboard/UserDashboard.tsx
-import React, { useState, useEffect } from 'react';
-import { useAuth, authApiClient } from '../../contexts/AuthContext';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Components
 import {
@@ -21,66 +20,15 @@ interface UserStats {
   dreamCategories: number;
 }
 
-interface DreamData {
-  total_dreams: number;
-  dream_categories: number;
-  favorite_time: string;
-  recent_dreams: any[];
-}
-
 export const UserDashboard: React.FC = () => {
   const { user, logout, refreshUserData } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [userStats, setUserStats] = useState<UserStats>({
+  const [userStats] = useState<UserStats>({
     dreamsLogged: 0,
     daysSinceJoined: 0,
     favoriteTime: "00:00",
     dreamCategories: 0
   });
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [statsError, setStatsError] = useState<string | null>(null);
-
-  // Función para obtener estadísticas del usuario usando axios
-  const fetchUserStats = async () => {
-    try {
-      setIsLoadingStats(true);
-      setStatsError(null);
-
-      const response = await authApiClient.get('/user/stats/');
-      
-      if (response.status === 200 && response.data) {
-        const data: DreamData = response.data;
-        setUserStats({
-          dreamsLogged: data.total_dreams || 0,
-          daysSinceJoined: calculateDaysSinceJoined(),
-          favoriteTime: data.favorite_time || "00:00",
-          dreamCategories: data.dream_categories || 0
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching user stats:', error);
-      
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          setUserStats({
-            dreamsLogged: 0,
-            daysSinceJoined: calculateDaysSinceJoined(),
-            favoriteTime: "00:00",
-            dreamCategories: 0
-          });
-        } else if (error.response?.status === 401) {
-          setStatsError('Sesión expirada. Por favor, inicia sesión nuevamente.');
-          logout();
-        } else {
-          setStatsError('Error al cargar las estadísticas. Intenta de nuevo más tarde.');
-        }
-      } else {
-        setStatsError('Error de conexión. Verifica tu conexión a internet.');
-      }
-    } finally {
-      setIsLoadingStats(false);
-    }
-  };
 
   // Calcular días desde que se unió
   const calculateDaysSinceJoined = (): number => {
@@ -92,33 +40,23 @@ export const UserDashboard: React.FC = () => {
     return 0;
   };
 
-  // Función para refrescar datos del usuario y estadísticas
+  // Función para refrescar datos del usuario
   const handleRefreshData = async () => {
     setIsRefreshing(true);
     try {
       await refreshUserData();
-      await fetchUserStats();
       console.log('Datos actualizados correctamente');
     } catch (error) {
       console.error('Error refreshing data:', error);
-      setStatsError('Error al actualizar los datos. Intenta de nuevo.');
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // Función para manejar logout con confirmación
+  // Función para manejar logout
   const handleLogout = () => {
- 
-      logout();
-    }
-
-  // Cargar estadísticas al montar el componente
-  useEffect(() => {
-    if (user) {
-      fetchUserStats();
-    }
-  }, [user]);
+    logout();
+  };
 
   if (!user) {
     return (
@@ -144,7 +82,7 @@ export const UserDashboard: React.FC = () => {
           onRefresh={handleRefreshData}
           onLogout={handleLogout}
           isRefreshing={isRefreshing}
-          user={user} // ✅ AGREGADO: Pasar el user prop
+          user={user}
         />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -152,9 +90,9 @@ export const UserDashboard: React.FC = () => {
           <UserInfoCards user={user} />
           <StatisticsSection
             userStats={userStats}
-            isLoadingStats={isLoadingStats}
-            statsError={statsError}
-            onRetryStats={fetchUserStats}
+            isLoadingStats={false}
+            statsError={null}
+            onRetryStats={() => {}}
           />
           <ActionsSection />
           <DashboardFooter />
