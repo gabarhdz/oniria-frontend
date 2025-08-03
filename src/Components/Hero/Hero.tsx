@@ -593,12 +593,7 @@ const HeroSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Modo oscuro indicator */}
-      <div className="absolute top-4 right-4 text-xs opacity-50">
-        <span className={theme.textSecondary}>
-          {isDarkMode ? 'Modo Nocturno' : 'Modo Diurno'}
-        </span>
-      </div>
+      
 
       {/* Animación CSS personalizada */}
       <style>{`

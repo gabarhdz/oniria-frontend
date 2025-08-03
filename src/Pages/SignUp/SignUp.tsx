@@ -353,7 +353,6 @@ const SignUp: React.FC = () => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(`Subiendo archivo: ${percentCompleted}%`);
-            // Aquí podrías actualizar una barra de progreso si quisieras
           }
         },
       });

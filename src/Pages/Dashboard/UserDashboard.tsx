@@ -12,7 +12,7 @@ import {
   StatisticsSection,
   ActionsSection,
   DashboardFooter
-} from './components';  // ← Cambiado aquí
+} from './components';  
 
 interface UserStats {
   dreamsLogged: number;
@@ -145,6 +145,7 @@ export const UserDashboard: React.FC = () => {
           onRefresh={handleRefreshData}
           onLogout={handleLogout}
           isRefreshing={isRefreshing}
+          user={user} // ✅ AGREGADO: Pasar el user prop
         />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
