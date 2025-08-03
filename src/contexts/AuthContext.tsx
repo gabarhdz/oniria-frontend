@@ -1,6 +1,8 @@
-// src/contexts/AuthContext.tsx
+// contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
+import type { ReactNode } from 'react';
+import axios from 'axios';
+import type { AxiosInstance } from 'axios';
 
 interface User {
   id: string;
@@ -13,332 +15,220 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (token: string, userData?: User) => Promise<void>;
   logout: () => void;
   refreshUserData: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-// Configuración de axios para el contexto de autenticación
-const authApiClient = axios.create({
+// Crear instancia de axios para autenticación
+export const authApiClient: AxiosInstance = axios.create({
   baseURL: 'http://127.0.0.1:8000/api',
-  timeout: 15000, // 15 segundos de timeout
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor para manejo de errores globales
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Interceptor para agregar token automáticamente
+authApiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Interceptor para manejar respuestas y errores de autenticación
 authApiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    // Logging de errores para debugging
-    console.error('Auth API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expirado o inválido
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Función para obtener datos del usuario con axios
-  const fetchUserData = async (authToken: string): Promise<User | null> => {
+  // Función para obtener datos del usuario desde el servidor
+  const fetchUserData = async (token: string): Promise<User | null> => {
     try {
-      const response = await authApiClient.get('/auth/users/me/', {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-        },
-      });
-
+      // Usar el endpoint 'me' para obtener datos del usuario actual
+      const response = await authApiClient.get('/users/me/');
+      
       if (response.status === 200 && response.data) {
-        return response.data;
-      } else {
-        console.error('Respuesta inesperada del servidor:', response.status);
-        return null;
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          // Token inválido o expirado
-          console.warn('Token inválido o expirado');
-          logout();
-          return null;
-        } else if (error.response) {
-          // Error de respuesta del servidor
-          console.error('Error del servidor al obtener datos del usuario:', {
-            status: error.response.status,
-            data: error.response.data,
-          });
-        } else if (error.request) {
-          // Error de red o timeout
-          if (error.code === 'ECONNABORTED') {
-            console.error('Timeout al obtener datos del usuario');
-          } else {
-            console.error('Error de conexión al obtener datos del usuario:', error.message);
-          }
-        } else {
-          console.error('Error al configurar la petición:', error.message);
-        }
-      } else {
-        console.error('Error inesperado al obtener datos del usuario:', error);
+        const userData: User = {
+          id: response.data.id,
+          username: response.data.username,
+          email: response.data.email,
+          is_psychologist: response.data.is_psychologist || false,
+          description: response.data.description || '',
+          profile_pic: response.data.profile_pic || null,
+        };
+        
+        console.log('User data fetched:', userData);
+        return userData;
       }
       return null;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        // Token inválido, limpiar datos
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_data');
+        throw new Error('Token inválido');
+      }
+      
+      throw error;
     }
   };
 
   // Función de login
-  const login = async (authToken: string, userData?: User) => {
+  const login = async (token: string, userData?: User): Promise<void> => {
     try {
-      setIsLoading(true);
+      // Guardar token
+      localStorage.setItem('access_token', token);
       
-      // Establecer token en el estado
-      setToken(authToken);
+      let finalUserData = userData;
       
-      // Intentar usar localStorage si está disponible, pero no depender de él
-      try {
-        if (typeof Storage !== 'undefined') {
-          localStorage.setItem('authToken', authToken);
-          localStorage.setItem('accessToken', authToken);
-        }
-      } catch (storageError) {
-        console.warn('localStorage no disponible, usando solo estado en memoria');
+      // Si no se proporcionaron datos del usuario, obtenerlos del servidor
+      if (!finalUserData) {
+        const fetchedUserData = await fetchUserData(token);
+        finalUserData = fetchedUserData === null ? undefined : fetchedUserData;
       }
-
-      // Si ya tenemos datos del usuario, usarlos
-      if (userData) {
-        setUser(userData);
-        try {
-          if (typeof Storage !== 'undefined') {
-            localStorage.setItem('user', JSON.stringify(userData));
-          }
-        } catch (storageError) {
-          console.warn('No se pudieron guardar los datos del usuario en localStorage');
-        }
+      
+      if (finalUserData) {
+        setUser(finalUserData);
+        localStorage.setItem('user_data', JSON.stringify(finalUserData));
+        console.log('User logged in successfully:', finalUserData);
       } else {
-        // Si no, obtenerlos del servidor
-        const fetchedUserData = await fetchUserData(authToken);
-        if (fetchedUserData) {
-          setUser(fetchedUserData);
-          try {
-            if (typeof Storage !== 'undefined') {
-              localStorage.setItem('user', JSON.stringify(fetchedUserData));
-            }
-          } catch (storageError) {
-            console.warn('No se pudieron guardar los datos del usuario en localStorage');
-          }
-        }
+        throw new Error('No se pudieron obtener los datos del usuario');
       }
     } catch (error) {
-      console.error('Error en login:', error);
-      logout();
-    } finally {
-      setIsLoading(false);
+      console.error('Error during login:', error);
+      // Limpiar datos en caso de error
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
+      setUser(null);
+      throw error;
     }
   };
 
   // Función de logout
-  const logout = () => {
+  const logout = (): void => {
     setUser(null);
-    setToken(null);
-    
-    // Limpiar localStorage si está disponible
-    try {
-      if (typeof Storage !== 'undefined') {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      }
-    } catch (storageError) {
-      console.warn('Error al limpiar localStorage');
-    }
-    
-    // Redirigir al login usando window.location para asegurar limpieza completa
-    window.location.href = '/login';
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_data');
+    console.log('User logged out');
   };
 
   // Función para refrescar datos del usuario
-  const refreshUserData = async () => {
-    if (token) {
-      const userData = await fetchUserData(token);
-      if (userData) {
-        setUser(userData);
-        try {
-          if (typeof Storage !== 'undefined') {
-            localStorage.setItem('user', JSON.stringify(userData));
-          }
-        } catch (storageError) {
-          console.warn('No se pudieron actualizar los datos del usuario en localStorage');
-        }
-      }
+  const refreshUserData = async (): Promise<void> => {
+    const token = localStorage.getItem('access_token');
+    if (!token || !user) {
+      return;
     }
-  };
 
-  // Función para verificar la validez del token
-  const verifyToken = async (authToken: string): Promise<boolean> => {
     try {
-      await authApiClient.post('/auth/jwt/verify/', { token: authToken });
-      return true;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          console.warn('Token inválido durante verificación');
-        } else {
-          console.error('Error al verificar token:', {
-            status: error.response?.status,
-            data: error.response?.data,
-          });
-        }
+      const updatedUserData = await fetchUserData(token);
+      if (updatedUserData) {
+        setUser(updatedUserData);
+        localStorage.setItem('user_data', JSON.stringify(updatedUserData));
+        console.log('User data refreshed:', updatedUserData);
       }
-      return false;
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+      // En caso de error de autenticación, hacer logout
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        logout();
+      }
     }
   };
 
   // Verificar autenticación al cargar la aplicación
   useEffect(() => {
-    const initAuth = async () => {
+    const checkAuthentication = async () => {
+      setIsLoading(true);
+      
       try {
-        let storedToken = null;
-        let storedUser = null;
-
-        // Intentar recuperar datos de localStorage si está disponible
-        try {
-          if (typeof Storage !== 'undefined') {
-            storedToken = localStorage.getItem('authToken') || localStorage.getItem('accessToken');
-            const storedUserData = localStorage.getItem('user');
-            if (storedUserData) {
-              storedUser = JSON.parse(storedUserData);
-            }
-          }
-        } catch (storageError) {
-          console.warn('Error al recuperar datos de localStorage:', storageError);
-        }
-
-        if (storedToken) {
-          // Verificar que el token siga siendo válido
-          const isTokenValid = await verifyToken(storedToken);
-          
-          if (isTokenValid) {
-            setToken(storedToken);
+        const token = localStorage.getItem('access_token');
+        const storedUserData = localStorage.getItem('user_data');
+        
+        if (token && storedUserData) {
+          try {
+            const parsedUserData: User = JSON.parse(storedUserData);
             
-            // Intentar usar datos guardados del usuario si están disponibles
-            if (storedUser) {
-              setUser(storedUser);
-            }
-
-            // Obtener datos actualizados del usuario
-            const userData = await fetchUserData(storedToken);
-            if (userData) {
-              setUser(userData);
-              try {
-                if (typeof Storage !== 'undefined') {
-                  localStorage.setItem('user', JSON.stringify(userData));
-                }
-              } catch (storageError) {
-                console.warn('No se pudieron guardar los datos actualizados del usuario');
-              }
+            // Verificar que el token sigue siendo válido obteniendo datos frescos
+            const freshUserData = await fetchUserData(token);
+            
+            if (freshUserData) {
+              setUser(freshUserData);
+              // Actualizar datos almacenados si hay cambios
+              localStorage.setItem('user_data', JSON.stringify(freshUserData));
             } else {
-              // No se pudieron obtener datos del usuario, limpiar todo
-              logout();
+              // Si no se pueden obtener datos frescos, usar los almacenados
+              setUser(parsedUserData);
             }
-          } else {
-            // Token inválido, limpiar todo
-            console.warn('Token inválido detectado durante inicialización');
+          } catch (parseError) {
+            console.error('Error parsing stored user data:', parseError);
             logout();
           }
         } else {
-          // No hay token, asegurar que el estado esté limpio
+          // No hay token o datos de usuario
           setUser(null);
-          setToken(null);
         }
       } catch (error) {
-        console.error('Error al inicializar autenticación:', error);
-        // En caso de error, limpiar estado
-        setUser(null);
-        setToken(null);
+        console.error('Error checking authentication:', error);
+        logout();
       } finally {
         setIsLoading(false);
       }
     };
 
-    initAuth();
+    checkAuthentication();
   }, []);
-
-  // Efecto para limpiar el estado si se detecta que el usuario no está autenticado
-  useEffect(() => {
-    if (!isLoading && !token && (window.location.pathname === '/dashboard' || window.location.pathname === '/profile')) {
-      window.location.href = '/login';
-    }
-  }, [isLoading, token]);
-
-  // Interceptor para añadir el token automáticamente a las peticiones
-  useEffect(() => {
-    const requestInterceptor = authApiClient.interceptors.request.use(
-      (config) => {
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
-
-    // Interceptor para manejar respuestas 401 automáticamente
-    const responseInterceptor = authApiClient.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError) => {
-        if (error.response?.status === 401 && token) {
-          console.warn('Token expirado detectado, cerrando sesión');
-          logout();
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    // Cleanup function para remover los interceptors
-    return () => {
-      authApiClient.interceptors.request.eject(requestInterceptor);
-      authApiClient.interceptors.response.eject(responseInterceptor);
-    };
-  }, [token]);
 
   const value: AuthContextType = {
     user,
-    token,
+    isAuthenticated: !!user,
     isLoading,
-    isAuthenticated: !!user && !!token,
     login,
     logout,
     refreshUserData,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Hook para usar el contexto de autenticación
+// Hook personalizado para usar el contexto de autenticación
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
-// Exportar la instancia de axios configurada para uso en otros componentes
-export { authApiClient };
+export default AuthContext;

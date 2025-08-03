@@ -109,10 +109,9 @@ export const UserDashboard: React.FC = () => {
 
   // Función para manejar logout con confirmación
   const handleLogout = () => {
-    if (window.confirm('¿Estás seguro de que quieres cerrar tu sesión onírica?')) {
+ 
       logout();
     }
-  };
 
   // Cargar estadísticas al montar el componente
   useEffect(() => {

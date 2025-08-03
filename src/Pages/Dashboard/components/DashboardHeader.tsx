@@ -1,6 +1,6 @@
 // components/dashboard/DashboardHeader.tsx
 import React, { useState } from 'react';
-import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle } from 'lucide-react';
+import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle } from 'lucide-react';
 
 interface User {
   username: string;
@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
   onRefresh: () => void;
   onLogout: () => void;
   isRefreshing: boolean;
-  user: User; // Required, same as WelcomeSection
+  user: User;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -24,6 +24,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   user
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
   const profileMenuItems = [
@@ -50,8 +51,145 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }
     
     // Si es una ruta relativa, la construimos con el dominio del API
-    return `http://127.0.0.1:8000${profilePic}`;
+    const cleanPath = profilePic.startsWith('/') ? profilePic : `/${profilePic}`;
+    return `http://127.0.0.1:8000${cleanPath}`;
   };
+
+  const handleLogoutClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowLogoutConfirm(false);
+    onLogout();
+  };
+
+  const handleCancelLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowLogoutConfirm(false);
+  };
+
+  // Componente para mostrar avatar simplificado como en WelcomeSection
+  const ProfileAvatar: React.FC<{ size: 'small' | 'large'; showRing?: boolean }> = ({ 
+    size, 
+    showRing = false 
+  }) => {
+    const [imageError, setImageError] = useState(false);
+    
+    const sizeClasses = size === 'small' ? 'w-10 h-10' : 'w-16 h-16';
+    const textSize = size === 'small' ? 'text-sm' : 'text-lg';
+    const ringClasses = showRing ? 'ring-2 ring-oniria_purple/30' : '';
+    
+    const profileImageUrl = getProfileImageUrl(user.profile_pic);
+
+    const handleImageError = () => {
+      setImageError(true);
+    };
+
+    return (
+      <div className={`${sizeClasses} ${ringClasses} rounded-full overflow-hidden bg-gradient-to-br from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 flex items-center justify-center relative`}>
+        {profileImageUrl && !imageError ? (
+          <img 
+            src={profileImageUrl}
+            alt={`Avatar de ${user.username}`}
+            className="w-full h-full object-cover"
+            onError={handleImageError}
+          />
+        ) : (
+          <span className={`text-white font-semibold ${textSize} select-none`}>
+            {getUserInitials(user.username)}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  // Modal de confirmación de logout
+  const LogoutConfirmModal = () => (
+    <div className={`fixed inset-0 z-[9999] transition-all duration-300 ${showLogoutConfirm ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleCancelLogout(e);
+        }}
+      />
+      
+      {/* Modal */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className={`relative bg-gradient-to-br from-oniria_darkblue/95 via-oniria_darkblue/90 to-oniria_blue/95 backdrop-blur-2xl border border-oniria_purple/30 rounded-2xl shadow-2xl shadow-oniria_purple/20 p-8 max-w-md w-full transform transition-all duration-500 ${showLogoutConfirm ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}>
+          
+          {/* Efectos de fondo decorativos */}
+          <div className="absolute inset-0 rounded-2xl overflow-hidden">
+            <div className="absolute top-4 left-4 w-2 h-2 bg-oniria_purple/30 rounded-full animate-pulse"></div>
+            <div className="absolute top-8 right-6 w-1 h-1 bg-oniria_pink/40 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-oniria_lightpink/30 rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+            <div className="absolute bottom-4 right-4 w-1 h-1 bg-oniria_purple/20 rounded-full animate-pulse" style={{animationDelay: '0.6s'}}></div>
+          </div>
+
+          {/* Contenido del modal */}
+          <div className="relative z-10 text-center space-y-6">
+            {/* Icono de advertencia animado */}
+            <div className="relative inline-flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-r from-oniria_pink/20 via-oniria_purple/20 to-oniria_lightpink/20 rounded-full blur-xl animate-pulse w-20 h-20"></div>
+              <div className="relative w-16 h-16 bg-gradient-to-br from-oniria_pink/30 to-oniria_purple/30 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 text-oniria_lightpink animate-pulse" />
+              </div>
+            </div>
+
+            {/* Título */}
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-oniria_lightpink via-oniria_pink to-oniria_purple bg-clip-text text-transparent">
+                ¿Cerrar Sesión?
+              </h3>
+              <p className="text-oniria_lightpink/80">
+                ¿Estás seguro de que deseas cerrar tu sesión en NOCTIRIA?
+              </p>
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-4 pt-4">
+              {/* Botón Cancelar */}
+              <button
+                onClick={handleCancelLogout}
+                className="group relative flex-1 px-6 py-3 rounded-xl bg-oniria_blue/20 backdrop-blur-sm border border-oniria_blue/50 hover:border-oniria_purple/60 text-oniria_lightpink hover:text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-oniria_blue/40 overflow-hidden cursor-pointer"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_blue/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                <span className="relative z-10 font-medium">Cancelar</span>
+              </button>
+
+              {/* Botón Confirmar */}
+              <button
+                onClick={handleConfirmLogout}
+                className="group relative flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-oniria_pink/30 to-oniria_purple/25 backdrop-blur-sm border border-oniria_pink/50 hover:border-oniria_purple/70 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-oniria_pink/50 overflow-hidden cursor-pointer"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_pink/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                
+                {/* Partículas de fondo */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute top-2 left-3 w-1 h-1 bg-white/50 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-3 right-4 w-1.5 h-1.5 bg-white/30 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div className="absolute top-1/2 left-1/2 w-0.5 h-0.5 bg-white/40 rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+                </div>
+
+                <span className="relative z-10 font-medium flex items-center justify-center gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Cerrar Sesión
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -143,27 +281,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_blue/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 
                 {/* Avatar del usuario */}
-                <div className="relative z-10 w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 flex items-center justify-center">
-                  {getProfileImageUrl(user.profile_pic) ? (
-                    <img 
-                      src={getProfileImageUrl(user.profile_pic)!} 
-                      alt={`Avatar de ${user.username}`}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      onError={(e) => {
-                        // Si la imagen falla al cargar, mostrar las iniciales
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const parent = target.parentElement;
-                        if (parent) {
-                          parent.innerHTML = `<span class="text-white font-medium text-sm">${getUserInitials(user.username)}</span>`;
-                        }
-                      }}
-                    />
-                  ) : (
-                    <span className="text-white font-medium text-sm">
-                      {getUserInitials(user.username)}
-                    </span>
-                  )}
+                <div className="relative z-10">
+                  <ProfileAvatar size="small" />
                 </div>
               </button>
 
@@ -173,28 +292,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   {/* Header del perfil */}
                   <div className="p-6 bg-gradient-to-r from-oniria_purple/10 via-oniria_pink/10 to-oniria_lightpink/10 border-b border-oniria_purple/20">
                     <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-r from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 ring-2 ring-oniria_purple/30 flex items-center justify-center">
-                        {getProfileImageUrl(user.profile_pic) ? (
-                          <img 
-                            src={getProfileImageUrl(user.profile_pic)!} 
-                            alt={`Avatar de ${user.username}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Si la imagen falla al cargar, mostrar las iniciales
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = `<span class="text-white font-semibold text-lg">${getUserInitials(user.username)}</span>`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <span className="text-white font-semibold text-lg">
-                            {getUserInitials(user.username)}
-                          </span>
-                        )}
-                      </div>
+                      <ProfileAvatar size="large" showRing={true} />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-white text-lg truncate">{user.username}</h3>
                         <p className="text-sm text-oniria_pink/80 truncate">{user.email || 'Sin email'}</p>
@@ -258,9 +356,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </div>
             </div>
 
-            {/* Botón Logout con animaciones - color cambiado */}
+            {/* Botón Logout con animaciones - ahora abre modal */}
             <button
-              onClick={onLogout}
+              onClick={handleLogoutClick}
               className="group relative flex items-center space-x-2 px-6 py-3 rounded-full bg-gradient-to-r from-oniria_pink/20 to-oniria_purple/15 backdrop-blur-sm border border-oniria_pink/40 hover:border-oniria_purple/60 text-oniria_lightpink hover:text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-oniria_pink/40 overflow-hidden cursor-pointer"
             >
               {/* Efecto de destello */}
@@ -289,6 +387,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       {/* Espaciador para el header fijo */}
       <div className="h-[90px]"></div>
+
+      {/* Modal de confirmación de logout */}
+      <LogoutConfirmModal />
     </>
   );
 };
