@@ -30,15 +30,6 @@ export const UserDashboard: React.FC = () => {
     dreamCategories: 0
   });
 
-  // Calcular días desde que se unió
-  const calculateDaysSinceJoined = (): number => {
-    if (user) {
-      const joinDate = new Date();
-      joinDate.setDate(joinDate.getDate() - Math.floor(Math.random() * 100 + 1));
-      return Math.floor((Date.now() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-    }
-    return 0;
-  };
 
   // Función para refrescar datos del usuario
   const handleRefreshData = async () => {
