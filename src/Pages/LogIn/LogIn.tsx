@@ -26,10 +26,57 @@ interface LoginResponse {
   };
 }
 
+// Utilidades para Remember Me
+const REMEMBER_USER_KEY = 'noctiria_remember_user';
+
+const saveRememberedUser = (username: string) => {
+  try {
+    const userData = {
+      username,
+      savedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 días
+    };
+    localStorage.setItem(REMEMBER_USER_KEY, JSON.stringify(userData));
+  } catch (error) {
+    console.warn('No se pudo guardar el usuario recordado:', error);
+  }
+};
+
+const getRememberedUser = (): string | null => {
+  try {
+    const stored = localStorage.getItem(REMEMBER_USER_KEY);
+    if (!stored) return null;
+
+    const userData = JSON.parse(stored);
+    const now = new Date();
+    const expiresAt = new Date(userData.expiresAt);
+
+    // Verificar si ha expirado
+    if (now > expiresAt) {
+      localStorage.removeItem(REMEMBER_USER_KEY);
+      return null;
+    }
+
+    return userData.username;
+  } catch (error) {
+    console.warn('Error al recuperar usuario recordado:', error);
+    localStorage.removeItem(REMEMBER_USER_KEY);
+    return null;
+  }
+};
+
+const clearRememberedUser = () => {
+  try {
+    localStorage.removeItem(REMEMBER_USER_KEY);
+  } catch (error) {
+    console.warn('Error al limpiar usuario recordado:', error);
+  }
+};
+
 // Configuración de axios para login
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api',
-  timeout: 15000, // 15 segundos de timeout
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -39,7 +86,6 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Logging de errores para debugging
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
@@ -260,6 +306,7 @@ const LogIn: React.FC = () => {
     register: registerField,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<LoginData>();
 
@@ -267,6 +314,15 @@ const LogIn: React.FC = () => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Cargar usuario recordado al iniciar
+  useEffect(() => {
+    const rememberedUsername = getRememberedUser();
+    if (rememberedUsername) {
+      setValue('username', rememberedUsername);
+      setRememberMe(true);
+    }
+  }, [setValue]);
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -278,18 +334,15 @@ const LogIn: React.FC = () => {
   const loginUser = async (loginData: LoginData) => {
     setIsLoading(true);
     try {
-      // Realizar petición con axios
       const response = await apiClient.post('/auth/jwt/create', loginData);
       return response.data;
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // Error de respuesta del servidor
         if (error.response) {
           const { status, data } = error.response;
           
           if (status === 400 || status === 401) {
-            // Errores de autenticación
             let errorMessage = '';
             
             if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
@@ -303,12 +356,10 @@ const LogIn: React.FC = () => {
             } else if (data.password && Array.isArray(data.password)) {
               errorMessage = `Contraseña: ${data.password.join(', ')}`;
             } else {
-              // Intentar extraer cualquier mensaje de error
               const errorValues = Object.values(data).flat();
               errorMessage = errorValues.length > 0 ? errorValues.join(', ') : 'Credenciales incorrectas';
             }
             
-            // Personalizar mensajes de error comunes
             if (errorMessage.toLowerCase().includes('invalid credentials') || 
                 errorMessage.toLowerCase().includes('unable to log in') ||
                 errorMessage.toLowerCase().includes('credenciales inválidas')) {
@@ -326,7 +377,6 @@ const LogIn: React.FC = () => {
             throw new Error(`Error del servidor (${status}). Por favor intenta nuevamente.`);
           }
         }
-        // Error de red o timeout
         else if (error.request) {
           if (error.code === 'ECONNABORTED') {
             throw new Error('La conexión ha tardado demasiado tiempo. Verifica tu conexión a internet e intenta nuevamente.');
@@ -334,12 +384,10 @@ const LogIn: React.FC = () => {
             throw new Error('Error de conexión. Verifica que el servidor esté funcionando y tu conexión a internet.');
           }
         }
-        // Error en la configuración de la petición
         else {
           throw new Error('Error al configurar la petición. Por favor intenta nuevamente.');
         }
       } else {
-        // Error no relacionado con axios
         throw new Error('Error inesperado durante el login. Por favor intenta nuevamente.');
       }
     } finally {
@@ -354,20 +402,27 @@ const LogIn: React.FC = () => {
     try {
       const result = await loginUser(data);
       
-      // Usar el método login del contexto de autenticación
       const token = result.access || result.token;
       if (token) {
+        // Manejar Remember Me
+        if (rememberMe) {
+          saveRememberedUser(data.username);
+        } else {
+          clearRememberedUser();
+        }
+
         await login(token, result.user);
         
         setShowAlert({
           type: 'success',
           title: '¡Bienvenido de vuelta!',
-          message: `Hola de nuevo, soñador. Tu sesión ha sido iniciada exitosamente.\n\nTus sueños te esperan en Noctiria...`
+          message: `Hola de nuevo, soñador. Tu sesión ha sido iniciada exitosamente.${
+            rememberMe ? '\n\nTu nombre de usuario ha sido recordado para próximas visitas.' : ''
+          }\n\nTus sueños te esperan en Noctiria...`
         });
         
         reset();
         
-        // Redirigir después de un pequeño delay para mostrar el mensaje
         setTimeout(() => {
           navigate('/dashboard', { replace: true });
         }, 2000);
@@ -397,7 +452,15 @@ const LogIn: React.FC = () => {
     navigate('/signup');
   };
 
-  // Si está cargando la autenticación, mostrar pantalla de carga
+  // Manejar cambio en Remember Me
+  const handleRememberMeChange = (checked: boolean) => {
+    setRememberMe(checked);
+    if (!checked) {
+      // Si desmarca, limpiar usuario recordado inmediatamente
+      clearRememberedUser();
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
@@ -422,7 +485,6 @@ const LogIn: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-[#252c3e]/60 via-[#214d72]/50 to-[#9675bc]/40 backdrop-blur-[0.5px]"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#9675bc]/3 to-transparent animate-dream-veil"></div>
 
-      {/* Alert Modal */}
       {showAlert && (
         <DreamAlert
           type={showAlert.type}
@@ -555,16 +617,16 @@ const LogIn: React.FC = () => {
                       name="remember-me"
                       type="checkbox"
                       checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-5 w-5 text-[#9675bc] focus:ring-[#9675bc]/40 border-[#9675bc]/30 rounded transition-all duration-200"
+                      onChange={(e) => handleRememberMeChange(e.target.checked)}
+                      className="h-5 w-5 text-[#9675bc] focus:ring-[#9675bc]/40 border-[#9675bc]/30 rounded transition-all duration-200 appearance-none bg-white border-2 checked:bg-[#9675bc] checked:border-[#9675bc] relative"
                       disabled={isLoading}
                     />
                     {rememberMe && (
-                      <CheckCircle className="absolute inset-0 w-5 h-5 text-[#9675bc] animate-check-in pointer-events-none" />
+                      <CheckCircle className="absolute inset-0 w-5 h-5 text-white animate-check-in pointer-events-none" />
                     )}
                   </div>
                   <label htmlFor="remember-me" className="ml-3 block text-sm text-[#252c3e]/80 group-hover/check:text-[#252c3e] transition-colors">
-                    Recordar mi sesión onírica
+                    Recordar mi nombre de soñador
                   </label>
                 </div>
 
@@ -629,16 +691,14 @@ const LogIn: React.FC = () => {
             </form>
 
             <div className="relative animate-fade-in-up mt-6" style={{ animationDelay: '0.5s' }}>
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gradient-to-r from-transparent via-[#f1b3be]/30 to-transparent" style={{
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(241, 179, 190, 0.3) 50%, transparent 100%)',
-                  height: '1px'
-                }} />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-gradient-to-r from-white/80 via-white/90 to-white/80 text-[#252c3e]/60 rounded-full backdrop-blur-sm border border-[#f1b3be]/20">
-                  o descubre Noctiria
-                </span>
+              <div className="relative flex items-center justify-center">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#f1b3be]/40 to-[#9675bc]/30"></div>
+                <div className="px-6">
+                  <span className="bg-gradient-to-r from-white/90 via-white/95 to-white/90 text-[#252c3e]/70 px-4 py-2 rounded-full backdrop-blur-sm border border-[#f1b3be]/30 shadow-sm text-sm font-medium">
+                    o descubre Noctiria
+                  </span>
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#f1b3be]/40 to-[#9675bc]/30"></div>
               </div>
             </div>
 
@@ -904,6 +964,7 @@ const LogIn: React.FC = () => {
         
         .animate-slide-in-down {
           animation: slide-in-down 0.3s ease-out;
+          
         }
         
         .animate-slide-in-up {

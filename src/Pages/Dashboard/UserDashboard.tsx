@@ -95,8 +95,8 @@ export const UserDashboard: React.FC = () => {
             onRetryStats={() => {}}
           />
           <ActionsSection />
-          <DashboardFooter />
         </main>
+         <DashboardFooter />
       </div>
     </div>
   );
