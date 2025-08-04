@@ -5,6 +5,7 @@ import './App.css';
 import Home1 from './Pages/Home/Home';
 import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
+import Profile from './Pages/Profile/Profile';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -167,7 +168,7 @@ function App() {
             path="/profile" 
             element={
               <ProtectedRoute>
-                <UserDashboard />
+                <Profile />
               </ProtectedRoute>
             } 
           />

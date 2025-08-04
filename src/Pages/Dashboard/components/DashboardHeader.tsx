@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 interface User {
   username: string;
   email?: string;
@@ -25,9 +25,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  
+  const navigate = useNavigate();
 
   const profileMenuItems = [
-    { icon: User, label: 'Mi Perfil', action: () => console.log('Ver perfil') },
+    { icon: User, label: 'Mi Perfil', action: () => navigate('/profile') },
     { icon: Settings, label: 'Configuración', action: () => console.log('Configuración') },
     { icon: Shield, label: 'Privacidad', action: () => console.log('Privacidad') },
     { icon: Bell, label: 'Notificaciones', action: () => console.log('Notificaciones') },
