@@ -1,4 +1,3 @@
-// components/dashboard/TwinklingStars.tsx
 import React from 'react';
 
 interface TwinklingStarsProps {

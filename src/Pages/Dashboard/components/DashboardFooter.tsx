@@ -1,4 +1,3 @@
-// components/dashboard/DashboardFooter.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { RiTwitterXFill } from "react-icons/ri";

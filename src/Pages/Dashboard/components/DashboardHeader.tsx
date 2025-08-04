@@ -1,4 +1,3 @@
-// components/dashboard/DashboardHeader.tsx
 import React, { useState } from 'react';
 import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle } from 'lucide-react';
 

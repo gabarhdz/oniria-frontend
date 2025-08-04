@@ -1,4 +1,3 @@
-// Pages/Dashboard/Dashboard/index.ts
 export { TwinklingStars } from './TwinklingStars';
 export { DashboardHeader } from './DashboardHeader';
 export { WelcomeSection } from './WelcomeSection';

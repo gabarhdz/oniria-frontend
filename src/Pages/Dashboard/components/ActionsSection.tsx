@@ -1,4 +1,3 @@
-// components/dashboard/ActionsSection.tsx
 import React from 'react';
 import { BookOpen, Palette, Award, Settings } from 'lucide-react';
 import { ActionButton } from './ActionButton';

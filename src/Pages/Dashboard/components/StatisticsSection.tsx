@@ -1,4 +1,3 @@
-// components/dashboard/StatisticsSection.tsx
 import React from 'react';
 import { BookOpen, Clock, Moon, Sparkles } from 'lucide-react';
 import { StatCard } from './StatCard';

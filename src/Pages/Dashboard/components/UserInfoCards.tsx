@@ -1,4 +1,3 @@
-// components/dashboard/UserInfoCards.tsx
 import React from 'react';
 import { User, Mail, Shield } from 'lucide-react';
 

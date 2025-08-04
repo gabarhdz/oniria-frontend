@@ -1,4 +1,3 @@
-// components/dashboard/WelcomeSection.tsx
 import React from 'react';
 import { User, Crown, Moon, Star } from 'lucide-react';
 
