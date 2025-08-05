@@ -77,6 +77,14 @@ const useAuth = () => {
   return { user };
 };
 
+// Pantalla de carga reutilizable
+const LoadingScreen: React.FC<{ text?: string }> = ({ text }) => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a]">
+    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#f1b3be] mb-6"></div>
+    <p className="text-xl text-[#ffe0db]/80">{text || 'Cargando...'}</p>
+  </div>
+);
+
 // Components
 const CommunityCard: React.FC<{ community: Community; onClick: () => void }> = ({ community, onClick }) => (
   <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg p-6 cursor-pointer hover:bg-white/20 transition-all duration-200 transform hover:scale-[1.02] border border-white/20" onClick={onClick}>
@@ -252,26 +260,42 @@ const CommunityApp: React.FC = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [parentPost, setParentPost] = useState<Post | null>(null);
 
+  // Loading states
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingAction, setLoadingAction] = useState(false);
+
   // Cargar comunidades y posts solo una vez al inicio
   useEffect(() => {
-    api.getCommunities().then(setCommunities);
-    api.getPosts().then(setPosts);
+    setLoadingInitial(true);
+    Promise.all([api.getCommunities(), api.getPosts()])
+      .then(([coms, psts]) => {
+        setCommunities(coms);
+        setPosts(psts);
+      })
+      .finally(() => setLoadingInitial(false));
   }, []);
 
   // Crear comunidad y recargar solo comunidades
   const handleCreateCommunity = async (data: { name: string; description: string }) => {
+    setLoadingAction(true);
     await api.createCommunity(data);
-    api.getCommunities().then(setCommunities);
+    const coms = await api.getCommunities();
+    setCommunities(coms);
+    setLoadingAction(false);
   };
 
   // Crear post y recargar solo posts
   const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
+    setLoadingAction(true);
     await api.createPost(data);
-    api.getPosts().then(setPosts);
+    const psts = await api.getPosts();
+    setPosts(psts);
+    setLoadingAction(false);
   };
 
-  // Likes y dislikes optimistas
+  // Likes y dislikes optimistas con pantalla de carga
   const handleLikePost = async (postId: string) => {
+    setLoadingAction(true);
     setPosts(prev =>
       prev.map(post =>
         post.id === postId
@@ -284,9 +308,11 @@ const CommunityApp: React.FC = () => {
       )
     );
     await api.likePost(postId);
+    setLoadingAction(false);
   };
 
   const handleDislikePost = async (postId: string) => {
+    setLoadingAction(true);
     setPosts(prev =>
       prev.map(post =>
         post.id === postId
@@ -299,6 +325,7 @@ const CommunityApp: React.FC = () => {
       )
     );
     await api.dislikePost(postId);
+    setLoadingAction(false);
   };
 
   const handleReply = (post: Post) => {
@@ -317,6 +344,11 @@ const CommunityApp: React.FC = () => {
       (post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.text.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+  // Pantalla de carga inicial
+  if (loadingInitial) return <LoadingScreen text="Cargando comunidades y posts..." />;
+  // Pantalla de carga para acciones
+  if (loadingAction) return <LoadingScreen text="Actualizando..." />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a]">
