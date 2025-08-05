@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Plus, Search, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import { useForm } from 'react-hook-form';
@@ -77,11 +77,76 @@ const useAuth = () => {
   return { user };
 };
 
-// Pantalla de carga reutilizable
-const LoadingScreen: React.FC<{ text?: string }> = ({ text }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a]">
-    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#f1b3be] mb-6"></div>
-    <p className="text-xl text-[#ffe0db]/80">{text || 'Cargando...'}</p>
+// Loading Components
+const PageLoader: React.FC = () => (
+  <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
+    <div className="text-center">
+      <div className="relative mb-8">
+        <div className="w-24 h-24 border-4 border-[#9675bc]/30 rounded-full"></div>
+        <div className="absolute top-0 left-0 w-24 h-24 border-4 border-transparent border-t-[#f1b3be] rounded-full animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] rounded-full flex items-center justify-center">
+            <MessageSquare className="w-6 h-6 text-white" />
+          </div>
+        </div>
+      </div>
+      <h2 className="text-2xl font-bold text-[#ffe0db] mb-3">Cargando Centro de Comunidades</h2>
+      <p className="text-[#ffe0db]/70 mb-6">Obteniendo comunidades y posts...</p>
+      <div className="flex justify-center space-x-2">
+        <div className="w-3 h-3 bg-[#f1b3be] rounded-full animate-bounce"></div>
+        <div className="w-3 h-3 bg-[#9675bc] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+        <div className="w-3 h-3 bg-[#ffe0db] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+      </div>
+    </div>
+  </div>
+);
+
+const ActionLoader: React.FC<{ message: string }> = ({ message }) => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
+    <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-2xl text-center max-w-sm mx-4">
+      <div className="relative mb-6">
+        <div className="w-16 h-16 border-3 border-[#9675bc]/30 rounded-full"></div>
+        <div className="absolute top-0 left-0 w-16 h-16 border-3 border-transparent border-t-[#f1b3be] border-r-[#f1b3be] rounded-full animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Plus className="w-6 h-6 text-[#ffe0db]" />
+        </div>
+      </div>
+      <h3 className="text-xl font-semibold text-[#ffe0db] mb-2">{message}</h3>
+      <p className="text-sm text-[#ffe0db]/70">Por favor espera un momento...</p>
+    </div>
+  </div>
+);
+
+// Error Components
+const ErrorAlert: React.FC<{ 
+  message: string; 
+  onRetry?: () => void; 
+  onClose: () => void 
+}> = ({ message, onRetry, onClose }) => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
+    <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-6 border border-red-400/30 shadow-2xl text-center max-w-md mx-4">
+      <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span className="text-white text-2xl">⚠</span>
+      </div>
+      <h3 className="text-lg font-semibold text-[#ffe0db] mb-2">Error</h3>
+      <p className="text-sm text-[#ffe0db]/80 mb-6">{message}</p>
+      <div className="flex space-x-3">
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="flex-1 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] text-white px-4 py-2 rounded-lg transition-all duration-200"
+          >
+            Reintentar
+          </button>
+        )}
+        <button
+          onClick={onClose}
+          className="flex-1 bg-white/20 hover:bg-white/30 text-[#ffe0db] px-4 py-2 rounded-lg transition-all duration-200"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
   </div>
 );
 
@@ -259,73 +324,187 @@ const CommunityApp: React.FC = () => {
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [parentPost, setParentPost] = useState<Post | null>(null);
-
+  
   // Loading states
-  const [loadingInitial, setLoadingInitial] = useState(true);
-  const [loadingAction, setLoadingAction] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isCreatingCommunity, setIsCreatingCommunity] = useState(false);
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
+  
+  // Error states
+  const [error, setError] = useState<string | null>(null);
+
+  // Función para manejar errores
+  const handleApiError = (error: any, defaultMessage: string): string => {
+    if (error.response) {
+      // Error del servidor
+      const status = error.response.status;
+      const data = error.response.data;
+      
+      if (status === 400) {
+        return data?.error || data?.message || 'Datos inválidos. Verifica la información ingresada.';
+      } else if (status === 401) {
+        return 'No tienes autorización. Por favor inicia sesión nuevamente.';
+      } else if (status === 403) {
+        return 'No tienes permisos para realizar esta acción.';
+      } else if (status === 404) {
+        return 'El recurso solicitado no fue encontrado.';
+      } else if (status === 500) {
+        return 'Error interno del servidor. Inténtalo más tarde.';
+      } else {
+        return data?.error || data?.message || defaultMessage;
+      }
+    } else if (error.request) {
+      // Error de red
+      return 'Error de conexión. Verifica tu conexión a internet.';
+    } else {
+      // Error desconocido
+      return defaultMessage;
+    }
+  };
 
   // Cargar comunidades y posts solo una vez al inicio
   useEffect(() => {
-    setLoadingInitial(true);
-    Promise.all([api.getCommunities(), api.getPosts()])
-      .then(([coms, psts]) => {
-        setCommunities(coms);
-        setPosts(psts);
-      })
-      .finally(() => setLoadingInitial(false));
+    const loadInitialData = async () => {
+      try {
+        setIsInitialLoading(true);
+        setError(null);
+        const [communitiesData, postsData] = await Promise.all([
+          api.getCommunities(),
+          api.getPosts()
+        ]);
+        setCommunities(communitiesData);
+        setPosts(postsData);
+      } catch (error: any) {
+        console.error('Error loading initial data:', error);
+        setError(handleApiError(error, 'Error al cargar los datos iniciales.'));
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+    
+    loadInitialData();
   }, []);
+
+  // Función para reintentar carga inicial
+  const retryInitialLoad = () => {
+    const loadInitialData = async () => {
+      try {
+        setIsInitialLoading(true);
+        setError(null);
+        const [communitiesData, postsData] = await Promise.all([
+          api.getCommunities(),
+          api.getPosts()
+        ]);
+        setCommunities(communitiesData);
+        setPosts(postsData);
+      } catch (error: any) {
+        console.error('Error loading initial data:', error);
+        setError(handleApiError(error, 'Error al cargar los datos iniciales.'));
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+    
+    loadInitialData();
+  };
 
   // Crear comunidad y recargar solo comunidades
   const handleCreateCommunity = async (data: { name: string; description: string }) => {
-    setLoadingAction(true);
-    await api.createCommunity(data);
-    const coms = await api.getCommunities();
-    setCommunities(coms);
-    setLoadingAction(false);
+    try {
+      setIsCreatingCommunity(true);
+      setError(null);
+      await api.createCommunity(data);
+      const updatedCommunities = await api.getCommunities();
+      setCommunities(updatedCommunities);
+    } catch (error: any) {
+      console.error('Error creating community:', error);
+      const errorMessage = handleApiError(error, 'Error al crear la comunidad.');
+      setError(errorMessage);
+    } finally {
+      setIsCreatingCommunity(false);
+    }
   };
 
   // Crear post y recargar solo posts
   const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
-    setLoadingAction(true);
-    await api.createPost(data);
-    const psts = await api.getPosts();
-    setPosts(psts);
-    setLoadingAction(false);
+    try {
+      setIsCreatingPost(true);
+      setError(null);
+      await api.createPost(data);
+      const updatedPosts = await api.getPosts();
+      setPosts(updatedPosts);
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      const errorMessage = handleApiError(error, 'Error al crear el post.');
+      setError(errorMessage);
+    } finally {
+      setIsCreatingPost(false);
+    }
   };
 
-  // Likes y dislikes optimistas con pantalla de carga
+  // Likes y dislikes optimistas con manejo de errores
   const handleLikePost = async (postId: string) => {
-    setLoadingAction(true);
+    if (!user) {
+      setError('Debes iniciar sesión para dar like a un post.');
+      return;
+    }
+
+    // Actualización optimista
+    const originalPosts = [...posts];
     setPosts(prev =>
       prev.map(post =>
         post.id === postId
           ? {
               ...post,
-              likes: user ? [...post.likes, user] : post.likes,
-              dislikes: post.dislikes.filter(u => u.id !== user?.id),
+              likes: post.likes.some(u => u.id === user.id) 
+                ? post.likes.filter(u => u.id !== user.id)  // Remove like if already liked
+                : [...post.likes, user], // Add like
+              dislikes: post.dislikes.filter(u => u.id !== user.id), // Remove dislike if exists
             }
           : post
       )
     );
-    await api.likePost(postId);
-    setLoadingAction(false);
+
+    try {
+      await api.likePost(postId);
+    } catch (error: any) {
+      console.error('Error liking post:', error);
+      // Revertir cambios optimistas
+      setPosts(originalPosts);
+      setError(handleApiError(error, 'Error al dar like al post.'));
+    }
   };
 
   const handleDislikePost = async (postId: string) => {
-    setLoadingAction(true);
+    if (!user) {
+      setError('Debes iniciar sesión para dar dislike a un post.');
+      return;
+    }
+
+    // Actualización optimista
+    const originalPosts = [...posts];
     setPosts(prev =>
       prev.map(post =>
         post.id === postId
           ? {
               ...post,
-              dislikes: user ? [...post.dislikes, user] : post.dislikes,
-              likes: post.likes.filter(u => u.id !== user?.id),
+              dislikes: post.dislikes.some(u => u.id === user.id)
+                ? post.dislikes.filter(u => u.id !== user.id) // Remove dislike if already disliked
+                : [...post.dislikes, user], // Add dislike
+              likes: post.likes.filter(u => u.id !== user.id), // Remove like if exists
             }
           : post
       )
     );
-    await api.dislikePost(postId);
-    setLoadingAction(false);
+
+    try {
+      await api.dislikePost(postId);
+    } catch (error: any) {
+      console.error('Error disliking post:', error);
+      // Revertir cambios optimistas
+      setPosts(originalPosts);
+      setError(handleApiError(error, 'Error al dar dislike al post.'));
+    }
   };
 
   const handleReply = (post: Post) => {
@@ -345,13 +524,37 @@ const CommunityApp: React.FC = () => {
         post.text.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-  // Pantalla de carga inicial
-  if (loadingInitial) return <LoadingScreen text="Cargando comunidades y posts..." />;
-  // Pantalla de carga para acciones
-  if (loadingAction) return <LoadingScreen text="Actualizando..." />;
+  // Show page loader while initial data is loading
+  if (isInitialLoading) {
+    return <PageLoader />;
+  }
+
+  // Show error if there's an error
+  if (error && !isInitialLoading) {
+    return (
+      <ErrorAlert
+        message={error}
+        onRetry={!isCreatingCommunity && !isCreatingPost ? retryInitialLoad : undefined}
+        onClose={() => setError(null)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a]">
+      {/* Action Loaders */}
+      {isCreatingCommunity && <ActionLoader message="Creando comunidad..." />}
+      {isCreatingPost && <ActionLoader message="Creando post..." />}
+      
+      {/* Error Alert */}
+      {error && !isInitialLoading && (
+        <ErrorAlert
+          message={error}
+          onRetry={!isCreatingCommunity && !isCreatingPost ? retryInitialLoad : undefined}
+          onClose={() => setError(null)}
+        />
+      )}
+
       {/* Header */}
       <header className="bg-black/20 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -403,7 +606,8 @@ const CommunityApp: React.FC = () => {
             {activeTab === 'communities' && (
               <button
                 onClick={() => setShowCreateCommunity(true)}
-                className="flex items-center space-x-2 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] text-white px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
+                disabled={isCreatingCommunity}
+                className="flex items-center space-x-2 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] text-white px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <Plus className="w-5 h-5" />
                 <span>Nueva Comunidad</span>
@@ -412,7 +616,8 @@ const CommunityApp: React.FC = () => {
             {activeTab === 'posts' && (
               <button
                 onClick={() => { setParentPost(null); setShowCreatePost(true); }}
-                className="flex items-center space-x-2 bg-gradient-to-r from-[#f1b3be] to-[#ffe0db] hover:from-[#ffe0db] hover:to-[#f1b3be] text-[#1a1f35] px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg"
+                disabled={isCreatingPost}
+                className="flex items-center space-x-2 bg-gradient-to-r from-[#f1b3be] to-[#ffe0db] hover:from-[#ffe0db] hover:to-[#f1b3be] text-[#1a1f35] px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <Plus className="w-5 h-5" />
                 <span>Nuevo Post</span>
