@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
 interface User {
   username: string;
   email?: string;
@@ -28,6 +29,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   
   const navigate = useNavigate();
 
+  // Navegación para los elementos del menú
+  const navigationItems = [
+    { label: 'Chatbot', path: '/chatbot' },
+    { label: 'Análisis', path: '/analysis' },
+    { label: 'Psicólogos', path: '/psychologists' },
+    { label: 'Comunidad', path: '/communities' }
+  ];
+
   const profileMenuItems = [
     { icon: User, label: 'Mi Perfil', action: () => navigate('/profile') },
     { icon: Settings, label: 'Configuración', action: () => console.log('Configuración') },
@@ -36,6 +45,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     { icon: darkMode ? Sun : Moon, label: darkMode ? 'Modo Claro' : 'Modo Oscuro', action: () => setDarkMode(!darkMode) },
     { icon: HelpCircle, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
+
+  // Función para manejar navegación
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
 
   // Función para obtener las iniciales del usuario
   const getUserInitials = (username: string): string => {
@@ -226,9 +240,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {/* Navegación con opciones de la landing */}
           <div className="flex items-center">
             <ul className="flex gap-8 text-[16px] font-inter">
-              {['Chatbot', 'Análisis', 'Psicólogos', 'Comunidad'].map((item, index) => (
-                <li key={item} className="group relative">
+              {navigationItems.map((item, index) => (
+                <li key={item.label} className="group relative">
                   <button 
+                    onClick={() => handleNavigation(item.path)}
                     className="relative text-oniria_lightpink hover:text-white transition-all duration-500 py-3 px-6 rounded-2xl block overflow-hidden cursor-pointer hover:bg-gradient-to-r hover:from-oniria_purple/10 hover:to-oniria_pink/10"
                   >
                     {/* Efecto de burbuja expansiva */}
@@ -243,7 +258,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     
                     {/* Texto con efecto de brillo */}
                     <span className="relative z-10 font-medium group-hover:drop-shadow-[0_0_8px_rgba(241,179,190,0.8)] transition-all duration-300">
-                      {item}
+                      {item.label}
                     </span>
                     
                     {/* Línea animada ondulada */}
