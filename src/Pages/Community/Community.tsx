@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Loader2, Edit2, Trash2, Camera, UserPlus, UserMinus, Reply, X } from 'lucide-react';
 
-// Types
+
 interface User {
   id: string;
   username: string;
