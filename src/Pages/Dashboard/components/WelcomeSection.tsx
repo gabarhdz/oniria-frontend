@@ -110,7 +110,9 @@ const TypewriterText: React.FC<{ text: string; speed?: number; className?: strin
       {!isComplete && (
         <span 
           className="inline-block w-0.5 h-8 ml-1 animate-pulse"
-          style={{ backgroundColor: '#f1b3be' }}
+          style={{
+          backgroundColor: '#214d72'
+        }}
         />
       )}
     </span>
@@ -120,9 +122,9 @@ const TypewriterText: React.FC<{ text: string; speed?: number; className?: strin
 const FloatingElements: React.FC = () => {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* Geometric floating shapes */}
+      {/* Geometric floating shapes con mayor contraste */}
       <div 
-        className="absolute animate-float-gentle opacity-10"
+        className="absolute animate-float-gentle"
         style={{
           top: '15%',
           left: '10%',
@@ -131,11 +133,13 @@ const FloatingElements: React.FC = () => {
           background: 'linear-gradient(135deg, #9675bc, #f1b3be)',
           borderRadius: '50%',
           filter: 'blur(1px)',
-          animationDelay: '0s'
+          animationDelay: '0s',
+          opacity: 0.4,
+          boxShadow: '0 4px 12px rgba(150, 117, 188, 0.3)'
         }}
       />
       <div 
-        className="absolute animate-float-gentle opacity-15"
+        className="absolute animate-float-gentle"
         style={{
           top: '70%',
           right: '15%',
@@ -144,11 +148,13 @@ const FloatingElements: React.FC = () => {
           background: 'linear-gradient(135deg, #f1b3be, #ffe0db)',
           clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
           filter: 'blur(1px)',
-          animationDelay: '2s'
+          animationDelay: '2s',
+          opacity: 0.5,
+          boxShadow: '0 4px 12px rgba(241, 179, 190, 0.4)'
         }}
       />
       <div 
-        className="absolute animate-float-gentle opacity-20"
+        className="absolute animate-float-gentle"
         style={{
           bottom: '20%',
           left: '20%',
@@ -157,11 +163,13 @@ const FloatingElements: React.FC = () => {
           background: '#ffe0db',
           clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
           filter: 'blur(0.5px)',
-          animationDelay: '4s'
+          animationDelay: '4s',
+          opacity: 0.6,
+          boxShadow: '0 3px 8px rgba(255, 224, 219, 0.4)'
         }}
       />
       
-      {/* Subtle sparkles */}
+      {/* Sparkles más visibles */}
       {Array.from({ length: 8 }, (_, i) => (
         <div
           key={i}
@@ -169,12 +177,13 @@ const FloatingElements: React.FC = () => {
           style={{
             top: `${20 + Math.random() * 60}%`,
             left: `${10 + Math.random() * 80}%`,
-            width: '2px',
-            height: '2px',
+            width: '3px',
+            height: '3px',
             background: '#ffe0db',
             borderRadius: '50%',
             animationDelay: `${Math.random() * 3}s`,
-            opacity: 0.6
+            opacity: 0.8,
+            boxShadow: '0 0 6px rgba(255, 224, 219, 0.8)'
           }}
         />
       ))}
@@ -188,9 +197,9 @@ const GlowingBorder: React.FC<{ children: React.ReactNode; className?: string }>
 }) => {
   return (
     <div className={`relative group ${className}`}>
-      {/* Animated border glow */}
+      {/* Enhanced animated border glow */}
       <div 
-        className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-30 transition-all duration-700 blur-sm"
+        className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-60 transition-all duration-700 blur-md"
         style={{
           background: 'linear-gradient(45deg, #9675bc, #f1b3be, #ffe0db, #9675bc)',
           backgroundSize: '400% 400%',
@@ -211,46 +220,49 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
   };
 
   return (
-    <GlowingBorder className="relative min-h-[400px] rounded-3xl overflow-hidden">
+    <GlowingBorder className="relative min-h-[400px] rounded-3xl overflow-hidden shadow-2xl">
       <FloatingElements />
       
-      {/* Main background with theme colors */}
+      {/* Fondo principal con variaciones claras del purple/blue */}
       <div 
-        className="absolute inset-0 backdrop-blur-sm"
+        className="absolute inset-0"
         style={{
-          background: 'linear-gradient(135deg, #252c3e 0%, #214d72 50%, #9675bc 100%)'
+          background: 'linear-gradient(135deg, #e6ddf4 0%, #d1e0f0 50%, #f0ebf8 100%)',
         }}
       />
       
-      {/* Subtle overlay */}
+      {/* Overlay sutil con tonos suaves */}
       <div 
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to top, #9675bc, transparent)'
+          background: `
+            radial-gradient(ellipse at 30% 30%, rgba(37, 44, 62, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 70% 70%, rgba(33, 77, 114, 0.08) 0%, transparent 50%)
+          `
         }}
       />
       
       {/* Main content */}
       <div className="relative z-10 p-8 text-center space-y-6">
         
-        {/* Avatar Section */}
+        {/* Avatar Section con mejor contraste */}
         <ScaleIn delay={0.2}>
           <div className="relative inline-flex items-center justify-center">
             <div className="relative group">
-              {/* Subtle glow effect around avatar */}
+              {/* Enhanced glow effect around avatar */}
               <div 
-                className="absolute inset-0 rounded-full opacity-50 group-hover:opacity-70 transition-all duration-500 blur-lg"
+                className="absolute inset-0 rounded-full opacity-60 group-hover:opacity-80 transition-all duration-500 blur-xl"
                 style={{
-                  background: 'radial-gradient(circle, #f1b3be 0%, transparent 70%)',
-                  transform: 'scale(1.2)'
+                  background: 'radial-gradient(circle, rgba(241, 179, 190, 0.6) 0%, rgba(150, 117, 188, 0.3) 50%, transparent 70%)',
+                  transform: 'scale(1.3)'
                 }}
               />
               
               <div 
-                className="relative w-28 h-28 rounded-full overflow-hidden shadow-xl transform transition-all duration-500 hover:shadow-2xl hover:scale-105 border-4 group"
+                className="relative w-28 h-28 rounded-full overflow-hidden shadow-2xl transform transition-all duration-500 hover:shadow-2xl hover:scale-105 border-4 group"
                 style={{ 
                   borderColor: '#f1b3be',
-                  boxShadow: '0 20px 40px rgba(150, 117, 188, 0.3)'
+                  boxShadow: '0 20px 40px rgba(150, 117, 188, 0.4), 0 0 20px rgba(241, 179, 190, 0.3)'
                 }}
               >
                 {/* Avatar Image or Initials */}
@@ -268,123 +280,131 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
                       background: 'linear-gradient(135deg, #9675bc 0%, #f1b3be 100%)'
                     }}
                   >
-                    {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <span className="relative z-10">{getUserInitials(user.username)}</span>
+                    {/* Enhanced shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <span className="relative z-10 drop-shadow-lg">{getUserInitials(user.username)}</span>
                   </div>
                 )}
               </div>
               
-              {/* Online indicator */}
+              {/* Enhanced online indicator */}
               <div className="absolute -bottom-1 -right-1">
                 <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-4 border-white relative"
-                  style={{ backgroundColor: '#4ade80' }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center shadow-xl border-4 border-white relative"
+                  style={{ 
+                    backgroundColor: '#4ade80',
+                    boxShadow: '0 4px 12px rgba(74, 222, 128, 0.4)'
+                  }}
                 >
                   <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-                  {/* Pulse ring */}
+                  {/* Enhanced pulse rings */}
                   <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-ping opacity-75" />
+                  <div className="absolute inset-0 rounded-full border border-green-300 animate-ping opacity-50" style={{ animationDelay: '0.5s' }} />
                 </div>
               </div>
             </div>
           </div>
         </ScaleIn>
         
-        {/* Welcome Text with typewriter effect */}
+        {/* Welcome Text con mejor contraste */}
         <FadeInUp delay={0.4}>
           <div className="space-y-4">
             <h1 
-              className="text-4xl lg:text-5xl font-bold leading-tight"
+              className="text-4xl lg:text-5xl font-bold leading-tight drop-shadow-lg"
               style={{ 
-                background: 'linear-gradient(135deg, #ffe0db 0%, #f1b3be 50%, #9675bc 100%)',
+                background: 'linear-gradient(135deg, #252c3e 0%, #214d72 30%, #9675bc 70%, #252c3e 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                fontFamily: 'var(--font-playfair, "Playfair Display", serif)'
+                fontFamily: 'var(--font-playfair, "Playfair Display", serif)',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
               }}
             >
               ¡Bienvenido, <TypewriterText text={user.username} />!
             </h1>
             
-            {/* Role badge with enhanced styling */}
+            {/* Role badge con mayor contraste */}
             <ScaleIn delay={0.6}>
               {user.is_psychologist ? (
                 <div 
-                  className="inline-flex items-center space-x-2 px-6 py-3 rounded-full border backdrop-blur-sm group hover:scale-105 transition-all duration-300 cursor-default relative overflow-hidden"
+                  className="inline-flex items-center space-x-2 px-6 py-3 rounded-full border backdrop-blur-sm group hover:scale-105 transition-all duration-300 cursor-default relative overflow-hidden shadow-lg"
                   style={{
-                    backgroundColor: 'rgba(255, 224, 219, 0.15)',
-                    borderColor: 'rgba(255, 224, 219, 0.3)'
+                    backgroundColor: 'rgba(37, 44, 62, 0.15)',
+                    borderColor: 'rgba(37, 44, 62, 0.3)',
+                    boxShadow: '0 8px 24px rgba(37, 44, 62, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
                   }}
                 >
-                  {/* Subtle shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <Crown className="w-5 h-5 animate-pulse" style={{ color: '#ffe0db' }} />
+                  {/* Enhanced shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  <Crown className="w-5 h-5 animate-pulse drop-shadow-sm" style={{ color: '#9675bc' }} />
                   <span 
-                    className="font-semibold text-lg relative z-10"
+                    className="font-semibold text-lg relative z-10 drop-shadow-sm"
                     style={{ 
-                      color: '#ffe0db',
+                      color: '#252c3e',
                       fontFamily: 'var(--font-inter, "Inter", sans-serif)'
                     }}
                   >
                     Psicólogo Certificado
                   </span>
-                  <Shield className="w-4 h-4" style={{ color: '#f1b3be' }} />
+                  <Shield className="w-4 h-4 drop-shadow-sm" style={{ color: '#214d72' }} />
                 </div>
               ) : (
                 <div 
-                  className="inline-flex items-center space-x-2 px-6 py-3 rounded-full border backdrop-blur-sm group hover:scale-105 transition-all duration-300 cursor-default relative overflow-hidden"
+                  className="inline-flex items-center space-x-2 px-6 py-3 rounded-full border backdrop-blur-sm group hover:scale-105 transition-all duration-300 cursor-default relative overflow-hidden shadow-lg"
                   style={{
-                    backgroundColor: 'rgba(241, 179, 190, 0.15)',
-                    borderColor: 'rgba(241, 179, 190, 0.3)'
+                    backgroundColor: 'rgba(37, 44, 62, 0.15)',
+                    borderColor: 'rgba(37, 44, 62, 0.3)',
+                    boxShadow: '0 8px 24px rgba(37, 44, 62, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
                   }}
                 >
-                  {/* Subtle shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <Moon className="w-5 h-5 animate-pulse" style={{ color: '#f1b3be' }} />
+                  {/* Enhanced shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  <Moon className="w-5 h-5 animate-pulse drop-shadow-sm" style={{ color: '#9675bc' }} />
                   <span 
-                    className="font-medium relative z-10"
+                    className="font-medium relative z-10 drop-shadow-sm"
                     style={{ 
-                      color: '#ffe0db',
+                      color: '#252c3e',
                       fontFamily: 'var(--font-inter, "Inter", sans-serif)'
                     }}
                   >
                     Explorador de Sueños
                   </span>
-                  <Star className="w-5 h-5 animate-twinkle" style={{ color: '#ffe0db' }} />
-                  <Sparkles className="w-4 h-4 animate-pulse" style={{ color: '#ffe0db' }} />
+                  <Star className="w-5 h-5 animate-twinkle drop-shadow-sm" style={{ color: '#214d72' }} />
+                  <Sparkles className="w-4 h-4 animate-pulse drop-shadow-sm" style={{ color: '#f1b3be' }} />
                 </div>
               )}
             </ScaleIn>
           </div>
         </FadeInUp>
         
-        {/* User description */}
+        {/* User description con mejor contraste */}
         {user.description && (
           <FadeInUp delay={0.8}>
             <div className="max-w-2xl mx-auto">
               <div 
-                className="backdrop-blur-sm border rounded-2xl px-6 py-4 relative group hover:scale-105 transition-all duration-300 overflow-hidden"
+                className="backdrop-blur-sm border rounded-2xl px-6 py-4 relative group hover:scale-105 transition-all duration-300 overflow-hidden shadow-xl"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  borderColor: 'rgba(255, 255, 255, 0.2)'
+                  backgroundColor: 'rgba(37, 44, 62, 0.1)',
+                  borderColor: 'rgba(37, 44, 62, 0.2)',
+                  boxShadow: '0 12px 24px rgba(37, 44, 62, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
                 }}
               >
-                {/* Subtle background animation */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500" />
+                {/* Enhanced background animation */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500" />
                 
                 <p 
-                  className="leading-relaxed text-lg relative z-10"
+                  className="leading-relaxed text-lg relative z-10 drop-shadow-sm"
                   style={{ 
-                    color: 'rgba(255, 224, 219, 0.9)',
+                    color: '#252c3e',
                     fontFamily: 'var(--font-inter, "Inter", sans-serif)'
                   }}
                 >
                   {user.description}
                 </p>
                 
-                {/* Decorative icon */}
+                {/* Enhanced decorative icon */}
                 <Heart 
-                  className="absolute top-3 right-3 w-4 h-4 opacity-50 animate-pulse" 
+                  className="absolute top-3 right-3 w-4 h-4 opacity-70 animate-pulse drop-shadow-sm" 
                   style={{ color: '#f1b3be' }}
                 />
               </div>
@@ -392,14 +412,14 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
           </FadeInUp>
         )}
         
-        {/* Time-based greeting */}
+        {/* Time-based greeting con mejor contraste */}
         <FadeInUp delay={1.0}>
           <div className="flex items-center justify-center space-x-2 group">
-            <Moon className="w-4 h-4 animate-pulse" style={{ color: '#f1b3be' }} />
+            <Moon className="w-4 h-4 animate-pulse drop-shadow-sm" style={{ color: '#9675bc' }} />
             <span 
-              className="text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+              className="text-sm font-medium opacity-90 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-sm"
               style={{ 
-                color: '#ffe0db',
+                color: '#252c3e',
                 fontFamily: 'var(--font-inter, "Inter", sans-serif)'
               }}
             >
@@ -410,16 +430,17 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
                 : 'Buenas noches, es hora de sumergirte en el mundo onírico'
               }
             </span>
-            <Star className="w-4 h-4 animate-twinkle" style={{ color: '#ffe0db' }} />
+            <Star className="w-4 h-4 animate-twinkle drop-shadow-sm" style={{ color: '#214d72' }} />
           </div>
         </FadeInUp>
       </div>
       
-      {/* Subtle border */}
+      {/* Enhanced border */}
       <div 
         className="absolute inset-0 rounded-3xl border pointer-events-none"
         style={{
-          borderColor: 'rgba(150, 117, 188, 0.3)'
+          borderColor: 'rgba(37, 44, 62, 0.3)',
+          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
         }}
       />
 
@@ -433,8 +454,8 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
         }
         
         @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.3); }
         }
         
         @keyframes gradientShift {
