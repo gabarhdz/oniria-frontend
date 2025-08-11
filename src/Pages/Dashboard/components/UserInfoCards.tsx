@@ -567,23 +567,6 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
   );
 };
 
-// Demo component
-const UserInfoCardsDemo = () => {
-  const demoUser = {
-    id: "demo123456789",
-    username: "Luna Soñadora",
-    email: "luna.sonadora@noctiria.com",
-    is_psychologist: true,
-    profile_pic: "https://example.com/profile.jpg"
-  };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#252c3e] via-[#214d72] to-[#9675bc] p-8">
-      <div className="max-w-7xl mx-auto py-16">
-        <UserInfoCards user={demoUser} />
-      </div>
-    </div>
-  );
-};
 
 export default UserInfoCards;
