@@ -419,59 +419,41 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <div className="flex justify-between items-center p-3 sm:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8"
              onClick={handleOutsideClick}>
           
-          {/* Logo mejorado con más elementos - Más pegado a la izquierda */}
-          <div className="relative flex-shrink-0 -ml-2 sm:-ml-4">
-            <div className="flex gap-1 sm:gap-2 items-center">
-              <div className="relative group">
-                <div className="flex items-center group">
-                  {/* Container del logo con efectos mejorados */}
-                  <div className="relative w-10 h-10 sm:w-14 sm:h-14 lg:w-20 lg:h-20 p-1 sm:p-2">
-                    {/* Círculo de resplandor */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple/20 via-oniria_pink/20 to-oniria_lightpink/20 rounded-full blur-lg animate-pulse"></div>
-                    
-                    {/* Partículas orbitales */}
-                    <div className="absolute inset-0 rounded-full">
-                      <div className="absolute top-0 left-1/2 w-1 h-1 bg-oniria_purple rounded-full animate-bounce transform -translate-x-1/2" style={{animationDelay: '0s'}}></div>
-                      <div className="absolute right-0 top-1/2 w-0.5 h-0.5 bg-oniria_pink rounded-full animate-ping transform -translate-y-1/2" style={{animationDelay: '0.5s'}}></div>
-                      <div className="absolute bottom-1 left-1 w-0.5 h-0.5 bg-oniria_lightpink rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-                      <div className="absolute top-2 right-2 w-0.5 h-0.5 bg-oniria_purple/60 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
-                    </div>
-
+          {/* Logo con texto NOCTIRIA - Más pegado a la izquierda */}
+          <div className="relative flex-shrink-0 -ml-6 sm:-ml-8">
+            <div className="flex gap-2 sm:gap-3 items-center">
+              <div className="relative">
+                <div className="flex items-center">
+                  {/* Container del logo solo con scale */}
+                  <div className="relative w-14 h-14 sm:w-18 sm:h-18 lg:w-28 lg:h-28 p-1 sm:p-2 transition-transform duration-300 hover:scale-105">
                     <img 
                       src="/img/Oniria.svg" 
                       alt="ONIRIA Logo" 
-                      className="w-full h-full object-contain filter drop-shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative z-10" 
+                      className="w-full h-full object-contain filter drop-shadow-sm relative z-10" 
                     />
-                    
-                    {/* Efecto de brillo al hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full"></div>
                   </div>
                   
-                  {/* Nombre con efectos mejorados */}
-                  <div className="relative ml-1 sm:ml-2">
-                    <span className="font-playfair font-black italic text-base sm:text-xl lg:text-2xl bg-gradient-to-r from-oniria_pink via-oniria_lightpink to-oniria_purple bg-clip-text text-transparent hover:bg-gradient-to-l transition-all duration-700 hover:tracking-wider hidden xs:block relative z-10">
+                  {/* Texto NOCTIRIA con efectos reducidos */}
+                  <div className="relative ml-2 sm:ml-3 group">
+                    <span className="font-inter font-bold text-lg sm:text-2xl lg:text-3xl bg-gradient-to-r from-oniria_pink via-oniria_lightpink to-oniria_purple bg-clip-text text-transparent hover:bg-gradient-to-l transition-all duration-700 hover:tracking-wider block relative z-10 group-hover:drop-shadow-[0_0_8px_rgba(241,179,190,0.6)]">
                       NOCTIRIA
                     </span>
                     
-                    {/* Efectos decorativos alrededor del texto */}
-                    <div className="absolute -top-1 -left-1 w-2 h-2 hidden sm:block">
-                      <Star className="w-full h-full text-oniria_purple/40 animate-pulse" />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 hidden sm:block">
-                      <Zap className="w-full h-full text-oniria_pink/30 animate-bounce" style={{animationDelay: '0.3s'}} />
-                    </div>
-                    
-                    {/* Subtítulo pequeño */}
-                    <div className="absolute -bottom-2 left-0 right-0 text-center hidden lg:block">
-                      <span className="text-[8px] text-oniria_purple/60 font-light tracking-widest animate-pulse">
-                        MENTAL WELLNESS
-                      </span>
+                    {/* Efectos decorativos reducidos alrededor del texto */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      {/* Partículas flotantes reducidas */}
+                      <div className="absolute -top-1 left-2 w-0.5 h-0.5 bg-oniria_purple/40 rounded-full animate-pulse"></div>
+                      <div className="absolute top-1 -right-1 w-0.5 h-0.5 bg-oniria_pink/30 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
+                      <div className="absolute -bottom-1 left-8 w-0.5 h-0.5 bg-oniria_lightpink/40 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
                     </div>
                     
-                    {/* Línea decorativa animada */}
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_purple/50 to-transparent hidden sm:block">
-                      <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple to-oniria_pink animate-pulse"></div>
+                    {/* Línea elegante que se expande desde el centro */}
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oniria_purple/30 to-transparent opacity-60 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center">
+                      <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple/40 to-oniria_pink/40"></div>
                     </div>
+                    
+                    {/* Resplandor de fondo reducido */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple/3 via-oniria_pink/3 to-oniria_lightpink/3 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                   </div>
                 </div>
               </div>
