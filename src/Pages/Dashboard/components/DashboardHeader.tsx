@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle, Menu, X } from 'lucide-react';
+import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle, Menu, X, Star, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface User {
@@ -256,7 +256,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     </div>
   );
 
-  // Menú móvil
+  // Menú móvil con scroll
   const MobileMenu = () => (
     <div className={`lg:hidden fixed inset-0 z-[60] transition-all duration-500 ${
       showMobileMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -269,13 +269,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         onClick={() => setShowMobileMenu(false)}
       />
       
-      {/* Panel deslizante */}
+      {/* Panel deslizante con scroll */}
       <div className={`absolute top-0 right-0 h-full w-80 max-w-[80vw] bg-gradient-to-br from-oniria_darkblue/95 via-oniria_darkblue/90 to-oniria_blue/95 backdrop-blur-2xl border-l border-oniria_purple/30 shadow-2xl shadow-oniria_purple/20 transform transition-transform duration-500 ${
         showMobileMenu ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      } flex flex-col`}>
         
-        {/* Header del menú móvil */}
-        <div className="flex items-center justify-between p-6 border-b border-oniria_purple/20">
+        {/* Header del menú móvil - Fijo */}
+        <div className="flex items-center justify-between p-6 border-b border-oniria_purple/20 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <ProfileAvatar size="medium" />
             <div>
@@ -296,76 +296,79 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </button>
         </div>
 
-        {/* Navegación móvil */}
-        <div className="p-4 space-y-2">
-          <h4 className="text-sm font-semibold text-oniria_purple/80 uppercase tracking-wider mb-4">
-            Navegación
-          </h4>
-          {navigationItems.map((item, index) => (
-            <div
-              key={item}
-              className={`transform transition-all duration-500 ${
-                showMobileMenu ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
-              }`}
-              style={{transitionDelay: `${index * 100}ms`}}
-            >
-              <NavigationLink 
-                item={item} 
-                onClick={() => setShowMobileMenu(false)}
-                isMobile={true}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Opciones de perfil */}
-        <div className="p-4 border-t border-oniria_purple/20">
-          <h4 className="text-sm font-semibold text-oniria_purple/80 uppercase tracking-wider mb-4">
-            Perfil
-          </h4>
-          {profileMenuItems.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                onClick={() => {
-                  item.action();
-                  setShowMobileMenu(false);
-                }}
-                className={`group relative w-full flex items-center space-x-3 text-oniria_lightpink hover:text-white transition-all duration-500 py-3 px-4 rounded-xl overflow-hidden transform ${
+        {/* Contenido scrolleable */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-oniria_darkblue/50 scrollbar-thumb-oniria_purple/30 hover:scrollbar-thumb-oniria_purple/50">
+          {/* Navegación móvil */}
+          <div className="p-4 space-y-2">
+            <h4 className="text-sm font-semibold text-oniria_purple/80 uppercase tracking-wider mb-4">
+              Navegación
+            </h4>
+            {navigationItems.map((item, index) => (
+              <div
+                key={item}
+                className={`transform transition-all duration-500 ${
                   showMobileMenu ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
-                } cursor-pointer hover:bg-gradient-to-r hover:from-oniria_purple/10 hover:to-oniria_pink/5`}
-                style={{transitionDelay: `${(navigationItems.length + index) * 100}ms`}}
+                }`}
+                style={{transitionDelay: `${index * 100}ms`}}
               >
-                {/* Efecto de burbuja expansiva */}
-                <div className="absolute inset-0 bg-gradient-to-br from-oniria_purple/20 via-oniria_pink/10 to-oniria_lightpink/5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
-                
-                {/* Partículas flotantes */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-2 left-6 w-0.5 h-0.5 bg-oniria_purple rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-3 right-6 w-1 h-1 bg-oniria_pink/80 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                  <div className="absolute top-1/2 right-8 w-0.5 h-0.5 bg-oniria_lightpink rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
-                </div>
+                <NavigationLink 
+                  item={item} 
+                  onClick={() => setShowMobileMenu(false)}
+                  isMobile={true}
+                />
+              </div>
+            ))}
+          </div>
 
-                <Icon className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:scale-110 text-oniria_pink group-hover:text-white" />
-                <span className="relative z-10 font-medium group-hover:drop-shadow-[0_0_8px_rgba(241,179,190,0.8)] transition-all duration-300">
-                  {item.label}
-                </span>
+          {/* Opciones de perfil */}
+          <div className="p-4 border-t border-oniria_purple/20">
+            <h4 className="text-sm font-semibold text-oniria_purple/80 uppercase tracking-wider mb-4">
+              Perfil
+            </h4>
+            {profileMenuItems.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => {
+                    item.action();
+                    setShowMobileMenu(false);
+                  }}
+                  className={`group relative w-full flex items-center space-x-3 text-oniria_lightpink hover:text-white transition-all duration-500 py-3 px-4 rounded-xl overflow-hidden transform ${
+                    showMobileMenu ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
+                  } cursor-pointer hover:bg-gradient-to-r hover:from-oniria_purple/10 hover:to-oniria_pink/5`}
+                  style={{transitionDelay: `${(navigationItems.length + index) * 100}ms`}}
+                >
+                  {/* Efecto de burbuja expansiva */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-oniria_purple/20 via-oniria_pink/10 to-oniria_lightpink/5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
+                  
+                  {/* Partículas flotantes */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute top-2 left-6 w-0.5 h-0.5 bg-oniria_purple rounded-full animate-pulse"></div>
+                    <div className="absolute bottom-3 right-6 w-1 h-1 bg-oniria_pink/80 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="absolute top-1/2 right-8 w-0.5 h-0.5 bg-oniria_lightpink rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+                  </div>
 
-                {/* Línea animada */}
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_purple to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center">
-                  <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple to-oniria_pink animate-pulse"></div>
-                </div>
+                  <Icon className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:scale-110 text-oniria_pink group-hover:text-white" />
+                  <span className="relative z-10 font-medium group-hover:drop-shadow-[0_0_8px_rgba(241,179,190,0.8)] transition-all duration-300">
+                    {item.label}
+                  </span>
 
-                {/* Efecto de destello lateral */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_lightpink/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 delay-100"></div>
-              </button>
-            );
-          })}
+                  {/* Línea animada */}
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_purple to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center">
+                    <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple to-oniria_pink animate-pulse"></div>
+                  </div>
+
+                  {/* Efecto de destello lateral */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_lightpink/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 delay-100"></div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Botones de acción en móvil */}
-        <div className="p-4 border-t border-oniria_purple/20 space-y-3">
+        {/* Botones de acción en móvil - Fijos en la parte inferior */}
+        <div className="p-4 border-t border-oniria_purple/20 space-y-3 flex-shrink-0">
           {/* Botón Refresh */}
           <button
             onClick={() => {
@@ -413,24 +416,63 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[70px] sm:h-[90px] font-playfair border-b border-oniria_purple/20 shadow-2xl shadow-oniria_purple/10">
-        <div className="flex justify-between items-center p-3 sm:p-4 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        <div className="flex justify-between items-center p-3 sm:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8"
              onClick={handleOutsideClick}>
           
-          {/* Logo con estilo adaptado - Responsive */}
-          <div className="relative flex-shrink-0">
-            <div className="flex gap-2 sm:gap-4 items-center">
+          {/* Logo mejorado con más elementos - Más pegado a la izquierda */}
+          <div className="relative flex-shrink-0 -ml-2 sm:-ml-4">
+            <div className="flex gap-1 sm:gap-2 items-center">
               <div className="relative group">
                 <div className="flex items-center group">
-                  <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 p-1 sm:p-2">
+                  {/* Container del logo con efectos mejorados */}
+                  <div className="relative w-10 h-10 sm:w-14 sm:h-14 lg:w-20 lg:h-20 p-1 sm:p-2">
+                    {/* Círculo de resplandor */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple/20 via-oniria_pink/20 to-oniria_lightpink/20 rounded-full blur-lg animate-pulse"></div>
+                    
+                    {/* Partículas orbitales */}
+                    <div className="absolute inset-0 rounded-full">
+                      <div className="absolute top-0 left-1/2 w-1 h-1 bg-oniria_purple rounded-full animate-bounce transform -translate-x-1/2" style={{animationDelay: '0s'}}></div>
+                      <div className="absolute right-0 top-1/2 w-0.5 h-0.5 bg-oniria_pink rounded-full animate-ping transform -translate-y-1/2" style={{animationDelay: '0.5s'}}></div>
+                      <div className="absolute bottom-1 left-1 w-0.5 h-0.5 bg-oniria_lightpink rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                      <div className="absolute top-2 right-2 w-0.5 h-0.5 bg-oniria_purple/60 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
+                    </div>
+
                     <img 
                       src="/img/Oniria.svg" 
                       alt="ONIRIA Logo" 
-                      className="w-full h-full object-contain filter drop-shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3" 
+                      className="w-full h-full object-contain filter drop-shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 relative z-10" 
                     />
+                    
+                    {/* Efecto de brillo al hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full"></div>
                   </div>
-                  <span className="font-playfair font-black italic text-lg sm:text-2xl lg:text-3xl ml-2 sm:ml-4 bg-gradient-to-r from-oniria_pink via-oniria_lightpink to-oniria_purple bg-clip-text text-transparent hover:bg-gradient-to-l transition-all duration-700 hover:tracking-wider hidden xs:block">
-                    NOCTIRIA
-                  </span>
+                  
+                  {/* Nombre con efectos mejorados */}
+                  <div className="relative ml-1 sm:ml-2">
+                    <span className="font-playfair font-black italic text-base sm:text-xl lg:text-2xl bg-gradient-to-r from-oniria_pink via-oniria_lightpink to-oniria_purple bg-clip-text text-transparent hover:bg-gradient-to-l transition-all duration-700 hover:tracking-wider hidden xs:block relative z-10">
+                      NOCTIRIA
+                    </span>
+                    
+                    {/* Efectos decorativos alrededor del texto */}
+                    <div className="absolute -top-1 -left-1 w-2 h-2 hidden sm:block">
+                      <Star className="w-full h-full text-oniria_purple/40 animate-pulse" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 hidden sm:block">
+                      <Zap className="w-full h-full text-oniria_pink/30 animate-bounce" style={{animationDelay: '0.3s'}} />
+                    </div>
+                    
+                    {/* Subtítulo pequeño */}
+                    <div className="absolute -bottom-2 left-0 right-0 text-center hidden lg:block">
+                      <span className="text-[8px] text-oniria_purple/60 font-light tracking-widest animate-pulse">
+                        MENTAL WELLNESS
+                      </span>
+                    </div>
+                    
+                    {/* Línea decorativa animada */}
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_purple/50 to-transparent hidden sm:block">
+                      <div className="absolute inset-0 bg-gradient-to-r from-oniria_purple to-oniria_pink animate-pulse"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>     
