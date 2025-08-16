@@ -10,6 +10,7 @@ import {
   Plus
 } from 'lucide-react';
 
+
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
@@ -85,7 +86,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, onClic
     </>
   );
 
-  // If there's a 'to' prop, use Link, otherwise use button
+
   if (to) {
     return (
       <Link to={to} className={baseClasses}>
@@ -101,7 +102,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, onClic
   );
 };
 
-export const AppFooter: React.FC = () => {
+export const DashboardFooter: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
 
   const navItems = [
@@ -258,34 +259,5 @@ export const AppFooter: React.FC = () => {
   );
 };
 
-// Demo component
-const AppFooterDemo = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
-      {/* Demo content */}
-      <div className="p-8 pb-32">
-        <div className="max-w-md mx-auto bg-white/10 backdrop-blur-xl rounded-3xl p-6 mb-8">
-          <h1 className="text-2xl font-bold text-white mb-4">Noctiria App</h1>
-          <p className="text-white/70 mb-4">
-            Este es un ejemplo de cómo se vería el footer en una aplicación móvil.
-          </p>
-          <p className="text-white/50 text-sm">
-            Navega entre las diferentes secciones usando el footer de abajo.
-          </p>
-        </div>
-        
-        {/* Spacer for demo */}
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-white/30 text-center">
-            <p>Contenido de la app aquí</p>
-            <p className="text-sm mt-2">Scroll hacia abajo para ver el footer fijo</p>
-          </div>
-        </div>
-      </div>
-      
-      <AppFooter />
-    </div>
-  );
-};
 
-export default AppFooterDemo;
+export default DashboardFooter;
