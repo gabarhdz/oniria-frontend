@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Home,
   BookOpen,
@@ -9,25 +10,24 @@ import {
   Plus
 } from 'lucide-react';
 
-
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
   isActive?: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  to?: string;
   notification?: boolean;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, onClick, notification = false }) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`group relative flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 min-w-0 flex-1 ${
-        isActive 
-          ? 'text-white' 
-          : 'text-oniria_lightpink/60 hover:text-oniria_lightpink active:scale-95'
-      }`}
-    >
+const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, onClick, to, notification = false }) => {
+  const baseClasses = `group relative flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 min-w-0 flex-1 ${
+    isActive 
+      ? 'text-white' 
+      : 'text-oniria_lightpink/60 hover:text-oniria_lightpink active:scale-95'
+  }`;
+
+  const content = (
+    <>
       {/* Active background glow */}
       {isActive && (
         <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_purple/20 rounded-2xl backdrop-blur-xl border border-oniria_lightpink/30">
@@ -82,11 +82,26 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, onClic
           <div className="absolute bottom-3 left-1/2 w-0.5 h-0.5 bg-white/60 rounded-full animate-float opacity-80" style={{animationDelay: '1s'}} />
         </div>
       )}
+    </>
+  );
+
+  // If there's a 'to' prop, use Link, otherwise use button
+  if (to) {
+    return (
+      <Link to={to} className={baseClasses}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className={baseClasses}>
+      {content}
     </button>
   );
 };
 
-export const DashboardFooter: React.FC = () => {
+export const AppFooter: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
 
   const navItems = [
@@ -94,7 +109,8 @@ export const DashboardFooter: React.FC = () => {
       id: 'home',
       icon: <Home className="w-5 h-5" />,
       label: 'Inicio',
-      notification: false
+      notification: false,
+      to: '/dashboard'
     },
     {
       id: 'dreams',
@@ -152,7 +168,8 @@ export const DashboardFooter: React.FC = () => {
                 icon={item.icon}
                 label={item.label}
                 isActive={activeTab === item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={item.to ? undefined : () => setActiveTab(item.id)}
+                to={item.to}
                 notification={item.notification}
               />
             ))}
@@ -241,5 +258,34 @@ export const DashboardFooter: React.FC = () => {
   );
 };
 
+// Demo component
+const AppFooterDemo = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
+      {/* Demo content */}
+      <div className="p-8 pb-32">
+        <div className="max-w-md mx-auto bg-white/10 backdrop-blur-xl rounded-3xl p-6 mb-8">
+          <h1 className="text-2xl font-bold text-white mb-4">Noctiria App</h1>
+          <p className="text-white/70 mb-4">
+            Este es un ejemplo de cómo se vería el footer en una aplicación móvil.
+          </p>
+          <p className="text-white/50 text-sm">
+            Navega entre las diferentes secciones usando el footer de abajo.
+          </p>
+        </div>
+        
+        {/* Spacer for demo */}
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-white/30 text-center">
+            <p>Contenido de la app aquí</p>
+            <p className="text-sm mt-2">Scroll hacia abajo para ver el footer fijo</p>
+          </div>
+        </div>
+      </div>
+      
+      <AppFooter />
+    </div>
+  );
+};
 
-export default DashboardFooter;
+export default AppFooterDemo;
