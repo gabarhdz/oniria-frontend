@@ -6,7 +6,6 @@ import {
   Settings, 
   Sparkles, 
   Star, 
-  Waves,
   ChevronRight,
   Zap
 } from 'lucide-react';
@@ -260,7 +259,7 @@ export const ActionsSection: React.FC = () => {
   return (
     <div 
       ref={sectionRef}
-      className="relative"
+      className="relative pb-24"
       style={{
         fontFamily: 'var(--font-inter, "Inter", sans-serif)',
       }}
@@ -338,11 +337,6 @@ export const ActionsSection: React.FC = () => {
             <p className="text-lg text-[#ffe0db]/80 max-w-2xl leading-relaxed">
               Descubre todas las herramientas avanzadas para analizar tus sueños y emociones
             </p>
-            
-            {/* Decorative wave */}
-            <div className="mt-4 flex justify-center">
-              <Waves className="w-8 h-8 text-[#9675bc]/50 animate-pulse" />
-            </div>
           </div>
         </div>
 
@@ -458,15 +452,4 @@ export const ActionsSection: React.FC = () => {
   );
 };
 
-// Demo component
-const ActionsSectionDemo = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#252c3e] via-[#214d72] to-[#9675bc] p-8">
-      <div className="max-w-7xl mx-auto py-16">
-        <ActionsSection />
-      </div>
-    </div>
-  );
-};
-
-export default ActionsSectionDemo;
+export default ActionsSection;

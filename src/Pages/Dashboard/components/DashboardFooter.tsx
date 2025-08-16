@@ -1,155 +1,245 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { RiTwitterXFill } from "react-icons/ri";
-import { FaInstagram } from "react-icons/fa";
-import { FaTiktok } from "react-icons/fa";
+import React, { useState } from 'react';
+import { 
+  Home,
+  BookOpen,
+  Brain,
+  Heart,
+  Settings,
+  Star,
+  Plus
+} from 'lucide-react';
 
- export const DashboardFooter: React.FC = () => {
+
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  isActive?: boolean;
+  onClick: () => void;
+  notification?: boolean;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive = false, onClick, notification = false }) => {
   return (
-    <footer className="relative bg-oniria_darkblue/95 backdrop-blur-xl text-white overflow-hidden border-t border-oniria_lightpink/10">
-      {/* Efectos de fondo animados */}
-      <div className="absolute inset-0 bg-gradient-to-t from-oniria_darkblue via-oniria_darkblue/90 to-oniria_darkblue/80"></div>
+    <button
+      onClick={onClick}
+      className={`group relative flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 min-w-0 flex-1 ${
+        isActive 
+          ? 'text-white' 
+          : 'text-oniria_lightpink/60 hover:text-oniria_lightpink active:scale-95'
+      }`}
+    >
+      {/* Active background glow */}
+      {isActive && (
+        <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_purple/20 rounded-2xl backdrop-blur-xl border border-oniria_lightpink/30">
+          <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/10 to-oniria_purple/10 rounded-2xl animate-pulse" />
+        </div>
+      )}
       
-      {/* Partículas flotantes de fondo */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 left-1/4 w-2 h-2 bg-oniria_lightpink/30 rounded-full animate-pulse"></div>
-        <div className="absolute top-16 right-1/3 w-1 h-1 bg-oniria_purple/40 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-20 left-1/3 w-1.5 h-1.5 bg-oniria_lightpink/20 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-10 right-1/4 w-1 h-1 bg-white/20 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute top-1/2 left-1/6 w-0.5 h-0.5 bg-oniria_purple/30 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
+      {/* Hover effect */}
+      <div className={`absolute inset-0 bg-gradient-to-br from-oniria_lightpink/5 to-oniria_purple/5 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-200 ${isActive ? 'opacity-0' : ''}`} />
+      
+      {/* Icon container */}
+      <div className="relative z-10 mb-1">
+        <div className={`p-1 rounded-xl transition-all duration-300 ${
+          isActive 
+            ? 'bg-gradient-to-br from-oniria_lightpink/20 to-oniria_purple/20 transform scale-110' 
+            : 'group-hover:bg-oniria_lightpink/10'
+        }`}>
+          <div className={`transition-all duration-300 ${isActive ? 'drop-shadow-[0_0_8px_rgba(241,179,190,0.6)]' : ''}`}>
+            {icon}
+          </div>
+        </div>
+        
+        {/* Notification dot */}
+        {notification && (
+          <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-br from-red-400 to-red-600 rounded-full animate-pulse border border-white/20">
+            <div className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-75" />
+          </div>
+        )}
       </div>
+      
+      {/* Label */}
+      <span className={`text-xs font-medium transition-all duration-300 relative z-10 truncate max-w-full ${
+        isActive 
+          ? 'text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.8)] font-semibold' 
+          : 'group-hover:text-oniria_lightpink'
+      }`}>
+        {label}
+      </span>
+      
+      {/* Active indicator line */}
+      {isActive && (
+        <div className="absolute bottom-0 left-1/2 w-8 h-0.5 bg-gradient-to-r from-oniria_lightpink to-oniria_purple rounded-full transform -translate-x-1/2 translate-y-1">
+          <div className="absolute inset-0 bg-white/40 rounded-full animate-pulse" />
+        </div>
+      )}
+      
+      {/* Floating particles on active */}
+      {isActive && (
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1 left-2 w-0.5 h-0.5 bg-oniria_lightpink rounded-full animate-float opacity-60" />
+          <div className="absolute top-2 right-3 w-1 h-1 bg-oniria_purple/40 rounded-full animate-float opacity-40" style={{animationDelay: '0.5s'}} />
+          <div className="absolute bottom-3 left-1/2 w-0.5 h-0.5 bg-white/60 rounded-full animate-float opacity-80" style={{animationDelay: '1s'}} />
+        </div>
+      )}
+    </button>
+  );
+};
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Contenido principal */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          {/* Logo y Copyright */}
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/10 to-oniria_purple/10 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-500 origin-center"></div>
-            <div className="relative p-4 rounded-2xl">
-              <h2 className="text-2xl font-bold italic font-playfair mb-2 relative overflow-hidden">
-                <Link to={'/'} className="group/logo relative inline-block">
-                  <span className="bg-gradient-to-r from-oniria_lightpink via-white to-oniria_lightpink bg-clip-text text-transparent group-hover/logo:bg-gradient-to-l transition-all duration-700 group-hover/logo:tracking-wider">
-                    NOCTIRIA
-                  </span>
-                  {/* Efecto de brillo que pasa por el texto */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/logo:translate-x-full transition-transform duration-1000 delay-200"></div>
-                </Link>
-              </h2>
-              <p className="text-sm mt-2 font-inter text-oniria_lightpink/70 group-hover:text-oniria_lightpink transition-colors duration-300">
-                © 2025 Noctiria. Todos los derechos reservados.
-              </p>
-              
-              {/* Partículas alrededor del logo */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                <div className="absolute top-2 right-4 w-1 h-1 bg-oniria_lightpink rounded-full animate-pulse"></div>
-                <div className="absolute bottom-3 left-2 w-1.5 h-1.5 bg-oniria_purple/60 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
-                <div className="absolute top-1/2 right-2 w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Enlaces de navegación */}
-          <div className="flex flex-wrap justify-center gap-6">
-            {['Contactos', 'Emociones', 'Sugerencias', 'Timeline'].map((item, index) => (
-              <a 
-                key={item}
-                href="#" 
-                className="group relative text-sm font-inter text-oniria_lightpink hover:text-white transition-all duration-500 py-2 px-4 rounded-full overflow-hidden"
-              >
-                {/* Efecto de burbuja expansiva */}
-                <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_purple/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
-                
-                {/* Partículas flotantes en hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-1 left-2 w-0.5 h-0.5 bg-oniria_lightpink rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-1 right-2 w-1 h-1 bg-oniria_purple/60 rounded-full animate-bounce" style={{animationDelay: `${index * 0.1}s`}}></div>
-                </div>
-                
-                {/* Texto con efecto de brillo */}
-                <span className="relative z-10 group-hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] transition-all duration-300">
-                  {item}
-                </span>
-                
-                {/* Línea animada */}
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oniria_lightpink to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-center"></div>
-                
-                {/* Efecto de destello lateral */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              </a>
-            ))}
-          </div>
-          
-          {/* Redes sociales */}
-          <div className="flex space-x-6">
-            {[
-              { icon: RiTwitterXFill, href: "https://x.com/", label: "Síguenos en X" },
-              { icon: FaInstagram, href: "https://instagram.com/", label: "Síguenos en Instagram" },
-              { icon: FaTiktok, href: "https://tiktok.com/", label: "Síguenos en TikTok" }
-            ].map(({ icon: Icon, href, label }, index) => (
-              <a 
-                key={href}
-                href={href}
-                target="_blank" 
-                rel="noopener noreferrer" 
-                aria-label={label}
-                className="group relative p-3 rounded-full bg-oniria_lightpink/10 backdrop-blur-sm border border-oniria_lightpink/20 hover:border-oniria_lightpink/60 text-oniria_lightpink hover:text-white transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-oniria_lightpink/40 overflow-hidden"
-              >
-                {/* Efecto de ondas expansivas */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_lightpink/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                {/* Partículas orbitantes */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-1 left-1 w-1 h-1 bg-oniria_purple rounded-full animate-spin" style={{animationDuration: '3s', animationDelay: `${index * 0.2}s`}}></div>
-                  <div className="absolute bottom-1 right-1 w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{animationDelay: `${index * 0.3}s`}}></div>
-                </div>
-                
-                <Icon className="w-5 h-5 relative z-10 transform transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" />
-                
-                {/* Anillo pulsante */}
-                <div className="absolute inset-0 rounded-full border border-oniria_lightpink/30 scale-100 group-hover:scale-125 opacity-100 group-hover:opacity-0 transition-all duration-500"></div>
-              </a>
+export const DashboardFooter: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('home');
+
+  const navItems = [
+    {
+      id: 'home',
+      icon: <Home className="w-5 h-5" />,
+      label: 'Inicio',
+      notification: false
+    },
+    {
+      id: 'dreams',
+      icon: <BookOpen className="w-5 h-5" />,
+      label: 'Sueños',
+      notification: true
+    },
+    {
+      id: 'add',
+      icon: <Plus className="w-6 h-6" />,
+      label: 'Agregar',
+      notification: false
+    },
+    {
+      id: 'analysis',
+      icon: <Brain className="w-5 h-5" />,
+      label: 'Análisis',
+      notification: false
+    },
+    {
+      id: 'profile',
+      icon: <Heart className="w-5 h-5" />,
+      label: 'Perfil',
+      notification: false
+    }
+  ];
+
+  return (
+    <footer className="fixed bottom-0 left-0 right-0 z-50">
+      {/* Main footer container */}
+      <div className="relative bg-oniria_darkblue/95 backdrop-blur-2xl border-t border-oniria_lightpink/20 shadow-2xl">
+        
+        {/* Animated top border */}
+        <div className="absolute top-0 left-0 right-0 h-px">
+          <div className="h-full bg-gradient-to-r from-transparent via-oniria_lightpink/60 to-transparent animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-oniria_lightpink/0 via-oniria_lightpink/40 to-oniria_lightpink/0 animate-shimmer" />
+        </div>
+        
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-to-t from-oniria_darkblue via-oniria_darkblue/95 to-oniria_darkblue/90" />
+        
+        {/* Floating background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-2 left-1/4 w-1 h-1 bg-oniria_lightpink/20 rounded-full animate-float" />
+          <div className="absolute top-3 right-1/3 w-0.5 h-0.5 bg-oniria_purple/30 rounded-full animate-float" style={{animationDelay: '1s'}} />
+          <div className="absolute top-1 right-1/4 w-1.5 h-1.5 bg-white/10 rounded-full animate-float" style={{animationDelay: '2s'}} />
+        </div>
+        
+        {/* Navigation container */}
+        <div className="relative z-10 px-4 py-2">
+          <div className="flex items-center justify-around max-w-md mx-auto">
+            {navItems.map((item) => (
+              <NavItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                isActive={activeTab === item.id}
+                onClick={() => setActiveTab(item.id)}
+                notification={item.notification}
+              />
             ))}
           </div>
         </div>
         
-        {/* Separador animado */}
-        <div className="relative my-8">
-          <div className="h-px bg-gradient-to-r from-transparent via-oniria_lightpink/30 to-transparent"></div>
-          <div className="absolute inset-0 h-px bg-gradient-to-r from-oniria_lightpink/0 via-oniria_lightpink/60 to-oniria_lightpink/0 animate-pulse"></div>
-        </div>
-        
-        {/* Enlaces legales */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
-          <div className="text-oniria_lightpink/60">
-            Conectando mentes, sanando corazones
-          </div>
-          
-          <div className="flex space-x-6">
-            {['Términos', 'Privacidad', 'Contacto'].map((item, index) => (
-              <a 
-                key={item}
-                href="#" 
-                className="group relative font-inter text-oniria_lightpink/60 hover:text-oniria_lightpink transition-all duration-300 py-1 px-2 rounded overflow-hidden"
-              >
-                {/* Mini efecto de burbuja */}
-                <div className="absolute inset-0 bg-oniria_lightpink/5 rounded scale-0 group-hover:scale-100 transition-transform duration-200 origin-center"></div>
-                
-                <span className="relative z-10 group-hover:drop-shadow-[0_0_4px_rgba(255,192,203,0.5)] transition-all duration-300">
-                  {item}
-                </span>
-                
-                {/* Línea sutil */}
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-oniria_lightpink/40 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></div>
-              </a>
-            ))}
-          </div>
-        </div>
+        {/* iPhone safe area */}
+        <div className="h-safe-area-inset-bottom bg-oniria_darkblue/90" />
       </div>
       
-      {/* Efecto de brillo en el borde superior */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oniria_lightpink/50 to-transparent animate-pulse"></div>
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+            opacity: 0.6;
+          }
+          50% {
+            transform: translateY(-4px) rotate(180deg);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        
+        .animate-shimmer {
+          animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        .h-safe-area-inset-bottom {
+          height: env(safe-area-inset-bottom, 0px);
+        }
+        
+        /* Custom Tailwind classes */
+        .text-oniria_lightpink {
+          color: #f1b3be;
+        }
+        
+        .text-oniria_purple {
+          color: #9675bc;
+        }
+        
+        .bg-oniria_darkblue {
+          background-color: #252c3e;
+        }
+        
+        .bg-oniria_lightpink {
+          background-color: #f1b3be;
+        }
+        
+        .bg-oniria_purple {
+          background-color: #9675bc;
+        }
+        
+        .border-oniria_lightpink {
+          border-color: #f1b3be;
+        }
+        
+        .from-oniria_lightpink {
+          --tw-gradient-from: #f1b3be;
+        }
+        
+        .to-oniria_purple {
+          --tw-gradient-to: #9675bc;
+        }
+        
+        .from-oniria_darkblue {
+          --tw-gradient-from: #252c3e;
+        }
+        
+        .to-oniria_darkblue {
+          --tw-gradient-to: #252c3e;
+        }
+      `}</style>
     </footer>
   );
 };
+
 
 export default DashboardFooter;

@@ -4,7 +4,6 @@ import {
   Mail, 
   Shield, 
   Heart,
-  Zap,
   Star,
   Eye,
   Crown,
@@ -76,7 +75,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group relative overflow-hidden transform transition-all duration-700 ease-out ${
+      className={`group relative overflow-hidden transform transition-all duration-700 ease-out mb-12 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}
       style={{
@@ -109,10 +108,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
           <>
             {/* Main particles */}
             <div className="absolute top-4 right-6 w-1.5 h-1.5 bg-[#f1b3be] rounded-full animate-dream-sparkle opacity-70" />
-            <div 
-              className="absolute bottom-5 left-7 w-2 h-2 bg-[#9675bc] rounded-full animate-dream-float opacity-60"
-              style={{ animationDelay: '0.4s' }}
-            />
             <div 
               className="absolute top-1/2 right-1/4 w-1 h-1 bg-[#ffe0db] rounded-full animate-dream-pulse opacity-90"
               style={{ animationDelay: '0.8s' }}
@@ -152,12 +147,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
                 <Sparkles className="w-3 h-3 text-[#ffe0db] animate-pulse" />
               </div>
             )}
-          </div>
-          
-          {/* Status indicator */}
-          <div className="relative">
-            <div className="w-3 h-3 bg-gradient-to-r from-[#f1b3be] to-[#9675bc] rounded-full animate-pulse opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-[#f1b3be] to-[#9675bc] rounded-full animate-ping opacity-20" />
           </div>
         </div>
         
@@ -210,22 +199,21 @@ const InfoCard: React.FC<InfoCardProps> = ({
           </div>
         </div>
         
-        {/* Progress indicator */}
-        <div className="mt-4 space-y-2">
+        {/* Estado de cuenta - Sin punto de hover */}
+        <div className="mt-2 space-y-2">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-[#252c3e]/50 font-medium">Completitud del perfil</span>
+            <span className="text-[#252c3e]/50 font-medium">Estado de la cuenta</span>
             <span className="text-[#252c3e]/70 font-bold">
-              {isSpecial ? '100%' : '85%'}
+              {isSpecial ? 'Profesional' : 'Activa'}
             </span>
           </div>
-          <div className="w-full bg-[#252c3e]/8 rounded-full h-1.5 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full transition-all duration-1000 ease-out"
-              style={{ 
-                width: isSpecial ? '100%' : '85%',
-                transitionDelay: isVisible ? '0.8s' : '0s'
-              }}
-            />
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 flex items-center space-x-1">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-xs text-[#252c3e]/60 font-medium">
+                {isSpecial ? 'Cuenta verificada y certificada' : 'Cuenta activa y en buen estado'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -287,21 +275,6 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
     >
       {/* Background dream elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Constellation pattern */}
-        <div 
-          className="absolute animate-constellation-drift opacity-8"
-          style={{
-            top: '12%',
-            left: '8%',
-            width: '120px',
-            height: '80px',
-            background: 'radial-gradient(circle, #9675bc 1.5px, transparent 1.5px), radial-gradient(circle, #f1b3be 1px, transparent 1px)',
-            backgroundSize: '25px 25px, 15px 15px',
-            backgroundPosition: '0 0, 12px 12px',
-            filter: 'blur(1px)'
-          }}
-        />
-        
         {/* Floating profile essence */}
         <div 
           className="absolute animate-profile-essence opacity-10"
@@ -336,24 +309,22 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
       </div>
       
       {/* Main content */}
-      <div className="relative z-10 space-y-8">
+      <div className="relative z-10 space-y-4 pb-16">
         
-        {/* Section header */}
+        {/* Section header - Sin iconos de corazón y rayo */}
         <div className={`text-center space-y-4 transform transition-all duration-700 ${
           sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <div className="relative inline-flex flex-col items-center">
             
-            {/* Title with decorative elements */}
-            <div className="flex items-center space-x-3 mb-3">
-              <Heart className="w-5 h-5 text-[#f1b3be] animate-pulse" />
+            {/* Title sin iconos decorativos */}
+            <div className="flex items-center justify-center mb-3">
               <h2 
                 className="text-3xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent"
                 style={{ fontFamily: 'var(--font-playfair, "Playfair Display", serif)' }}
               >
                 Perfil del Soñador
               </h2>
-              <Zap className="w-5 h-5 text-[#9675bc] animate-bounce" />
             </div>
             
             {/* Subtitle */}
@@ -485,17 +456,6 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
           }
         }
         
-        @keyframes constellation-drift {
-          0%, 100% {
-            transform: translateX(0px) translateY(0px) rotate(0deg);
-            opacity: 0.08;
-          }
-          50% {
-            transform: translateX(15px) translateY(-8px) rotate(180deg);
-            opacity: 0.15;
-          }
-        }
-        
         @keyframes profile-essence {
           0%, 100% {
             transform: rotate(0deg) scale(1);
@@ -547,10 +507,6 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
           animation: sparkle-trail 2s ease-in-out infinite;
         }
         
-        .animate-constellation-drift {
-          animation: constellation-drift 10s ease-in-out infinite;
-        }
-        
         .animate-profile-essence {
           animation: profile-essence 8s ease-in-out infinite;
         }
@@ -566,7 +522,6 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
     </div>
   );
 };
-
 
 
 export default UserInfoCards;

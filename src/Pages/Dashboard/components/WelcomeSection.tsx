@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Crown, Moon, Star, Sparkles, Heart, Eye, Waves, Shield } from 'lucide-react';
+import { User, Crown, Moon, Star, Sparkles, Heart, Eye } from 'lucide-react';
 
 interface User {
   username: string;
@@ -364,7 +364,7 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
             </div>
             
             {/* Avatar content */}
-            <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-2xl group-hover:shadow-3xl transition-shadow duration-500">
+            <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-2xl group-hover:shadow-3xl transition-shadow duration-500">
               {profileImageUrl && !imageError ? (
                 <img
                   src={profileImageUrl}
@@ -434,40 +434,27 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
             <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-transparent via-[#f1b3be]/60 to-transparent group-hover:w-1/2 transition-all duration-700 origin-center" />
           </div>
 
-          {/* Enhanced role display */}
-          <div className={`flex items-center justify-center space-x-3 text-[#ffe0db]/90 transform transition-all duration-700 ${
+          {/* Enhanced role display - Solo el badge */}
+          <div className={`flex items-center justify-center text-[#ffe0db]/90 transform transition-all duration-700 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`} style={{ transitionDelay: '0.6s' }}>
             
             {user.is_psychologist ? (
-              <>
-                <div className="relative group">
-                  <Crown className="w-6 h-6 text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300 animate-bounce" />
-                  <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-150" />
-                </div>
-              </>
+              <div className="relative group">
+                <Crown className="w-6 h-6 text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300 animate-bounce" />
+                <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-150" />
+              </div>
             ) : (
-              <>
-                <div className="relative group">
-                  <Moon className="w-6 h-6 text-[#f1b3be] group-hover:text-[#ffe0db] transition-colors duration-300 animate-pulse" />
-                  <div className="absolute inset-0 bg-[#f1b3be]/20 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-150" />
-                </div>
-                <div className="flex items-center space-x-2 bg-gradient-to-r from-[#f1b3be]/10 to-[#9675bc]/10 px-4 py-2 rounded-full border border-[#f1b3be]/20 backdrop-blur-sm hover:border-[#f1b3be]/40 transition-all duration-300 group">
-                  <Eye className="w-4 h-4 text-[#f1b3be] group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-sm font-semibold group-hover:text-white transition-colors duration-300">
-                    Explorador de Sueños
-                  </span>
-                  <Heart className="w-4 h-4 text-[#ffe0db] animate-pulse" />
-                </div>
-                <div className="relative group">
-                  <Star className="w-6 h-6 text-[#ffe0db] group-hover:text-[#f1b3be] transition-colors duration-300 animate-twinkle" />
-                  <div className="absolute inset-0 bg-[#ffe0db]/20 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-150" />
-                </div>
-              </>
+              <div className="flex items-center space-x-2 bg-gradient-to-r from-[#f1b3be]/10 to-[#9675bc]/10 px-4 py-2 rounded-full border border-[#f1b3be]/20 backdrop-blur-sm hover:border-[#f1b3be]/40 transition-all duration-300 group">
+                <Eye className="w-4 h-4 text-[#f1b3be]" />
+                <span className="text-sm font-semibold group-hover:text-white transition-colors duration-300">
+                  Explorador de Sueños
+                </span>
+              </div>
             )}
           </div>
 
-          {/* Enhanced description */}
+          {/* Enhanced description - Sin iconos */}
           {user.description && (
             <div className={`transform transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -485,22 +472,17 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
                 <p className="relative text-[#ffe0db]/80 group-hover:text-[#ffe0db]/95 transition-colors duration-500 leading-relaxed text-lg italic">
                   {user.description}
                 </p>
-                
-                {/* Decorative wave */}
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                  <Waves className="w-6 h-6 text-[#9675bc]/30 animate-pulse" />
-                </div>
               </div>
             </div>
           )}
 
-          {/* Additional decorative elements */}
+          {/* Iconos decorativos sin animación */}
           <div className={`flex justify-center space-x-6 transform transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`} style={{ transitionDelay: '1.2s' }}>
-            <Sparkles className="w-5 h-5 text-[#f1b3be]/60 animate-pulse" />
-            <Star className="w-6 h-6 text-[#ffe0db]/60 animate-twinkle" />
-            <Heart className="w-5 h-5 text-[#9675bc]/60 animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <Sparkles className="w-5 h-5 text-[#f1b3be]/60" />
+            <Star className="w-6 h-6 text-[#ffe0db]/60" />
+            <Heart className="w-5 h-5 text-[#9675bc]/60" />
           </div>
         </div>
       </div>
@@ -643,4 +625,4 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
   );
 };
 
-export default WelcomeSection; 
+export default WelcomeSection;
