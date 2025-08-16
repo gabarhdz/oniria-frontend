@@ -145,14 +145,6 @@ const StatCard: React.FC<StatCardProps> = ({
               <p className="text-xs font-bold text-[#252c3e]/60 uppercase tracking-widest">
                 {title}
               </p>
-              {change && (
-                <div className="flex items-center space-x-1">
-                  <TrendingUp className={`w-3 h-3 transition-colors duration-300 ${change.isPositive ? 'text-emerald-500' : 'text-red-500 rotate-180'}`} />
-                  <span className={`text-xs font-semibold ${change.isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-                    {change.isPositive ? '+' : ''}{change.value}%
-                  </span>
-                </div>
-              )}
             </div>
           </div>
           
@@ -215,25 +207,6 @@ const StatCard: React.FC<StatCardProps> = ({
               {/* Corner highlight */}
               <div className="absolute top-1 right-1 w-2 h-2 bg-white/50 rounded-full animate-ping opacity-70" />
             </div>
-          </div>
-        </div>
-        
-        {/* Progress indicator */}
-        <div className="space-y-2 pt-2">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-[#252c3e]/50 font-medium">Progreso del mes</span>
-            <span className="text-[#252c3e]/70 font-bold">
-              {typeof value === 'number' ? Math.min(Math.round((animatedValue / 100) * 100), 100) : 92}%
-            </span>
-          </div>
-          <div className="w-full bg-[#252c3e]/8 rounded-full h-2 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full transition-all duration-2000 ease-out"
-              style={{ 
-                width: `${typeof value === 'number' ? Math.min(Math.round((animatedValue / 100) * 100), 100) : 92}%`,
-                transitionDelay: isVisible ? '0.5s' : '0s'
-              }}
-            />
           </div>
         </div>
       </div>
@@ -326,21 +299,6 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
     >
       {/* Floating background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Dream constellation */}
-        <div 
-          className="absolute animate-constellation-drift opacity-6"
-          style={{
-            top: '15%',
-            left: '10%',
-            width: '100px',
-            height: '100px',
-            background: 'radial-gradient(circle, #9675bc 2px, transparent 2px), radial-gradient(circle, #f1b3be 1px, transparent 1px)',
-            backgroundSize: '20px 20px, 12px 12px',
-            backgroundPosition: '0 0, 8px 8px',
-            filter: 'blur(1px)'
-          }}
-        />
-        
         {/* Floating emotion bubbles */}
         <div 
           className="absolute animate-emotion-float opacity-8"
@@ -375,23 +333,21 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
       </div>
       
       {/* Main content */}
-      <div className="relative z-10 space-y-10">
+      <div className="relative z-10 space-y-10 pb-16">
         
         {/* Section header */}
         <div className={`text-center space-y-6 transform transition-all duration-700 ${
           sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <div className="relative inline-flex flex-col items-center">
-            {/* Title with decorative elements */}
+            {/* Title sin iconos del ojo y corazón */}
             <div className="flex items-center space-x-4 mb-3">
-              <Eye className="w-6 h-6 text-[#9675bc] animate-pulse" />
               <h2 
                 className="text-4xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent"
                 style={{ fontFamily: 'var(--font-playfair, "Playfair Display", serif)' }}
               >
                 Tu Viaje Onírico
               </h2>
-              <Heart className="w-6 h-6 text-[#f1b3be] animate-pulse" />
             </div>
             
             {/* Subtitle */}
@@ -399,11 +355,11 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
               Estadísticas profundas de tu exploración emocional en Noctiria
             </p>
             
-            {/* Decorative elements */}
+            {/* Decorative elements - sin animación */}
             <div className="mt-4 flex items-center space-x-2">
-              <Stars className="w-5 h-5 text-[#9675bc]/60 animate-pulse" />
-              <Waves className="w-6 h-6 text-[#f1b3be]/50 animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <Sparkles className="w-5 h-5 text-[#ffe0db]/60 animate-pulse" style={{ animationDelay: '1s' }} />
+              <Stars className="w-5 h-5 text-[#9675bc]/60" />
+              <Waves className="w-6 h-6 text-[#f1b3be]/50" />
+              <Sparkles className="w-5 h-5 text-[#ffe0db]/60" />
             </div>
           </div>
         </div>
@@ -522,17 +478,6 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
           }
         }
         
-        @keyframes constellation-drift {
-          0%, 100% {
-            transform: translateX(0px) translateY(0px) rotate(0deg);
-            opacity: 0.06;
-          }
-          50% {
-            transform: translateX(20px) translateY(-10px) rotate(180deg);
-            opacity: 0.12;
-          }
-        }
-        
         @keyframes emotion-float {
           0%, 100% {
             transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
@@ -580,10 +525,6 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
           animation: dream-pulse 2s ease-in-out infinite;
         }
         
-        .animate-constellation-drift {
-          animation: constellation-drift 12s ease-in-out infinite;
-        }
-        
         .animate-emotion-float {
           animation: emotion-float 8s ease-in-out infinite;
         }
@@ -600,27 +541,4 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
   );
 };
 
-// Demo component
-const StatisticsSectionDemo = () => {
-  const [userStats] = useState({
-    dreamsLogged: 142,
-    daysSinceJoined: 78,
-    favoriteTime: "23:45",
-    dreamCategories: 23
-  });
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#252c3e] via-[#214d72] to-[#9675bc] p-8">
-      <div className="max-w-7xl mx-auto py-16">
-        <StatisticsSection
-          userStats={userStats}
-          isLoadingStats={false}
-          statsError={null}
-          onRetryStats={() => console.log('Retry stats')}
-        />
-      </div>
-    </div>
-  );
-};
-
-export default StatisticsSectionDemo;
+export default StatisticsSection;
