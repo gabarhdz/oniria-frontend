@@ -3,11 +3,13 @@ import {
   User, Camera, Edit3, Save, X, Lock, Shield, Eye, EyeOff, 
   Settings, Bell, Moon, Sun, Globe, UserCheck, Mail, 
   Calendar, Heart, Star, Sparkles, CheckCircle, AlertCircle, 
-  Upload, Loader2, RefreshCw, ArrowLeft, Trash2, AlertTriangle
+  Upload, Loader2, RefreshCw, ArrowLeft, Trash2, AlertTriangle,
+  Home, ChevronRight, Key, Download
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext'; 
+import { DashboardFooter } from '../Dashboard/components/DashboardFooter';
 import axios, { AxiosError } from 'axios';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams, Link } from 'react-router-dom';
 
 // Tipos para TypeScript
 interface UserProfile {
@@ -63,7 +65,130 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Componente Breadcrumbs integrado
+interface BreadcrumbItem {
+  label: string;
+  path?: string;
+  isActive?: boolean;
+}
 
+interface ProfileBreadcrumbsProps {
+  activeSection: 'profile' | 'privacy' | 'security';
+}
+
+const ProfileBreadcrumbs: React.FC<ProfileBreadcrumbsProps> = ({ activeSection }) => {
+  const getSectionLabel = (section: string) => {
+    switch (section) {
+      case 'profile': return 'Perfil';
+      case 'privacy': return 'Privacidad';
+      case 'security': return 'Seguridad';
+      default: return 'Perfil';
+    }
+  };
+
+  const breadcrumbItems: BreadcrumbItem[] = [
+    {
+      label: 'Dashboard',
+      path: '/dashboard'
+    },
+    {
+      label: 'Mi Perfil',
+      path: '/dashboard/profile/profile'
+    },
+    {
+      label: getSectionLabel(activeSection),
+      isActive: true
+    }
+  ];
+
+  return (
+    <nav className="flex items-center space-x-2 text-sm mb-6">
+      <div className="flex items-center space-x-2 bg-[#ffe0db]/10 backdrop-blur-sm rounded-full px-4 py-2 border border-[#ffe0db]/20">
+        <Home className="w-4 h-4 text-[#f1b3be]" />
+        
+        {breadcrumbItems.map((item, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && (
+              <ChevronRight className="w-4 h-4 text-[#ffe0db]/40" />
+            )}
+            
+            {item.isActive ? (
+              <span className="text-[#ffe0db] font-semibold flex items-center space-x-1">
+                <User className="w-4 h-4" />
+                <span>{item.label}</span>
+              </span>
+            ) : (
+              <Link
+                to={item.path!}
+                className="text-[#ffe0db]/70 hover:text-[#ffe0db] transition-colors duration-200 hover:underline"
+              >
+                {item.label}
+              </Link>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </nav>
+  );
+};
+
+// Loading screen component matching App.tsx
+const LoadingScreen: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        {Array.from({ length: 20 }, (_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white/10 animate-pulse"
+            style={{
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${Math.random() * 2 + 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="text-center z-10">
+        <div className="relative mb-8">
+          <div className="w-32 h-32 mx-auto bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+            <img 
+              src="/img/Oniria.svg" 
+              alt="Oniria" 
+              className="w-24 h-24 object-contain drop-shadow-lg" 
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <Loader2 className="w-8 h-8 text-[#f1b3be] animate-spin" />
+            <h2 className="text-2xl font-bold text-[#ffe0db]">
+              Cargando tu perfil...
+            </h2>
+          </div>
+          
+          <div className="flex justify-center space-x-1 mt-6">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-2 h-2 bg-[#9675bc] rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.3}s` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// TwinklingStars component matching dashboard
 const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ count = 30, className = '' }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -79,7 +204,7 @@ const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ coun
       {stars.map((star) => (
         <div
           key={star.id}
-          className="absolute rounded-full bg-gradient-to-r from-purple-300 to-pink-300 animate-twinkle opacity-60"
+          className="absolute rounded-full bg-gradient-to-r from-[#f1b3be] to-[#ffe0db] animate-twinkle opacity-60"
           style={{
             width: `${star.size}px`,
             height: `${star.size}px`,
@@ -94,73 +219,53 @@ const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ coun
   );
 };
 
-const FloatingOrbs: React.FC = () => {
-  const orbs = Array.from({ length: 6 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 80 + 40,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    delay: Math.random() * 6,
-    duration: Math.random() * 8 + 6,
-  }));
+// Profile Header Component
+const ProfileHeader: React.FC<{ activeTab: string }> = ({ activeTab }) => {
+  const getTabTitle = () => {
+    switch (activeTab) {
+      case 'profile': return 'Mi Perfil';
+      case 'privacy': return 'Configuración de Privacidad';
+      case 'security': return 'Seguridad de la Cuenta';
+      default: return 'Mi Perfil';
+    }
+  };
+
+  const getTabDescription = () => {
+    switch (activeTab) {
+      case 'profile': return 'Gestiona tu identidad en Noctiria';
+      case 'privacy': return 'Controla quién puede ver tu información';
+      case 'security': return 'Protege tu cuenta y datos personales';
+      default: return 'Gestiona tu identidad en Noctiria';
+    }
+  };
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {orbs.map((orb) => (
-        <div
-          key={orb.id}
-          className="absolute rounded-full animate-float-gentle opacity-20"
-          style={{
-            width: `${orb.size}px`,
-            height: `${orb.size}px`,
-            left: `${orb.x}%`,
-            top: `${orb.y}%`,
-            background: `radial-gradient(circle, rgba(147, 51, 234, 0.6) 0%, rgba(219, 39, 119, 0.4) 50%, rgba(236, 72, 153, 0.2) 100%)`,
-            filter: 'blur(2px)',
-            animationDelay: `${orb.delay}s`,
-            animationDuration: `${orb.duration}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+    <header className="relative z-10 p-6 border-b border-[#f1b3be]/20 backdrop-blur-xl bg-[#252c3e]/30">
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <Link 
+          to="/dashboard"
+          className="flex items-center space-x-3 text-[#ffe0db]/80 hover:text-[#ffe0db] transition-colors group"
+        >
+          <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-medium">Volver al Dashboard</span>
+        </Link>
 
-const ParallaxClouds: React.FC = () => {
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {[...Array(4)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute opacity-10 animate-morph-slow"
-          style={{
-            width: `${120 + i * 30}px`,
-            height: `${80 + i * 20}px`,
-            left: `${10 + i * 20}%`,
-            top: `${15 + i * 20}%`,
-            transform: `translateY(${scrollY * (0.1 + i * 0.05)}px)`,
-            background: `radial-gradient(ellipse, rgba(147, 51, 234, ${0.3 - i * 0.05}) 0%, rgba(219, 39, 119, ${0.2 - i * 0.03}) 50%, transparent 100%)`,
-            borderRadius: `${60 + i * 10}% ${40 - i * 5}% ${30 + i * 10}% ${70 - i * 5}% / ${60 - i * 5}% ${30 + i * 10}% ${70 + i * 5}% ${40 - i * 5}%`,
-            filter: 'blur(3px)',
-            animationDelay: `${i * 2}s`,
-          }}
-        />
-      ))}
-    </div>
+        <div className="flex items-center space-x-4">
+          <div className="text-right">
+            <h1 className="text-2xl font-bold text-[#ffe0db]">{getTabTitle()}</h1>
+            <p className="text-[#f1b3be]">{getTabDescription()}</p>
+          </div>
+          <Sparkles className="w-8 h-8 text-[#f1b3be] animate-pulse" />
+        </div>
+      </div>
+    </header>
   );
 };
 
 // Componente principal
 const Profile: React.FC = () => {
   const { user: authUser, logout } = useAuth(); 
+  const { section } = useParams<{ section?: string }>();
   
   // Estados principales
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -179,9 +284,10 @@ const Profile: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'privacy' | 'settings'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'privacy' | 'security'>(
+    (section as 'profile' | 'privacy' | 'security') || 'profile'
+  );
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -200,6 +306,13 @@ const Profile: React.FC = () => {
       return () => URL.revokeObjectURL(url);
     }
   }, [selectedFile]);
+
+  // Update active tab based on URL parameter
+  useEffect(() => {
+    if (section && ['profile', 'privacy', 'security'].includes(section)) {
+      setActiveTab(section as 'profile' | 'privacy' | 'security');
+    }
+  }, [section]);
 
   // Cargar datos del usuario actual
   useEffect(() => {
@@ -229,9 +342,8 @@ const Profile: React.FC = () => {
         console.error('Error fetching user data:', err);
         if (axios.isAxiosError(err)) {
           if (err.response?.status === 401) {
-            // Token expirado o inválido
             setError('Sesión expirada. Por favor, inicia sesión nuevamente.');
-            logout(); // Cerrar sesión si el token es inválido
+            logout();
           } else {
             setError('Error al cargar los datos del usuario. Por favor, intenta nuevamente.');
           }
@@ -276,17 +388,32 @@ const Profile: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Preparar los datos para enviar
       const formData = new FormData();
-      formData.append('username', editData.username);
-      formData.append('email', editData.email);
-      formData.append('description', editData.description || '');
+      
+      // Solo agregar campos que han cambiado
+      if (editData.username !== user.username) {
+        formData.append('username', editData.username);
+      }
+      if (editData.email !== user.email) {
+        formData.append('email', editData.email);
+      }
+      if (editData.description !== user.description) {
+        formData.append('description', editData.description || '');
+      }
       
       if (selectedFile) {
         formData.append('profile_pic', selectedFile);
       }
 
-      // Actualizar el perfil
+      // Solo hacer la petición si hay campos para actualizar
+      const hasChanges = Array.from(formData.keys()).length > 0;
+      
+      if (!hasChanges && !selectedFile) {
+        showNotification('error', 'No hay cambios para guardar');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await apiClient.put('/users/me/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -295,7 +422,6 @@ const Profile: React.FC = () => {
 
       const updatedUser = response.data;
       
-      // Mapear la respuesta
       const userProfile: UserProfile = {
         id: updatedUser.id,
         username: updatedUser.username,
@@ -307,6 +433,7 @@ const Profile: React.FC = () => {
       };
 
       setUser(userProfile);
+      setEditData(userProfile);
       setIsEditing(false);
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -322,7 +449,6 @@ const Profile: React.FC = () => {
           const errorData = error.response.data;
           let errorMessage = 'Error al actualizar el perfil.';
           
-          // Manejar errores específicos de validación
           if (errorData.username) {
             errorMessage = `Usuario: ${Array.isArray(errorData.username) ? errorData.username.join(', ') : errorData.username}`;
           } else if (errorData.email) {
@@ -351,7 +477,6 @@ const Profile: React.FC = () => {
   };
 
   const handleDeleteAccount = () => {
-    // Aquí iría la lógica de eliminación real
     showNotification('success', 'Solicitud de eliminación procesada');
     setShowDeleteModal(false);
   };
@@ -386,41 +511,44 @@ const Profile: React.FC = () => {
 
     return (
       <div className={`relative ${sizeClasses} group`}>
-        <div className={`${sizeClasses} rounded-full overflow-hidden bg-gradient-to-br from-purple-500/40 via-pink-400/30 to-purple-600/20 border-4 border-white/20 shadow-2xl flex items-center justify-center relative transition-all duration-500 group-hover:scale-105 group-hover:shadow-purple-500/50`}>
+        <div className={`${sizeClasses} rounded-full overflow-hidden bg-gradient-to-br from-[#9675bc]/40 via-[#f1b3be]/30 to-[#ffe0db]/20 border-4 border-[#ffe0db]/20 shadow-2xl flex items-center justify-center relative transition-all duration-500 group-hover:scale-105 group-hover:shadow-[#f1b3be]/50`}>
           {imageUrl ? (
             <img 
               src={imageUrl}
               alt={`Avatar de ${user?.username || 'Usuario'}`}
               className="w-full h-full object-cover"
               onError={(e) => {
-                // En caso de error al cargar la imagen, mostrar iniciales
                 (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                const nextSibling = (e.target as HTMLImageElement).nextElementSibling;
+                if (nextSibling) {
+                  nextSibling.classList.remove('hidden');
+                }
               }}
             />
           ) : (
-            <span className={`text-white font-bold ${textSize} select-none`}>
+            <span className={`text-[#ffe0db] font-bold ${textSize} select-none`}>
               {user?.username ? getUserInitials(user.username) : '??'}
             </span>
           )}
           
-          {/* Overlay de edición */}
+          <div className={`text-[#ffe0db] font-bold ${textSize} select-none ${imageUrl ? 'hidden' : ''}`}>
+            {user?.username ? getUserInitials(user.username) : '??'}
+          </div>
+          
           {editable && isEditing && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
                  onClick={() => fileInputRef.current?.click()}>
-              <Camera className="w-8 h-8 text-white" />
+              <Camera className="w-8 h-8 text-[#ffe0db]" />
             </div>
           )}
         </div>
 
-        {/* Indicador de estado */}
-        <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-          <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+        <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-[#ffe0db] flex items-center justify-center">
+          <div className="w-3 h-3 bg-[#ffe0db] rounded-full animate-pulse"></div>
         </div>
 
-        {/* Efectos decorativos */}
-        <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full opacity-60 animate-pulse"></div>
-        <div className="absolute -bottom-1 -left-3 w-4 h-4 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full opacity-40 animate-bounce" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-[#f1b3be] to-[#9675bc] rounded-full opacity-60 animate-pulse"></div>
+        <div className="absolute -bottom-1 -left-3 w-4 h-4 bg-gradient-to-br from-[#ffe0db] to-[#f1b3be] rounded-full opacity-40 animate-bounce" style={{animationDelay: '0.5s'}}></div>
       </div>
     );
   };
@@ -453,21 +581,21 @@ const Profile: React.FC = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full border border-red-500/30 shadow-2xl transform animate-scale-in">
+        <div className="bg-gradient-to-br from-[#252c3e]/95 via-[#214d72]/90 to-[#252c3e]/95 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full border border-red-500/30 shadow-2xl transform animate-scale-in">
           <div className="text-center space-y-6">
             <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
               <AlertTriangle className="w-10 h-10 text-red-400 animate-pulse" />
             </div>
             
             <div>
-              <h3 className="text-2xl font-bold text-white mb-2">¿Eliminar Cuenta?</h3>
-              <p className="text-slate-300">Esta acción es irreversible. Perderás todos tus sueños, análisis y datos.</p>
+              <h3 className="text-2xl font-bold text-[#ffe0db] mb-2">¿Eliminar Cuenta?</h3>
+              <p className="text-[#ffe0db]/70">Esta acción es irreversible. Perderás todos tus sueños, análisis y datos.</p>
             </div>
 
             <div className="flex gap-4 pt-4">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-6 py-3 bg-slate-600/50 hover:bg-slate-600/70 text-white rounded-xl transition-all duration-300 hover:scale-105"
+                className="flex-1 px-6 py-3 bg-[#252c3e]/50 hover:bg-[#252c3e]/70 text-[#ffe0db] rounded-xl transition-all duration-300 hover:scale-105"
               >
                 Cancelar
               </button>
@@ -486,22 +614,15 @@ const Profile: React.FC = () => {
 
   // Estados de carga y error
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white text-xl">Cargando tu perfil...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
         <div className="text-center bg-red-500/10 backdrop-blur-xl rounded-2xl p-8 border border-red-500/30">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Error al cargar el perfil</h2>
+          <h2 className="text-2xl font-bold text-[#ffe0db] mb-2">Error al cargar el perfil</h2>
           <p className="text-red-300 mb-4">{error || 'No se pudieron cargar los datos del usuario'}</p>
           <button
             onClick={() => window.location.reload()}
@@ -515,14 +636,13 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] relative overflow-hidden">
       {/* Efectos de fondo */}
       <TwinklingStars count={40} />
-      <FloatingOrbs />
-      <ParallaxClouds />
       
-      {/* Overlay de gradiente */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-transparent to-pink-900/20"></div>
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#252c3e]/60 via-[#214d72]/50 to-[#9675bc]/40 backdrop-blur-[0.5px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#9675bc]/3 to-transparent"></div>
 
       {/* Input oculto para archivos */}
       <input
@@ -540,47 +660,35 @@ const Profile: React.FC = () => {
       <DeleteConfirmModal />
 
       {/* Header */}
-      <header className="relative z-10 p-6 border-b border-white/10 backdrop-blur-xl bg-slate-900/30">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <button className="flex items-center space-x-3 text-white/80 hover:text-white transition-colors group">
-            <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Volver al Dashboard</span>
-          </button>
-
-
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <h1 className="text-2xl font-bold text-white">Mi Perfil</h1>
-              <p className="text-purple-300">Gestiona tu identidad en Noctiria</p>
-            </div>
-            <Sparkles className="w-8 h-8 text-purple-400 animate-pulse" />
-          </div>
-        </div>
-      </header>
+      <ProfileHeader activeTab={activeTab} />
 
       {/* Contenido principal */}
       <main className={`relative z-10 p-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <div className="max-w-6xl mx-auto">
           
+          {/* Breadcrumbs usando el componente creado */}
+          <ProfileBreadcrumbs activeSection={activeTab} />
+          
           {/* Pestañas de navegación */}
-          <div className="flex space-x-2 mb-8 bg-white/10 backdrop-blur-xl rounded-2xl p-2">
+          <div className="flex space-x-2 mb-8 bg-[#ffe0db]/10 backdrop-blur-xl rounded-2xl p-2">
             {[
-              { key: 'profile', label: 'Perfil', icon: User },
-              { key: 'privacy', label: 'Privacidad', icon: Shield },
-              { key: 'settings', label: 'Configuración', icon: Settings }
-            ].map(({ key, label, icon: Icon }) => (
-              <button
+              { key: 'profile', label: 'Perfil', icon: User, path: '/dashboard/profile/profile' },
+              { key: 'privacy', label: 'Privacidad', icon: Shield, path: '/dashboard/profile/privacy' },
+              { key: 'security', label: 'Seguridad', icon: Settings, path: '/dashboard/profile/security' }
+            ].map(({ key, label, icon: Icon, path }) => (
+              <Link
                 key={key}
+                to={path}
                 onClick={() => setActiveTab(key as any)}
                 className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                   activeTab === key
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    ? 'bg-gradient-to-r from-[#9675bc] to-[#f1b3be] text-[#ffe0db] shadow-lg'
+                    : 'text-[#ffe0db]/70 hover:text-[#ffe0db] hover:bg-[#ffe0db]/10'
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{label}</span>
-              </button>
+              </Link>
             ))}
           </div>
 
@@ -590,67 +698,72 @@ const Profile: React.FC = () => {
               
               {/* Card Principal del Usuario */}
               <div className="lg:col-span-2">
-                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl p-8 relative overflow-hidden">
+                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-8 relative overflow-hidden">
                   {/* Efectos decorativos */}
-                  <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full blur-2xl"></div>
+                  <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-[#f1b3be]/20 to-[#9675bc]/20 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-[#ffe0db]/20 to-[#f1b3be]/20 rounded-full blur-2xl"></div>
 
                   <div className="relative z-10">
                     {/* Header de la card */}
-                    <div className="flex items-start justify-between mb-8">
-                      <div className="flex items-center space-x-6">
-                        <ProfileAvatar size="large" editable={true} />
-                        <div>
-                          <div className="flex items-center space-x-3">
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editData?.username || ''}
-                                onChange={(e) => setEditData(editData ? {...editData, username: e.target.value} : null)}
-                                className="text-3xl font-bold bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2 text-white focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
-                              />
-                            ) : (
-                              <h2 className="text-3xl font-bold text-white">{user.username}</h2>
-                            )}
-                            {user.is_psychologist && (
-                              <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full p-2">
-                                <UserCheck className="w-5 h-5 text-white" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Mail className="w-4 h-4 text-purple-300" />
-                            {isEditing ? (
-                              <input
-                                type="email"
-                                value={editData?.email || ''}
-                                onChange={(e) => setEditData(editData ? {...editData, email: e.target.value} : null)}
-                                className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1 text-purple-100 focus:ring-2 focus:ring-purple-400"
-                              />
-                            ) : (
-                              <span className="text-purple-300">{user.email}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-2 mt-1 text-sm text-white/60">
-                            <Calendar className="w-4 h-4" />
-                            <span>Miembro desde {formatJoinDate(user.date_joined)}</span>
+                    <div className="mb-8">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-6">
+                          <ProfileAvatar size="large" editable={true} />
+                          <div>
+                            <div className="flex items-center space-x-3">
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={editData?.username || ''}
+                                  onChange={(e) => setEditData(editData ? {...editData, username: e.target.value} : null)}
+                                  className="text-3xl font-bold bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-2 text-[#ffe0db] focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
+                                />
+                              ) : (
+                                <h2 className="text-3xl font-bold text-[#ffe0db]">{user.username}</h2>
+                              )}
+                              {user.is_psychologist && (
+                                <div className="bg-gradient-to-r from-blue-500 to-[#9675bc] rounded-full p-2">
+                                  <UserCheck className="w-5 h-5 text-[#ffe0db]" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Mail className="w-4 h-4 text-[#f1b3be]" />
+                              {isEditing ? (
+                                <input
+                                  type="email"
+                                  value={editData?.email || ''}
+                                  onChange={(e) => setEditData(editData ? {...editData, email: e.target.value} : null)}
+                                  className="bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-3 py-1 text-[#f1b3be] focus:ring-2 focus:ring-[#f1b3be]"
+                                />
+                              ) : (
+                                <span className="text-[#f1b3be]">{user.email}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 mt-1 text-sm text-[#ffe0db]/60">
+                              <Calendar className="w-4 h-4" />
+                              <span>Miembro desde {formatJoinDate(user.date_joined)}</span>
+                            </div>
                           </div>
                         </div>
+                        
+                        {!isEditing && (
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-[#ffe0db] font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-[#f1b3be]/50"
+                          >
+                            <Edit3 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                            <span>Editar</span>
+                          </button>
+                        )}
                       </div>
-                      
-                      {!isEditing ? (
-                        <button
-                          onClick={() => setIsEditing(true)}
-                          className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-purple-500/50"
-                        >
-                          <Edit3 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                          <span>Editar</span>
-                        </button>
-                      ) : (
-                        <div className="flex space-x-2">
+
+                      {/* Botones de edición debajo del perfil */}
+                      {isEditing && (
+                        <div className="flex justify-end space-x-3 pt-4 border-t border-[#ffe0db]/20">
                           <button
                             onClick={handleCancel}
-                            className="flex items-center space-x-2 px-4 py-2 bg-slate-600/50 hover:bg-slate-600/70 rounded-xl text-white transition-all duration-300"
+                            className="flex items-center space-x-2 px-6 py-3 bg-[#252c3e]/50 hover:bg-[#252c3e]/70 rounded-xl text-[#ffe0db] transition-all duration-300 hover:scale-105"
                           >
                             <X className="w-4 h-4" />
                             <span>Cancelar</span>
@@ -658,7 +771,7 @@ const Profile: React.FC = () => {
                           <button
                             onClick={handleSave}
                             disabled={isLoading}
-                            className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-xl text-white transition-all duration-300 disabled:opacity-50"
+                            className="flex items-center space-x-2 px-6 py-3 bg-green-500 hover:bg-green-600 rounded-xl text-white transition-all duration-300 disabled:opacity-50 hover:scale-105"
                           >
                             {isLoading ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -673,8 +786,8 @@ const Profile: React.FC = () => {
 
                     {/* Descripción */}
                     <div className="mb-8">
-                      <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                        <Heart className="w-5 h-5 text-pink-400 mr-2" />
+                      <h3 className="text-xl font-semibold text-[#ffe0db] mb-4 flex items-center">
+                        <Heart className="w-5 h-5 text-[#f1b3be] mr-2" />
                         Sobre mi mundo onírico
                       </h3>
                       {isEditing ? (
@@ -683,11 +796,11 @@ const Profile: React.FC = () => {
                           onChange={(e) => setEditData(editData ? {...editData, description: e.target.value} : null)}
                           rows={6}
                           placeholder="Cuéntanos sobre tus sueños, experiencias y conexión con el mundo onírico..."
-                          className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 resize-none"
+                          className="w-full bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-3 text-[#ffe0db] placeholder-[#ffe0db]/50 focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be] resize-none"
                           maxLength={1500}
                         />
                       ) : (
-                        <p className="text-white/80 leading-relaxed">
+                        <p className="text-[#ffe0db]/80 leading-relaxed">
                           {user.description || 'Aún no has compartido tu historia onírica...'}
                         </p>
                       )}
@@ -696,16 +809,16 @@ const Profile: React.FC = () => {
                     {/* Estadísticas */}
                     <div className="grid grid-cols-3 gap-6">
                       {[
-                        { label: 'Sueños Registrados', value: '47', icon: Moon, color: 'from-purple-500 to-indigo-500' },
-                        { label: 'Días Activo', value: '89', icon: Calendar, color: 'from-pink-500 to-rose-500' },
-                        { label: 'Análisis Completos', value: '23', icon: Star, color: 'from-amber-500 to-orange-500' }
+                        { label: 'Sueños Registrados', value: '47', icon: Moon, color: 'from-[#9675bc] to-indigo-500' },
+                        { label: 'Días Activo', value: '89', icon: Calendar, color: 'from-[#f1b3be] to-rose-500' },
+                        { label: 'Análisis Completos', value: '23', icon: Star, color: 'from-amber-500 to-[#ffe0db]' }
                       ].map((stat, index) => (
-                        <div key={stat.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                        <div key={stat.label} className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-2xl p-6 border border-[#ffe0db]/20 hover:bg-[#ffe0db]/15 transition-all duration-300 group">
                           <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                            <stat.icon className="w-6 h-6 text-white" />
+                            <stat.icon className="w-6 h-6 text-[#ffe0db]" />
                           </div>
-                          <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                          <div className="text-white/60 text-sm">{stat.label}</div>
+                          <div className="text-3xl font-bold text-[#ffe0db] mb-1">{stat.value}</div>
+                          <div className="text-[#ffe0db]/60 text-sm">{stat.label}</div>
                         </div>
                       ))}
                     </div>
@@ -716,23 +829,23 @@ const Profile: React.FC = () => {
               {/* Sidebar */}
               <div className="space-y-6">
                 {/* Card de Estado */}
-                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-6">
+                  <h3 className="text-xl font-semibold text-[#ffe0db] mb-4 flex items-center">
                     <Shield className="w-5 h-5 text-green-400 mr-2" />
                     Estado de la Cuenta
                   </h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70">Verificación</span>
+                      <span className="text-[#ffe0db]/70">Verificación</span>
                       <span className="text-green-400 font-medium">✓ Verificado</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70">Privacidad</span>
+                      <span className="text-[#ffe0db]/70">Privacidad</span>
                       <span className="text-blue-400 font-medium capitalize">{privacySettings.profile_visibility}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70">Tipo de Cuenta</span>
-                      <span className="text-purple-400 font-medium">
+                      <span className="text-[#ffe0db]/70">Tipo de Cuenta</span>
+                      <span className="text-[#f1b3be] font-medium">
                         {user.is_psychologist ? 'Psicólogo' : 'Soñador'}
                       </span>
                     </div>
@@ -740,19 +853,19 @@ const Profile: React.FC = () => {
                 </div>
 
                 {/* Card de Actividad Reciente */}
-                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-6">
+                  <h3 className="text-xl font-semibold text-[#ffe0db] mb-4 flex items-center">
                     <RefreshCw className="w-5 h-5 text-blue-400 mr-2" />
                     Actividad Reciente
                   </h3>
                   <div className="space-y-3">
                     {[
-                      { action: 'Sueño registrado', time: 'Hace 2 horas', color: 'text-purple-400' },
-                      { action: 'Análisis completado', time: 'Ayer', color: 'text-pink-400' },
+                      { action: 'Sueño registrado', time: 'Hace 2 horas', color: 'text-[#9675bc]' },
+                      { action: 'Análisis completado', time: 'Ayer', color: 'text-[#f1b3be]' },
                       { action: 'Perfil actualizado', time: 'Hace 3 días', color: 'text-blue-400' }
                     ].map((activity, index) => (
                       <div key={index} className="flex items-center justify-between">
-                        <span className="text-white/70 text-sm">{activity.action}</span>
+                        <span className="text-[#ffe0db]/70 text-sm">{activity.action}</span>
                         <span className={`text-xs ${activity.color} font-medium`}>{activity.time}</span>
                       </div>
                     ))}
@@ -760,18 +873,18 @@ const Profile: React.FC = () => {
                 </div>
 
                 {/* Card de Acciones Rápidas */}
-                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Acciones Rápidas</h3>
+                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-6">
+                  <h3 className="text-xl font-semibold text-[#ffe0db] mb-4">Acciones Rápidas</h3>
                   <div className="space-y-3">
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 rounded-xl text-white transition-all duration-300 group">
-                      <Moon className="w-5 h-5 text-purple-300 group-hover:rotate-12 transition-transform" />
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#9675bc]/20 hover:bg-[#9675bc]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                      <Moon className="w-5 h-5 text-[#9675bc] group-hover:rotate-12 transition-transform" />
                       <span>Registrar Sueño</span>
                     </button>
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-pink-500/20 hover:bg-pink-500/30 rounded-xl text-white transition-all duration-300 group">
-                      <Star className="w-5 h-5 text-pink-300 group-hover:scale-110 transition-transform" />
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#f1b3be]/20 hover:bg-[#f1b3be]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                      <Star className="w-5 h-5 text-[#f1b3be] group-hover:scale-110 transition-transform" />
                       <span>Ver Análisis</span>
                     </button>
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-white transition-all duration-300 group">
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
                       <Globe className="w-5 h-5 text-blue-300 group-hover:rotate-180 transition-transform" />
                       <span>Explorar Comunidad</span>
                     </button>
@@ -784,20 +897,20 @@ const Profile: React.FC = () => {
           {/* Tab: Privacidad */}
           {activeTab === 'privacy' && (
             <div className="animate-fade-in">
-              <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl p-8">
+              <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-8">
                 <div className="flex items-center space-x-3 mb-8">
                   <Shield className="w-8 h-8 text-blue-400" />
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Configuración de Privacidad</h2>
-                    <p className="text-white/70">Controla quién puede ver tu información y actividad</p>
+                    <h2 className="text-2xl font-bold text-[#ffe0db]">Configuración de Privacidad</h2>
+                    <p className="text-[#ffe0db]/70">Controla quién puede ver tu información y actividad</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Visibilidad del Perfil */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                      <Eye className="w-5 h-5 text-purple-400 mr-2" />
+                  <div className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-2xl p-6 border border-[#ffe0db]/20">
+                    <h3 className="text-lg font-semibold text-[#ffe0db] mb-4 flex items-center">
+                      <Eye className="w-5 h-5 text-[#9675bc] mr-2" />
                       Visibilidad del Perfil
                     </h3>
                     <div className="space-y-3">
@@ -816,13 +929,13 @@ const Profile: React.FC = () => {
                               ...privacySettings,
                               profile_visibility: e.target.value as any
                             })}
-                            className="mt-1 w-4 h-4 text-purple-600 bg-white/20 border-white/30 focus:ring-purple-500"
+                            className="mt-1 w-4 h-4 text-[#9675bc] bg-[#ffe0db]/20 border-[#ffe0db]/30 focus:ring-[#9675bc]"
                           />
                           <div>
-                            <div className="text-white font-medium group-hover:text-purple-300 transition-colors">
+                            <div className="text-[#ffe0db] font-medium group-hover:text-[#f1b3be] transition-colors">
                               {option.label}
                             </div>
-                            <div className="text-white/60 text-sm">{option.desc}</div>
+                            <div className="text-[#ffe0db]/60 text-sm">{option.desc}</div>
                           </div>
                         </label>
                       ))}
@@ -830,8 +943,8 @@ const Profile: React.FC = () => {
                   </div>
 
                   {/* Configuraciones Específicas */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <div className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-2xl p-6 border border-[#ffe0db]/20">
+                    <h3 className="text-lg font-semibold text-[#ffe0db] mb-4 flex items-center">
                       <Settings className="w-5 h-5 text-green-400 mr-2" />
                       Configuraciones Específicas
                     </h3>
@@ -853,10 +966,10 @@ const Profile: React.FC = () => {
                           desc: 'Recibir notificaciones de actividad comunitaria'
                         }
                       ].map((setting) => (
-                        <div key={setting.key} className="flex items-center justify-between group hover:bg-white/5 rounded-lg p-2 transition-colors">
+                        <div key={setting.key} className="flex items-center justify-between group hover:bg-[#ffe0db]/5 rounded-lg p-2 transition-colors">
                           <div className="flex-1">
-                            <div className="text-white font-medium">{setting.label}</div>
-                            <div className="text-white/60 text-sm">{setting.desc}</div>
+                            <div className="text-[#ffe0db] font-medium">{setting.label}</div>
+                            <div className="text-[#ffe0db]/60 text-sm">{setting.desc}</div>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input
@@ -868,7 +981,7 @@ const Profile: React.FC = () => {
                               })}
                               className="sr-only peer"
                             />
-                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9675bc]/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#9675bc]"></div>
                           </label>
                         </div>
                       ))}
@@ -890,125 +1003,114 @@ const Profile: React.FC = () => {
             </div>
           )}
 
-          {/* Tab: Configuración */}
-          {activeTab === 'settings' && (
+          {/* Tab: Seguridad */}
+          {activeTab === 'security' && (
             <div className="animate-fade-in">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
-                {/* Configuración de Cuenta */}
-                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl p-8">
+                {/* Configuración de Seguridad */}
+                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-8">
                   <div className="flex items-center space-x-3 mb-6">
-                    <User className="w-7 h-7 text-blue-400" />
-                    <h2 className="text-xl font-bold text-white">Configuración de Cuenta</h2>
+                    <Lock className="w-7 h-7 text-yellow-400" />
+                    <h2 className="text-xl font-bold text-[#ffe0db]">Seguridad de la Cuenta</h2>
                   </div>
 
                   <div className="space-y-6">
                     {/* Cambiar Contraseña */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                        <Lock className="w-5 h-5 text-yellow-400 mr-2" />
+                    <div className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-xl p-4 border border-[#ffe0db]/20">
+                      <h3 className="text-lg font-semibold text-[#ffe0db] mb-3 flex items-center">
+                        <Key className="w-5 h-5 text-yellow-400 mr-2" />
                         Cambiar Contraseña
                       </h3>
                       <div className="space-y-3">
                         <input
                           type="password"
                           placeholder="Contraseña actual"
-                          className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
+                          className="w-full bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-4 py-3 text-[#ffe0db] placeholder-[#ffe0db]/50 focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
                         />
                         <input
                           type="password"
                           placeholder="Nueva contraseña"
-                          className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
+                          className="w-full bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-4 py-3 text-[#ffe0db] placeholder-[#ffe0db]/50 focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
                         />
                         <input
                           type="password"
                           placeholder="Confirmar nueva contraseña"
-                          className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
+                          className="w-full bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-4 py-3 text-[#ffe0db] placeholder-[#ffe0db]/50 focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
                         />
                       </div>
                       <button className="mt-4 w-full flex items-center justify-center space-x-2 px-4 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-lg text-yellow-300 font-medium transition-all duration-300">
-                        <Lock className="w-4 h-4" />
+                        <Key className="w-4 h-4" />
                         <span>Actualizar Contraseña</span>
                       </button>
                     </div>
 
                     {/* Preferencias de Notificación */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                        <Bell className="w-5 h-5 text-purple-400 mr-2" />
-                        Notificaciones
+                    <div className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-xl p-4 border border-[#ffe0db]/20">
+                      <h3 className="text-lg font-semibold text-[#ffe0db] mb-3 flex items-center">
+                        <Bell className="w-5 h-5 text-[#f1b3be] mr-2" />
+                        Notificaciones de Seguridad
                       </h3>
                       <div className="space-y-3">
                         {[
-                          'Nuevos análisis de sueños',
-                          'Mensajes de la comunidad',
-                          'Recordatorios de registro',
-                          'Actualizaciones de la aplicación'
+                          'Inicio de sesión desde nuevo dispositivo',
+                          'Cambios en la configuración de seguridad',
+                          'Intentos de acceso fallidos',
+                          'Cambios en la información del perfil'
                         ].map((notif, index) => (
-                          <label key={index} className="flex items-center justify-between cursor-pointer group hover:bg-white/5 rounded-lg p-2 transition-colors">
-                            <span className="text-white/80 group-hover:text-white">{notif}</span>
+                          <label key={index} className="flex items-center justify-between cursor-pointer group hover:bg-[#ffe0db]/5 rounded-lg p-2 transition-colors">
+                            <span className="text-[#ffe0db]/80 group-hover:text-[#ffe0db]">{notif}</span>
                             <input
                               type="checkbox"
-                              defaultChecked={index < 2}
-                              className="w-4 h-4 text-purple-600 bg-white/20 border-white/30 rounded focus:ring-purple-500"
+                              defaultChecked={true}
+                              className="w-4 h-4 text-[#9675bc] bg-[#ffe0db]/20 border-[#ffe0db]/30 rounded focus:ring-[#9675bc]"
                             />
                           </label>
                         ))}
                       </div>
                     </div>
 
-                    {/* Tema */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                        <Sun className="w-5 h-5 text-orange-400 mr-2" />
-                        Apariencia
+                    {/* Autenticación en dos pasos */}
+                    <div className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-xl p-4 border border-[#ffe0db]/20">
+                      <h3 className="text-lg font-semibold text-[#ffe0db] mb-3 flex items-center">
+                        <Shield className="w-5 h-5 text-green-400 mr-2" />
+                        Autenticación en Dos Pasos
                       </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { key: 'dark', label: 'Modo Oscuro', icon: Moon, active: true },
-                          { key: 'light', label: 'Modo Claro', icon: Sun, active: false }
-                        ].map((theme) => (
-                          <button
-                            key={theme.key}
-                            className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
-                              theme.active
-                                ? 'bg-purple-500/30 text-white border-2 border-purple-400'
-                                : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/20'
-                            }`}
-                          >
-                            <theme.icon className="w-4 h-4" />
-                            <span>{theme.label}</span>
-                          </button>
-                        ))}
-                      </div>
+                      <p className="text-[#ffe0db]/70 text-sm mb-4">
+                        Añade una capa extra de seguridad a tu cuenta requiriendo un código adicional al iniciar sesión.
+                      </p>
+                      <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-500/20 hover:bg-green-500/30 rounded-lg text-green-300 font-medium transition-all duration-300">
+                        <Shield className="w-4 h-4" />
+                        <span>Configurar 2FA</span>
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Configuración Peligrosa */}
-                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-red-500/30 shadow-2xl p-8">
+                {/* Zona Peligrosa */}
+                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-red-500/30 shadow-2xl p-8">
                   <div className="flex items-center space-x-3 mb-6">
                     <AlertTriangle className="w-7 h-7 text-red-400" />
-                    <h2 className="text-xl font-bold text-white">Zona Peligrosa</h2>
+                    <h2 className="text-xl font-bold text-[#ffe0db]">Zona Peligrosa</h2>
                   </div>
 
                   <div className="space-y-6">
                     {/* Exportar Datos */}
                     <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
-                      <h3 className="text-lg font-semibold text-white mb-2">Exportar Mis Datos</h3>
-                      <p className="text-white/70 text-sm mb-4">
+                      <h3 className="text-lg font-semibold text-[#ffe0db] mb-2">Exportar Mis Datos</h3>
+                      <p className="text-[#ffe0db]/70 text-sm mb-4">
                         Descarga una copia de todos tus datos personales, sueños y análisis.
                       </p>
                       <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-orange-500/20 hover:bg-orange-500/30 rounded-lg text-orange-300 font-medium transition-all duration-300">
-                        <Upload className="w-4 h-4" />
+                        <Download className="w-4 h-4" />
                         <span>Solicitar Exportación</span>
                       </button>
                     </div>
 
                     {/* Desactivar Cuenta */}
                     <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-                      <h3 className="text-lg font-semibold text-white mb-2">Desactivar Cuenta</h3>
-                      <p className="text-white/70 text-sm mb-4">
+                      <h3 className="text-lg font-semibold text-[#ffe0db] mb-2">Desactivar Cuenta</h3>
+                      <p className="text-[#ffe0db]/70 text-sm mb-4">
                         Desactiva temporalmente tu cuenta. Podrás reactivarla más tarde.
                       </p>
                       <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-lg text-yellow-300 font-medium transition-all duration-300">
@@ -1019,8 +1121,8 @@ const Profile: React.FC = () => {
 
                     {/* Eliminar Cuenta */}
                     <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-                      <h3 className="text-lg font-semibold text-white mb-2">Eliminar Cuenta</h3>
-                      <p className="text-white/70 text-sm mb-4">
+                      <h3 className="text-lg font-semibold text-[#ffe0db] mb-2">Eliminar Cuenta</h3>
+                      <p className="text-[#ffe0db]/70 text-sm mb-4">
                         Elimina permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer.
                       </p>
                       <button
@@ -1038,6 +1140,9 @@ const Profile: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* Footer */}
+      <DashboardFooter />
 
       {/* Estilos CSS personalizados */}
       <style>{`
