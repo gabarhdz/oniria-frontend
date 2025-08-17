@@ -389,12 +389,29 @@ const Profile: React.FC = () => {
     
     try {
       const formData = new FormData();
-      formData.append('username', editData.username);
-      formData.append('email', editData.email);
-      formData.append('description', editData.description || '');
+      
+      // Solo agregar campos que han cambiado
+      if (editData.username !== user.username) {
+        formData.append('username', editData.username);
+      }
+      if (editData.email !== user.email) {
+        formData.append('email', editData.email);
+      }
+      if (editData.description !== user.description) {
+        formData.append('description', editData.description || '');
+      }
       
       if (selectedFile) {
         formData.append('profile_pic', selectedFile);
+      }
+
+      // Solo hacer la petición si hay campos para actualizar
+      const hasChanges = Array.from(formData.keys()).length > 0;
+      
+      if (!hasChanges && !selectedFile) {
+        showNotification('error', 'No hay cambios para guardar');
+        setIsLoading(false);
+        return;
       }
 
       const response = await apiClient.put('/users/me/', formData, {
@@ -416,6 +433,7 @@ const Profile: React.FC = () => {
       };
 
       setUser(userProfile);
+      setEditData(userProfile);
       setIsEditing(false);
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -501,7 +519,10 @@ const Profile: React.FC = () => {
               className="w-full h-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                const nextSibling = (e.target as HTMLImageElement).nextElementSibling;
+                if (nextSibling) {
+                  nextSibling.classList.remove('hidden');
+                }
               }}
             />
           ) : (
@@ -509,6 +530,10 @@ const Profile: React.FC = () => {
               {user?.username ? getUserInitials(user.username) : '??'}
             </span>
           )}
+          
+          <div className={`text-[#ffe0db] font-bold ${textSize} select-none ${imageUrl ? 'hidden' : ''}`}>
+            {user?.username ? getUserInitials(user.username) : '??'}
+          </div>
           
           {editable && isEditing && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
@@ -680,60 +705,65 @@ const Profile: React.FC = () => {
 
                   <div className="relative z-10">
                     {/* Header de la card */}
-                    <div className="flex items-start justify-between mb-8">
-                      <div className="flex items-center space-x-6">
-                        <ProfileAvatar size="large" editable={true} />
-                        <div>
-                          <div className="flex items-center space-x-3">
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editData?.username || ''}
-                                onChange={(e) => setEditData(editData ? {...editData, username: e.target.value} : null)}
-                                className="text-3xl font-bold bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-2 text-[#ffe0db] focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
-                              />
-                            ) : (
-                              <h2 className="text-3xl font-bold text-[#ffe0db]">{user.username}</h2>
-                            )}
-                            {user.is_psychologist && (
-                              <div className="bg-gradient-to-r from-blue-500 to-[#9675bc] rounded-full p-2">
-                                <UserCheck className="w-5 h-5 text-[#ffe0db]" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Mail className="w-4 h-4 text-[#f1b3be]" />
-                            {isEditing ? (
-                              <input
-                                type="email"
-                                value={editData?.email || ''}
-                                onChange={(e) => setEditData(editData ? {...editData, email: e.target.value} : null)}
-                                className="bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-3 py-1 text-[#f1b3be] focus:ring-2 focus:ring-[#f1b3be]"
-                              />
-                            ) : (
-                              <span className="text-[#f1b3be]">{user.email}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-2 mt-1 text-sm text-[#ffe0db]/60">
-                            <Calendar className="w-4 h-4" />
-                            <span>Miembro desde {formatJoinDate(user.date_joined)}</span>
+                    <div className="mb-8">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-6">
+                          <ProfileAvatar size="large" editable={true} />
+                          <div>
+                            <div className="flex items-center space-x-3">
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={editData?.username || ''}
+                                  onChange={(e) => setEditData(editData ? {...editData, username: e.target.value} : null)}
+                                  className="text-3xl font-bold bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-2 text-[#ffe0db] focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
+                                />
+                              ) : (
+                                <h2 className="text-3xl font-bold text-[#ffe0db]">{user.username}</h2>
+                              )}
+                              {user.is_psychologist && (
+                                <div className="bg-gradient-to-r from-blue-500 to-[#9675bc] rounded-full p-2">
+                                  <UserCheck className="w-5 h-5 text-[#ffe0db]" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Mail className="w-4 h-4 text-[#f1b3be]" />
+                              {isEditing ? (
+                                <input
+                                  type="email"
+                                  value={editData?.email || ''}
+                                  onChange={(e) => setEditData(editData ? {...editData, email: e.target.value} : null)}
+                                  className="bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-3 py-1 text-[#f1b3be] focus:ring-2 focus:ring-[#f1b3be]"
+                                />
+                              ) : (
+                                <span className="text-[#f1b3be]">{user.email}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 mt-1 text-sm text-[#ffe0db]/60">
+                              <Calendar className="w-4 h-4" />
+                              <span>Miembro desde {formatJoinDate(user.date_joined)}</span>
+                            </div>
                           </div>
                         </div>
+                        
+                        {!isEditing && (
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-[#ffe0db] font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-[#f1b3be]/50"
+                          >
+                            <Edit3 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                            <span>Editar</span>
+                          </button>
+                        )}
                       </div>
-                      
-                      {!isEditing ? (
-                        <button
-                          onClick={() => setIsEditing(true)}
-                          className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-[#ffe0db] font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-[#f1b3be]/50"
-                        >
-                          <Edit3 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                          <span>Editar</span>
-                        </button>
-                      ) : (
-                        <div className="flex space-x-2">
+
+                      {/* Botones de edición debajo del perfil */}
+                      {isEditing && (
+                        <div className="flex justify-end space-x-3 pt-4 border-t border-[#ffe0db]/20">
                           <button
                             onClick={handleCancel}
-                            className="flex items-center space-x-2 px-4 py-2 bg-[#252c3e]/50 hover:bg-[#252c3e]/70 rounded-xl text-[#ffe0db] transition-all duration-300"
+                            className="flex items-center space-x-2 px-6 py-3 bg-[#252c3e]/50 hover:bg-[#252c3e]/70 rounded-xl text-[#ffe0db] transition-all duration-300 hover:scale-105"
                           >
                             <X className="w-4 h-4" />
                             <span>Cancelar</span>
@@ -741,7 +771,7 @@ const Profile: React.FC = () => {
                           <button
                             onClick={handleSave}
                             disabled={isLoading}
-                            className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-xl text-white transition-all duration-300 disabled:opacity-50"
+                            className="flex items-center space-x-2 px-6 py-3 bg-green-500 hover:bg-green-600 rounded-xl text-white transition-all duration-300 disabled:opacity-50 hover:scale-105"
                           >
                             {isLoading ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
