@@ -8,6 +8,8 @@ import SignUp from './Pages/SignUp/SignUp';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
+import ForgotPassword from './Pages/ForgotPassword/ForgotPassword';
+import ResetPassword from './Pages/ResetPassword/ResetPassword';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 
 // Componente para rutas públicas que redirige si ya está autenticado
@@ -152,7 +154,10 @@ function App() {
           <Route path="/" element={<Home1 />} />
           <Route path="/login" element={<PublicRoute><LogIn /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
-          
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        
+         
           {/* Rutas protegidas para usuarios autenticados */}
           <Route 
             path="/dashboard" 

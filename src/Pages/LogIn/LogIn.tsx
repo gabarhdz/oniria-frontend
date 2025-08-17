@@ -441,11 +441,7 @@ const LogIn: React.FC = () => {
   };
 
   const handleForgotPassword = () => {
-    setShowAlert({
-      type: 'error',
-      title: 'Recuperación de contraseña',
-      message: 'La funcionalidad de recuperación de contraseña estará disponible próximamente.\n\nMientras tanto, contacta con nuestros guías oníricas si necesitas ayuda para recuperar el acceso a tu cuenta.'
-    });
+   navigate('/forgot-password');
   };
 
   const handleSignUpRedirect = () => {
@@ -629,7 +625,7 @@ const LogIn: React.FC = () => {
                     Recordar mi nombre de soñador
                   </label>
                 </div>
-
+              
                 <div className="text-sm">
                   <button
                     type="button"
@@ -642,6 +638,7 @@ const LogIn: React.FC = () => {
                     <Moon className="inline w-3 h-3 ml-1 opacity-0 group-hover/forgot:opacity-100 transition-opacity duration-300" />
                   </button>
                 </div>
+  
               </div>
 
               <div className="pt-4 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
