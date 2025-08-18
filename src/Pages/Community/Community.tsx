@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Search, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Loader2, Edit2, Trash2, Camera, UserPlus, UserMinus, Reply, X, ArrowLeft, Send, Sparkles, Star, Heart, Eye, Zap, Crown } from 'lucide-react';
+import { Plus, Search, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Loader2, Edit2, Trash2, Camera, UserPlus, UserMinus, Reply, X, ArrowLeft, Send, Sparkles, Star, Heart, Eye, Zap, Crown, Filter, ChevronDown, Users, Clock, CheckCircle, XCircle } from 'lucide-react';
 import axios from 'axios';
-
+import { DashboardFooter } from '../Dashboard/components';
 interface User {
   id: string;
   username: string;
@@ -134,7 +134,7 @@ const useAuth = () => {
   return { user };
 };
 
-// Enhanced Loading Screen
+// Improved Loading Screen
 const PageLoader: React.FC = () => {
   const [loadingText, setLoadingText] = useState('Iniciando Noctiria...');
   const [progress, setProgress] = useState(0);
@@ -168,15 +168,15 @@ const PageLoader: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center relative overflow-hidden">
-      {/* Animated background particles */}
+      {/* Subtle background particles */}
       <div className="absolute inset-0">
-        {Array.from({ length: 50 }, (_, i) => (
+        {Array.from({ length: 15 }, (_, i) => (
           <div
             key={i}
-            className="absolute rounded-full bg-white/5 animate-float"
+            className="absolute rounded-full bg-white/10 animate-float"
             style={{
-              width: `${Math.random() * 8 + 4}px`,
-              height: `${Math.random() * 8 + 4}px`,
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 5}s`,
@@ -186,76 +186,47 @@ const PageLoader: React.FC = () => {
         ))}
       </div>
 
-      {/* Floating dream bubbles */}
-      <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div
-            key={i}
-            className="absolute animate-dream-bubble opacity-20"
-            style={{
-              width: `${Math.random() * 60 + 40}px`,
-              height: `${Math.random() * 60 + 40}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: `linear-gradient(135deg, #9675bc, #f1b3be)`,
-              borderRadius: `${Math.random() * 50 + 25}% ${Math.random() * 50 + 25}%`,
-              filter: 'blur(2px)',
-              animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${Math.random() * 4 + 6}s`,
-            }}
-          />
-        ))}
-      </div>
-
       <div className="text-center z-10 space-y-8">
-        {/* Logo container with glow */}
+        {/* Simplified logo container */}
         <div className="relative">
-          <div className="w-32 h-32 mx-auto bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-2xl animate-pulse-glow">
-            <div className="w-24 h-24 bg-gradient-to-br from-white/20 to-transparent rounded-full flex items-center justify-center backdrop-blur-sm">
-              <MessageSquare className="w-12 h-12 text-white drop-shadow-lg" />
-            </div>
+          <div className="w-24 h-24 mx-auto bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-xl">
+            <MessageSquare className="w-12 h-12 text-white drop-shadow-lg" />
           </div>
           
-          {/* Orbital rings */}
+          {/* Single subtle ring */}
           <div className="absolute inset-0 animate-spin-slow">
-            <div className="w-full h-full rounded-full border-2 border-[#f1b3be]/30 border-dashed" />
-          </div>
-          <div className="absolute inset-2 animate-spin-reverse">
-            <div className="w-full h-full rounded-full border border-[#ffe0db]/40" />
+            <div className="w-full h-full rounded-full border border-[#f1b3be]/20 border-dashed" />
           </div>
         </div>
 
-        {/* Enhanced text section */}
+        {/* Clean text section */}
         <div className="space-y-6">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent animate-text-glow">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent">
             Centro de Comunidades
           </h2>
           
           <div className="space-y-3">
-            <p className="text-xl text-[#ffe0db] animate-fade-in-up">{loadingText}</p>
+            <p className="text-lg text-[#ffe0db]/90">{loadingText}</p>
             
             {/* Progress bar */}
-            <div className="w-80 mx-auto">
-              <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden backdrop-blur-sm">
+            <div className="w-64 mx-auto">
+              <div className="w-full bg-white/20 rounded-full h-1 overflow-hidden backdrop-blur-sm">
                 <div 
-                  className="h-full bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full transition-all duration-300 ease-out shadow-lg animate-progress-glow"
+                  className="h-full bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 />
               </div>
-              <p className="text-sm text-[#ffe0db]/70 mt-2">{Math.round(progress)}% completado</p>
+              <p className="text-xs text-[#ffe0db]/60 mt-2">{Math.round(progress)}% completado</p>
             </div>
           </div>
           
-          {/* Loading dots */}
+          {/* Simple loading dots */}
           <div className="flex justify-center space-x-2">
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-3 h-3 bg-[#f1b3be] rounded-full animate-bounce shadow-lg"
-                style={{
-                  animationDelay: `${i * 0.2}s`,
-                  boxShadow: '0 0 20px rgba(241, 179, 190, 0.6)'
-                }}
+                className="w-2 h-2 bg-[#f1b3be] rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
               />
             ))}
           </div>
@@ -270,51 +241,20 @@ const ActionLoader: React.FC<{ message: string }> = ({ message }) => (
   <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
     <div className="bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/20 shadow-2xl text-center max-w-sm mx-4 relative overflow-hidden">
       
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#9675bc]/20 via-[#f1b3be]/20 to-[#ffe0db]/20 animate-pulse" />
-      
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {Array.from({ length: 10 }, (_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-[#f1b3be] rounded-full animate-float opacity-60"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 space-y-6">
-        {/* Enhanced spinner */}
+      <div className="space-y-6">
+        {/* Simple spinner */}
         <div className="relative inline-flex items-center justify-center">
-          <div className="w-20 h-20 border-4 border-[#9675bc]/30 rounded-full animate-spin">
+          <div className="w-16 h-16 border-4 border-[#9675bc]/30 rounded-full animate-spin">
             <div className="absolute inset-0 border-4 border-transparent border-t-[#f1b3be] border-r-[#f1b3be] rounded-full animate-spin" />
           </div>
-          <div className="absolute inset-0 w-20 h-20 border-2 border-[#ffe0db]/40 rounded-full animate-pulse" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-[#ffe0db] animate-pulse" />
+            <Loader2 className="w-6 h-6 text-[#ffe0db] animate-spin" />
           </div>
         </div>
         
         <div className="space-y-3">
-          <h3 className="text-2xl font-semibold text-[#ffe0db] drop-shadow-lg">{message}</h3>
-          <p className="text-sm text-[#ffe0db]/70">Procesando en el reino onírico...</p>
-          
-          {/* Progress dots */}
-          <div className="flex justify-center space-x-1 pt-2">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 bg-[#f1b3be] rounded-full animate-wave"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              />
-            ))}
-          </div>
+          <h3 className="text-xl font-semibold text-[#ffe0db]">{message}</h3>
+          <p className="text-sm text-[#ffe0db]/70">Procesando...</p>
         </div>
       </div>
     </div>
@@ -330,20 +270,14 @@ const ErrorAlert: React.FC<{
   <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
     <div className="bg-gradient-to-br from-red-500/20 via-red-400/10 to-pink-500/20 backdrop-blur-xl rounded-3xl p-8 border border-red-400/30 shadow-2xl text-center max-w-md mx-4 relative overflow-hidden">
       
-      {/* Error glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-pink-500/10 animate-pulse" />
-      
       <div className="relative z-10 space-y-6">
-        {/* Error icon with animation */}
-        <div className="relative">
-          <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-error-pulse">
-            <span className="text-white text-3xl animate-bounce">⚠</span>
-          </div>
-          <div className="absolute inset-0 w-20 h-20 bg-red-500/30 rounded-full animate-ping mx-auto" />
+        {/* Error icon */}
+        <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto shadow-xl">
+          <span className="text-white text-2xl">⚠</span>
         </div>
         
         <div className="space-y-4">
-          <h3 className="text-2xl font-semibold text-[#ffe0db]">Error en Noctiria</h3>
+          <h3 className="text-xl font-semibold text-[#ffe0db]">Error en Noctiria</h3>
           <p className="text-sm text-[#ffe0db]/80 leading-relaxed">{message}</p>
         </div>
         
@@ -385,21 +319,6 @@ const ConfirmationModal: React.FC<{
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl text-center max-w-md mx-4 relative overflow-hidden animate-modal-entrance">
         
-        {/* Background particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {Array.from({ length: 8 }, (_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-[#f1b3be] rounded-full animate-float opacity-40"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-              }}
-            />
-          ))}
-        </div>
-
         <div className="relative z-10 space-y-6">
           <div className="space-y-3">
             <h3 className="text-xl font-semibold text-[#ffe0db]">{title}</h3>
@@ -430,7 +349,106 @@ const ConfirmationModal: React.FC<{
   );
 };
 
-// Enhanced Community Card
+// Filter Dropdown Component
+const FilterDropdown: React.FC<{
+  filterBy: string;
+  setFilterBy: (value: string) => void;
+  sortOrder: string;
+  setSortOrder: (value: string) => void;
+  currentUser?: User;
+}> = ({ filterBy, setFilterBy, sortOrder, setSortOrder, currentUser }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const filterOptions = [
+    { value: 'all', label: 'Todas las comunidades', icon: Users },
+    { value: 'member', label: 'Soy miembro', icon: CheckCircle },
+    { value: 'non-member', label: 'No soy miembro', icon: XCircle },
+    { value: 'created-asc', label: 'Más antiguas primero', icon: Clock },
+    { value: 'created-desc', label: 'Más recientes primero', icon: Clock },
+    { value: 'members-asc', label: 'Menos miembros primero', icon: Users },
+    { value: 'members-desc', label: 'Más miembros primero', icon: Users },
+  ];
+
+  const getActiveFilter = () => {
+    if (filterBy === 'member') return filterOptions[1];
+    if (filterBy === 'non-member') return filterOptions[2];
+    if (sortOrder === 'created-asc') return filterOptions[3];
+    if (sortOrder === 'created-desc') return filterOptions[4];
+    if (sortOrder === 'members-asc') return filterOptions[5];
+    if (sortOrder === 'members-desc') return filterOptions[6];
+    return filterOptions[0];
+  };
+
+  const handleOptionClick = (option: typeof filterOptions[0]) => {
+    if (option.value === 'member' || option.value === 'non-member') {
+      setFilterBy(option.value);
+      setSortOrder('created-desc');
+    } else if (option.value === 'all') {
+      setFilterBy('all');
+      setSortOrder('created-desc');
+    } else {
+      setFilterBy('all');
+      setSortOrder(option.value);
+    }
+    setIsOpen(false);
+  };
+
+  const activeFilter = getActiveFilter();
+  const IconComponent = activeFilter.icon;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl px-4 py-3 text-[#ffe0db] hover:bg-white/20 transition-all duration-300 min-w-[200px]"
+      >
+        <Filter className="w-4 h-4" />
+        <IconComponent className="w-4 h-4" />
+        <span className="text-sm font-medium">{activeFilter.label}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-2 w-full bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-xl rounded-xl border border-white/20 shadow-2xl z-50 overflow-hidden">
+          {filterOptions.map((option) => {
+            const OptionIcon = option.icon;
+            const isActive = activeFilter.value === option.value;
+            const isDisabled = !currentUser && (option.value === 'member' || option.value === 'non-member');
+            
+            return (
+              <button
+                key={option.value}
+                onClick={() => !isDisabled && handleOptionClick(option)}
+                disabled={isDisabled}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-[#9675bc]/20 to-[#f1b3be]/20 text-[#1a1f35]' 
+                    : isDisabled
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-[#1a1f35] hover:bg-white/50'
+                }`}
+              >
+                <OptionIcon className="w-4 h-4" />
+                <span className="text-sm font-medium">{option.label}</span>
+                {isActive && <div className="w-2 h-2 bg-[#f1b3be] rounded-full ml-auto" />}
+                {isDisabled && <span className="text-xs text-gray-400 ml-auto">(Requiere login)</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Enhanced Community Card (MEJORADO)
 const CommunityCard: React.FC<{ 
   community: Community; 
   onClick: () => void;
@@ -440,122 +458,91 @@ const CommunityCard: React.FC<{
   currentUser?: User;
 }> = ({ community, onClick, onEdit, onDelete, onJoin, currentUser }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
-  const cardRef = useRef<HTMLDivElement>(null);
   
   const isMember = currentUser && community.users.some(user => user.id === currentUser.id);
   const isOwner = currentUser && community.owner && community.owner.id === currentUser.id;
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-    
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    setMousePosition({ x, y });
-  };
-
   return (
     <div 
-      ref={cardRef}
-      className="group relative overflow-hidden cursor-pointer transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2"
-      onMouseMove={handleMouseMove}
+      className="group relative overflow-hidden cursor-pointer transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
     >
-      {/* Dynamic mouse glow */}
-      <div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
-        style={{
-          background: `radial-gradient(300px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(150, 117, 188, 0.15), transparent 40%)`,
-        }}
-      />
-      
-      {/* Enhanced glass border */}
-      <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[#9675bc]/30 via-[#f1b3be]/20 to-[#ffe0db]/30 group-hover:from-[#9675bc]/50 group-hover:via-[#f1b3be]/40 group-hover:to-[#ffe0db]/50 transition-all duration-500">
-        <div className="h-full w-full rounded-2xl bg-gradient-to-br from-white/15 via-white/10 to-[#ffe0db]/20 backdrop-blur-xl shadow-inner" />
+      {/* Enhanced glass border with subtle glow */}
+      <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[#9675bc]/40 via-[#f1b3be]/30 to-[#ffe0db]/40 group-hover:from-[#9675bc]/60 group-hover:via-[#f1b3be]/50 group-hover:to-[#ffe0db]/60 transition-all duration-500">
+        <div className="h-full w-full rounded-2xl bg-gradient-to-br from-white/20 via-white/15 to-[#ffe0db]/10 backdrop-blur-xl shadow-inner" />
       </div>
       
-      {/* Floating particles on hover */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-        {isHovered && (
-          <>
-            {Array.from({ length: 6 }, (_, i) => (
-              <div
-                key={i}
-                className="absolute w-1 h-1 bg-[#f1b3be] rounded-full animate-float opacity-70"
-                style={{
-                  left: `${20 + Math.random() * 60}%`,
-                  top: `${20 + Math.random() * 60}%`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${2 + Math.random()}s`,
-                }}
-              />
-            ))}
-          </>
-        )}
-      </div>
+      {/* Subtle hover glow */}
+      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-[#9675bc]/5 via-[#f1b3be]/5 to-[#ffe0db]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
       
       <div className="relative z-10 p-6 space-y-4">
-        {/* Header */}
+        {/* Header with improved layout */}
         <div className="flex items-center space-x-4">
           {community.profile_image ? (
             <div className="relative">
-              <img src={community.profile_image} alt={community.name} className="w-12 h-12 rounded-full border-2 border-[#f1b3be] object-cover shadow-lg" />
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#9675bc]/20 to-[#f1b3be]/20 group-hover:opacity-100 opacity-0 transition-opacity duration-300" />
+              <img src={community.profile_image} alt={community.name} className="w-14 h-14 rounded-xl border-2 border-[#f1b3be]/50 object-cover shadow-lg" />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#9675bc]/10 to-[#f1b3be]/10 group-hover:opacity-100 opacity-0 transition-opacity duration-300" />
             </div>
           ) : (
             <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#9675bc] to-[#f1b3be] rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                <span className="text-white font-bold">{community.name.charAt(0).toUpperCase()}</span>
+              <div className="w-14 h-14 bg-gradient-to-br from-[#9675bc] to-[#f1b3be] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                <span className="text-white font-bold text-lg">{community.name.charAt(0).toUpperCase()}</span>
               </div>
-              <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           )}
           
           <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-semibold text-[#ffe0db] group-hover:text-white transition-colors duration-300">{community.name}</h3>
+            <div className="flex items-center space-x-2 mb-1">
+              <h3 className="text-xl font-bold text-[#ffe0db] group-hover:text-white transition-colors duration-300">{community.name}</h3>
               {isOwner && (
-                <div className="flex items-center space-x-1 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] text-white text-xs px-2 py-1 rounded-full shadow-lg">
+                <div className="flex items-center space-x-1 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] text-white text-xs px-2 py-1 rounded-lg shadow-md">
                   <Crown className="w-3 h-3" />
-                  <span>Propietario</span>
+                  <span>Owner</span>
+                </div>
+              )}
+              {isMember && !isOwner && (
+                <div className="flex items-center space-x-1 bg-emerald-500/20 text-emerald-300 text-xs px-2 py-1 rounded-lg">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Miembro</span>
                 </div>
               )}
             </div>
-            <p className="text-[#ffe0db]/70 text-sm group-hover:text-[#ffe0db]/90 transition-colors duration-300 mt-1">
-              {community.description || 'Sin descripción'}
+            <p className="text-[#ffe0db]/80 text-sm group-hover:text-[#ffe0db] transition-colors duration-300 leading-relaxed">
+              {community.description || 'Una comunidad esperando ser explorada...'}
             </p>
           </div>
         </div>
         
-        {/* Stats */}
-        <div className="flex items-center space-x-4 text-xs text-[#ffe0db]/60 group-hover:text-[#ffe0db]/80 transition-colors duration-300">
-          <div className="flex items-center space-x-1">
-            <User className="w-3 h-3" />
-            <span>{community.users.length} miembros</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Calendar className="w-3 h-3" />
-            <span>{new Date(community.created_at).toLocaleDateString()}</span>
-          </div>
-          {community.owner && (
+        {/* Enhanced stats */}
+        <div className="flex items-center justify-between text-xs text-[#ffe0db]/60 group-hover:text-[#ffe0db]/80 transition-colors duration-300">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 bg-white/5 px-2 py-1 rounded-md">
+              <Users className="w-3 h-3" />
+              <span className="font-medium">{community.users.length}</span>
+            </div>
             <div className="flex items-center space-x-1">
-              <User className="w-3 h-3" />
-              <span>Por: {community.owner.username}</span>
+              <Clock className="w-3 h-3" />
+              <span>{new Date(community.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
+          
+          {community.owner && (
+            <div className="text-xs text-[#ffe0db]/50">
+              Por: {community.owner.username}
             </div>
           )}
         </div>
         
-        {/* Action buttons */}
+        {/* Enhanced action buttons */}
         <div className="flex items-center justify-between pt-4 border-t border-white/10">
           <div className="flex space-x-2">
             {isOwner && onEdit && (
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="p-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-lg transition-all duration-300 transform hover:scale-110 backdrop-blur-sm"
+                className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-100 rounded-lg transition-all duration-300 transform hover:scale-110 backdrop-blur-sm"
                 title="Editar comunidad"
               >
                 <Edit2 className="w-4 h-4" />
@@ -564,7 +551,7 @@ const CommunityCard: React.FC<{
             {isOwner && onDelete && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-lg transition-all duration-300 transform hover:scale-110 backdrop-blur-sm"
+                className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-100 rounded-lg transition-all duration-300 transform hover:scale-110 backdrop-blur-sm"
                 title="Eliminar comunidad"
               >
                 <Trash2 className="w-4 h-4" />
@@ -577,8 +564,8 @@ const CommunityCard: React.FC<{
               onClick={(e) => { e.stopPropagation(); onJoin(); }}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-all duration-300 transform hover:scale-105 backdrop-blur-sm font-medium ${
                 isMember 
-                  ? 'bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100'
-                  : 'bg-green-500/20 hover:bg-green-500/40 text-green-300 hover:text-green-100'
+                  ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-100'
+                  : 'bg-green-500/20 hover:bg-green-500/30 text-green-300 hover:text-green-100'
               }`}
             >
               {isMember ? <UserMinus className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
@@ -612,32 +599,11 @@ const PostCard: React.FC<{
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Chat bubble background */}
       <div className="relative bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6 transition-all duration-300 hover:shadow-xl hover:bg-white/20">
         
-        {/* Floating particles on hover */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-          {isHovered && (
-            <>
-              {Array.from({ length: 4 }, (_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-1 h-1 bg-[#f1b3be] rounded-full animate-float opacity-60"
-                  style={{
-                    left: `${20 + Math.random() * 60}%`,
-                    top: `${20 + Math.random() * 60}%`,
-                    animationDelay: `${Math.random() * 2}s`,
-                  }}
-                />
-              ))}
-            </>
-          )}
-        </div>
-
         {/* Reply indicator */}
         {post.parent_post && (
           <div className="bg-gradient-to-r from-[#9675bc]/20 to-[#f1b3be]/20 rounded-xl p-4 mb-4 border-l-4 border-[#f1b3be] backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
             <div className="relative z-10">
               <div className="flex items-center space-x-2 mb-2">
                 <Reply className="w-4 h-4 text-[#f1b3be]" />
@@ -765,7 +731,7 @@ const PostCard: React.FC<{
   );
 });
 
-// Enhanced Community Modal
+// Enhanced Community Modal (WIDER)
 const CommunityModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -811,31 +777,31 @@ const CommunityModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-gradient-to-br from-white/95 via-white/90 to-white/85 backdrop-blur-xl rounded-3xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20 animate-modal-entrance">
+      <div className="bg-gradient-to-br from-white/95 via-white/90 to-white/85 backdrop-blur-xl rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20 animate-modal-entrance mx-4">
         
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#9675bc] to-[#f1b3be] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Sparkles className="w-8 h-8 text-white" />
+          <div className="w-20 h-20 bg-gradient-to-br from-[#9675bc] to-[#f1b3be] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Sparkles className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-[#252c3e] mb-2">
+          <h2 className="text-3xl font-bold text-[#252c3e] mb-3">
             {isEditing ? 'Editar Comunidad' : 'Crear Nueva Comunidad'}
           </h2>
-          <p className="text-sm text-[#252c3e]/70">
+          <p className="text-base text-[#252c3e]/70">
             {isEditing ? 'Actualiza la información de tu comunidad' : 'Dale vida a una nueva comunidad onírica'}
           </p>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Profile Image Upload */}
           <div className="text-center">
-            <label className="block text-sm font-semibold text-[#252c3e] mb-4">Imagen de Perfil</label>
+            <label className="block text-base font-semibold text-[#252c3e] mb-6">Imagen de Perfil</label>
             <div className="relative inline-block">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#9675bc]/20 to-[#f1b3be]/20 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg mx-auto">
+              <div className="w-32 h-32 bg-gradient-to-br from-[#9675bc]/20 to-[#f1b3be]/20 rounded-2xl flex items-center justify-center overflow-hidden border-4 border-white shadow-xl mx-auto">
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <Camera className="w-8 h-8 text-[#9675bc]" />
+                  <Camera className="w-12 h-12 text-[#9675bc]" />
                 )}
               </div>
               <input
@@ -844,58 +810,170 @@ const CommunityModal: React.FC<{
                 onChange={handleImageChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#f1b3be] to-[#9675bc] rounded-full flex items-center justify-center shadow-lg cursor-pointer">
-                <Plus className="w-4 h-4 text-white" />
+              <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-gradient-to-br from-[#f1b3be] to-[#9675bc] rounded-full flex items-center justify-center shadow-xl cursor-pointer">
+                <Plus className="w-5 h-5 text-white" />
               </div>
             </div>
           </div>
 
-          {/* Name Field */}
-          <div>
-            <label className="block text-sm font-semibold text-[#252c3e] mb-2">Nombre de la Comunidad</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              maxLength={30}
-              className="w-full px-4 py-3 bg-white/50 border border-[#9675bc]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#252c3e] placeholder-[#252c3e]/50 backdrop-blur-sm transition-all duration-300"
-              placeholder="Ej: Exploradores de Sueños"
-            />
-            <div className="text-xs text-[#252c3e]/60 mt-1">{name.length}/30 caracteres</div>
-          </div>
-          
-          {/* Description Field */}
-          <div>
-            <label className="block text-sm font-semibold text-[#252c3e] mb-2">Descripción</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={450}
-              className="w-full px-4 py-3 bg-white/50 border border-[#9675bc]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#252c3e] placeholder-[#252c3e]/50 backdrop-blur-sm transition-all duration-300 resize-none"
-              placeholder="Describe el propósito de tu comunidad onírica..."
-              rows={4}
-            />
-            <div className="text-xs text-[#252c3e]/60 mt-1">{description.length}/450 caracteres</div>
+          {/* Form fields in grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Name Field */}
+            <div className="md:col-span-1">
+              <label className="block text-base font-semibold text-[#252c3e] mb-3">Nombre de la Comunidad</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                maxLength={30}
+                className="w-full px-4 py-4 bg-white/50 border border-[#9675bc]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#252c3e] placeholder-[#252c3e]/50 backdrop-blur-sm transition-all duration-300 text-base"
+                placeholder="Ej: Exploradores de Sueños"
+              />
+              <div className="text-sm text-[#252c3e]/60 mt-2">{name.length}/30 caracteres</div>
+            </div>
+            
+            {/* Description Field */}
+            <div className="md:col-span-1">
+              <label className="block text-base font-semibold text-[#252c3e] mb-3">Descripción</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={450}
+                className="w-full px-4 py-4 bg-white/50 border border-[#9675bc]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#252c3e] placeholder-[#252c3e]/50 backdrop-blur-sm transition-all duration-300 resize-none text-base"
+                placeholder="Describe el propósito de tu comunidad onírica..."
+                rows={4}
+              />
+              <div className="text-sm text-[#252c3e]/60 mt-2">{description.length}/450 caracteres</div>
+            </div>
           </div>
           
           {/* Action Buttons */}
-          <div className="flex space-x-3 pt-4">
+          <div className="flex space-x-4 pt-6">
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="flex-1 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] text-white py-4 px-8 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg text-base"
             >
-              {isEditing ? 'Actualizar' : 'Crear Comunidad'}
+              {isEditing ? 'Actualizar Comunidad' : 'Crear Comunidad'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-white/50 hover:bg-white/70 text-[#252c3e] py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+              className="flex-1 bg-white/50 hover:bg-white/70 text-[#252c3e] py-4 px-8 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm text-base"
             >
               Cancelar
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+};
+
+// Chat-style Post Creation Component
+const ChatPostCreator: React.FC<{
+  onSubmit: (data: { title: string; text: string }) => void;
+  placeholder?: string;
+  parentPost?: Post;
+  post?: Post;
+  isEditing?: boolean;
+}> = ({ onSubmit, placeholder = "Comparte tus pensamientos...", parentPost, post, isEditing = false }) => {
+  const [title, setTitle] = useState(post?.title || '');
+  const [text, setText] = useState(post?.text || '');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [text]);
+
+  const handleSubmit = () => {
+    if (title.trim() && text.trim()) {
+      onSubmit({ title, text });
+      if (!isEditing) {
+        setTitle('');
+        setText('');
+      }
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-white/20 via-white/15 to-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-lg mb-6">
+      
+      {/* Parent post preview */}
+      {parentPost && (
+        <div className="bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-xl p-4 mb-4 border-l-4 border-[#f1b3be]">
+          <div className="flex items-center space-x-2 mb-2">
+            <Reply className="w-4 h-4 text-[#f1b3be]" />
+            <p className="text-sm text-[#ffe0db]/70 font-medium">Respondiendo a:</p>
+          </div>
+          <p className="text-sm font-semibold text-[#ffe0db]">{parentPost.title}</p>
+          <p className="text-xs text-[#ffe0db]/60 mt-1">{parentPost.text.substring(0, 100)}...</p>
+        </div>
+      )}
+      
+      <div className="space-y-4">
+        {/* Title input */}
+        <div>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyPress={handleKeyPress}
+            maxLength={50}
+            className="w-full px-0 py-2 bg-transparent border-none focus:outline-none text-[#ffe0db] placeholder-[#ffe0db]/50 text-lg font-semibold"
+            placeholder="Título de tu mensaje..."
+          />
+          <div className="h-px bg-gradient-to-r from-[#9675bc]/30 to-[#f1b3be]/30"></div>
+        </div>
+        
+        {/* Text input */}
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyPress={handleKeyPress}
+            maxLength={2500}
+            className="w-full px-0 py-2 bg-transparent border-none focus:outline-none text-[#ffe0db] placeholder-[#ffe0db]/50 resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
+            placeholder={placeholder}
+            rows={2}
+          />
+          
+          {/* Bottom bar */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+            <div className="flex items-center space-x-3 text-xs text-[#ffe0db]/60">
+              <span>{title.length}/50</span>
+              <span>•</span>
+              <span>{text.length}/2500</span>
+              <span>•</span>
+              <span className="flex items-center space-x-1">
+                <kbd className="px-1 py-0.5 bg-white/10 rounded text-xs">⌘</kbd>
+                <span>+</span>
+                <kbd className="px-1 py-0.5 bg-white/10 rounded text-xs">Enter</kbd>
+                <span>para enviar</span>
+              </span>
+            </div>
+            
+            <button
+              onClick={handleSubmit}
+              disabled={!title.trim() || !text.trim()}
+              className="flex items-center space-x-2 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] disabled:from-gray-400 disabled:to-gray-500 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              <span>{isEditing ? 'Actualizar' : 'Enviar'}</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -911,26 +989,13 @@ const PostModal: React.FC<{
   post?: Post;
   isEditing?: boolean;
 }> = ({ isOpen, onClose, onSubmit, community, parentPost, post, isEditing = false }) => {
-  const [title, setTitle] = useState('');
-  const [text, setText] = useState('');
-
-  useEffect(() => {
-    if (isOpen) {
-      setTitle(post?.title || '');
-      setText(post?.text || '');
-    }
-  }, [isOpen, post]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ 
-      title, 
-      text, 
-      community: community.id, 
-      parent_post: parentPost?.id 
+  const handleChatSubmit = (data: { title: string; text: string }) => {
+    onSubmit({
+      title: data.title,
+      text: data.text,
+      community: community.id,
+      parent_post: parentPost?.id
     });
-    setTitle('');
-    setText('');
     onClose();
   };
 
@@ -938,10 +1003,10 @@ const PostModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-gradient-to-br from-white/95 via-white/90 to-white/85 backdrop-blur-xl rounded-3xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20 animate-modal-entrance">
+      <div className="bg-gradient-to-br from-white/95 via-white/90 to-white/85 backdrop-blur-xl rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20 animate-modal-entrance mx-4">
         
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-[#9675bc] to-[#f1b3be] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
             <MessageSquare className="w-8 h-8 text-white" />
           </div>
@@ -953,79 +1018,30 @@ const PostModal: React.FC<{
           </p>
         </div>
         
-        {/* Parent post preview */}
-        {parentPost && (
-          <div className="bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-xl p-4 mb-6 border-l-4 border-[#f1b3be]">
-            <div className="flex items-center space-x-2 mb-2">
-              <Reply className="w-4 h-4 text-[#f1b3be]" />
-              <p className="text-sm text-[#252c3e]/70 font-medium">Respondiendo a:</p>
-            </div>
-            <p className="text-sm font-semibold text-[#252c3e]">{parentPost.title}</p>
-            <p className="text-xs text-[#252c3e]/60 mt-1">{parentPost.text.substring(0, 100)}...</p>
-          </div>
-        )}
+        <div className="bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] rounded-2xl p-6">
+          <ChatPostCreator
+            onSubmit={handleChatSubmit}
+            parentPost={parentPost}
+            post={post}
+            isEditing={isEditing}
+            placeholder="Comparte tus pensamientos, sueños y experiencias..."
+          />
+        </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title Field */}
-          <div>
-            <label className="block text-sm font-semibold text-[#252c3e] mb-2">Título del Mensaje</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              maxLength={50}
-              className="w-full px-4 py-3 bg-white/50 border border-[#9675bc]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#252c3e] placeholder-[#252c3e]/50 backdrop-blur-sm transition-all duration-300"
-              placeholder="¿De qué quieres hablar?"
-            />
-            <div className="text-xs text-[#252c3e]/60 mt-1">{title.length}/50 caracteres</div>
-          </div>
-          
-          {/* Content Field - Chat-like */}
-          <div>
-            <label className="block text-sm font-semibold text-[#252c3e] mb-2">Tu Mensaje</label>
-            <div className="relative">
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                required
-                maxLength={2500}
-                className="w-full px-4 py-4 pb-12 bg-white/50 border border-[#9675bc]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#252c3e] placeholder-[#252c3e]/50 backdrop-blur-sm transition-all duration-300 resize-none"
-                placeholder="Comparte tus pensamientos, sueños y experiencias..."
-                rows={6}
-              />
-              
-              {/* Character count and send button */}
-              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                <div className="text-xs text-[#252c3e]/60">{text.length}/2500</div>
-                <button
-                  type="submit"
-                  disabled={!title.trim() || !text.trim()}
-                  className="bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] disabled:from-gray-300 disabled:to-gray-400 text-white p-2 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed shadow-lg"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-white/50 hover:bg-white/70 text-[#252c3e] py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+        <div className="flex justify-end pt-4">
+          <button
+            onClick={onClose}
+            className="bg-white/50 hover:bg-white/70 text-[#252c3e] py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-// Main Community Component (keeping all original functionality)
+// Main Community Component
 const CommunityApp: React.FC = () => {
   const { user } = useAuth();
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -1033,6 +1049,10 @@ const CommunityApp: React.FC = () => {
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState<'communities' | 'community-posts'>('communities');
+  
+  // Filter states
+  const [filterBy, setFilterBy] = useState('all'); // 'all', 'member', 'non-member'
+  const [sortOrder, setSortOrder] = useState('created-desc'); // 'created-asc', 'created-desc', 'members-asc', 'members-desc'
   
   // Modal states
   const [showCommunityModal, setShowCommunityModal] = useState(false);
@@ -1390,10 +1410,43 @@ const CommunityApp: React.FC = () => {
     });
   };
 
-  // Filtering (MANTENIDO IGUAL)
-  const filteredCommunities = communities.filter(community =>
-    community.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtering and sorting logic
+  const getFilteredAndSortedCommunities = () => {
+    let filtered = communities.filter(community =>
+      community.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Apply membership filter
+    if (user) {
+      if (filterBy === 'member') {
+        filtered = filtered.filter(community => 
+          community.users.some(u => u.id === user.id)
+        );
+      } else if (filterBy === 'non-member') {
+        filtered = filtered.filter(community => 
+          !community.users.some(u => u.id === user.id)
+        );
+      }
+    }
+
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      switch (sortOrder) {
+        case 'created-asc':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'created-desc':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'members-asc':
+          return a.users.length - b.users.length;
+        case 'members-desc':
+          return b.users.length - a.users.length;
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+  };
+
+  const filteredCommunities = getFilteredAndSortedCommunities();
 
   const filteredPosts = posts.filter(post =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1422,14 +1475,14 @@ const CommunityApp: React.FC = () => {
       
       {/* Enhanced background effects */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Floating dream elements */}
-        {Array.from({ length: 20 }, (_, i) => (
+        {/* Simplified floating elements */}
+        {Array.from({ length: 8 }, (_, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-white/5 animate-dream-float"
             style={{
-              width: `${Math.random() * 12 + 8}px`,
-              height: `${Math.random() * 12 + 8}px`,
+              width: `${Math.random() * 8 + 4}px`,
+              height: `${Math.random() * 8 + 4}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 8}s`,
@@ -1438,9 +1491,9 @@ const CommunityApp: React.FC = () => {
           />
         ))}
         
-        {/* Gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-[#9675bc]/10 to-[#f1b3be]/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-[#f1b3be]/10 to-[#ffe0db]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        {/* Subtle gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-[#9675bc]/5 to-[#f1b3be]/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-[#f1b3be]/5 to-[#ffe0db]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Action Loaders */}
@@ -1486,7 +1539,7 @@ const CommunityApp: React.FC = () => {
                   <MessageSquare className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent animate-text-shimmer">
                     {currentView === 'communities' ? 'Centro de Comunidades' : selectedCommunity?.name}
                   </h1>
                   {currentView === 'community-posts' && selectedCommunity && (
@@ -1502,10 +1555,6 @@ const CommunityApp: React.FC = () => {
                   <User className="w-4 h-4 text-[#f1b3be]" />
                   <span className="text-sm text-[#ffe0db] font-medium">{selectedCommunity.users.length} miembros</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Eye className="w-4 h-4 text-[#9675bc]" />
-                  <span className="text-sm text-[#ffe0db] font-medium">En línea</span>
-                </div>
               </div>
             )}
           </div>
@@ -1518,10 +1567,9 @@ const CommunityApp: React.FC = () => {
         {/* Enhanced Search and Actions */}
         <div className="flex flex-col lg:flex-row justify-between items-center mb-8 space-y-4 lg:space-y-0">
           
-          {/* Search Bar */}
-          <div className="relative w-full lg:w-96">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/20 to-[#f1b3be]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative">
+          <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-4 w-full lg:w-auto">
+            {/* Search Bar */}
+            <div className="relative w-full lg:w-96">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#ffe0db]/50 w-5 h-5" />
               <input
                 type="text"
@@ -1530,8 +1578,18 @@ const CommunityApp: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f1b3be] focus:border-transparent text-[#ffe0db] placeholder-[#ffe0db]/50 transition-all duration-300 shadow-lg hover:shadow-xl"
               />
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
             </div>
+
+            {/* Filter Dropdown - Solo en vista de comunidades */}
+            {currentView === 'communities' && (
+              <FilterDropdown
+                filterBy={filterBy}
+                setFilterBy={setFilterBy}
+                sortOrder={sortOrder}
+                setSortOrder={setSortOrder}
+                currentUser={user}
+              />
+            )}
           </div>
           
           {/* Action Buttons */}
@@ -1546,19 +1604,6 @@ const CommunityApp: React.FC = () => {
                 <Plus className="w-5 h-5 relative z-10" />
                 <span className="font-semibold relative z-10">Nueva Comunidad</span>
                 <Sparkles className="w-4 h-4 relative z-10 group-hover:animate-pulse" />
-              </button>
-            )}
-            
-            {currentView === 'community-posts' && selectedCommunity && user && isCommunityMember(selectedCommunity) && (
-              <button
-                onClick={() => openPostModal()}
-                disabled={isActionLoading}
-                className="group relative flex items-center space-x-3 bg-gradient-to-r from-[#f1b3be] to-[#ffe0db] hover:from-[#ffe0db] hover:to-[#f1b3be] text-[#1a1f35] px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <MessageSquare className="w-5 h-5 relative z-10" />
-                <span className="relative z-10">Nuevo Mensaje</span>
-                <Send className="w-4 h-4 relative z-10 group-hover:animate-pulse" />
               </button>
             )}
           </div>
@@ -1598,10 +1643,9 @@ const CommunityApp: React.FC = () => {
                     <div className="w-24 h-24 bg-gradient-to-br from-[#9675bc]/20 to-[#f1b3be]/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
                       <Search className="w-12 h-12 text-[#ffe0db]/40" />
                     </div>
-                    <div className="absolute inset-0 bg-[#f1b3be]/20 rounded-full animate-ping" />
                   </div>
                   <h3 className="text-xl font-semibold text-[#ffe0db] mb-2">No se encontraron comunidades</h3>
-                  <p className="text-[#ffe0db]/70">Intenta con diferentes términos de búsqueda</p>
+                  <p className="text-[#ffe0db]/70">Intenta con diferentes términos de búsqueda o filtros</p>
                 </div>
               )}
             </div>
@@ -1610,6 +1654,17 @@ const CommunityApp: React.FC = () => {
             
             /* Posts Chat Interface */
             <div className="max-w-4xl mx-auto">
+              {/* Chat Post Creator for community members */}
+              {user && isCommunityMember(selectedCommunity!) && (
+                <ChatPostCreator
+                  onSubmit={(data) => handleCreatePost({
+                    title: data.title,
+                    text: data.text,
+                    community: selectedCommunity!.id
+                  })}
+                />
+              )}
+              
               <div className="space-y-4">
                 {filteredPosts.map((post, index) => (
                   <div
@@ -1641,21 +1696,12 @@ const CommunityApp: React.FC = () => {
                       <div className="w-32 h-32 bg-gradient-to-br from-[#9675bc]/20 to-[#f1b3be]/20 rounded-full flex items-center justify-center mx-auto animate-pulse">
                         <MessageSquare className="w-16 h-16 text-[#ffe0db]/40" />
                       </div>
-                      <div className="absolute inset-0 bg-[#f1b3be]/10 rounded-full animate-ping" />
-                      <div className="absolute top-4 right-4 w-4 h-4 bg-[#ffe0db] rounded-full animate-bounce" />
-                      <div className="absolute bottom-8 left-8 w-3 h-3 bg-[#9675bc] rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
                     </div>
                     <h3 className="text-2xl font-bold text-[#ffe0db] mb-4">No hay mensajes aún</h3>
                     <p className="text-[#ffe0db]/70 text-lg mb-8">¡Sé el primero en compartir algo increíble!</p>
                     
                     {user && isCommunityMember(selectedCommunity!) && (
-                      <button
-                        onClick={() => openPostModal()}
-                        className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
-                      >
-                        <Sparkles className="w-5 h-5" />
-                        <span>Crear primer mensaje</span>
-                      </button>
+                      <p className="text-[#ffe0db]/60">Usa el cuadro de arriba para escribir tu primer mensaje</p>
                     )}
                   </div>
                 )}
@@ -1692,82 +1738,49 @@ const CommunityApp: React.FC = () => {
           isEditing={!!editingPost}
         />
       )}
-
+      <DashboardFooter />
       {/* Enhanced CSS Animations */}
       <style>{`
         @keyframes float {
           0%, 100% {
             transform: translateY(0px) translateX(0px) rotate(0deg);
-            opacity: 0.4;
+            opacity: 0.3;
           }
           33% {
-            transform: translateY(-20px) translateX(10px) rotate(120deg);
-            opacity: 0.8;
+            transform: translateY(-15px) translateX(8px) rotate(90deg);
+            opacity: 0.6;
           }
           66% {
-            transform: translateY(-10px) translateX(-10px) rotate(240deg);
-            opacity: 0.6;
+            transform: translateY(-8px) translateX(-8px) rotate(180deg);
+            opacity: 0.4;
           }
         }
         
         @keyframes dream-float {
           0%, 100% {
             transform: translateY(0px) translateX(0px) scale(1) rotate(0deg);
-            opacity: 0.3;
+            opacity: 0.2;
           }
           25% {
-            transform: translateY(-15px) translateX(8px) scale(1.1) rotate(90deg);
-            opacity: 0.7;
+            transform: translateY(-12px) translateX(6px) scale(1.05) rotate(90deg);
+            opacity: 0.4;
           }
           50% {
-            transform: translateY(-8px) translateX(-8px) scale(0.9) rotate(180deg);
-            opacity: 0.5;
+            transform: translateY(-6px) translateX(-6px) scale(0.95) rotate(180deg);
+            opacity: 0.3;
           }
           75% {
-            transform: translateY(-20px) translateX(5px) scale(1.05) rotate(270deg);
-            opacity: 0.8;
+            transform: translateY(-15px) translateX(4px) scale(1.02) rotate(270deg);
+            opacity: 0.5;
           }
         }
         
-        @keyframes dream-bubble {
+        @keyframes text-shimmer {
           0%, 100% {
-            transform: translateY(0px) translateX(0px) scale(1) rotate(0deg);
-            opacity: 0.15;
-          }
-          33% {
-            transform: translateY(-25px) translateX(15px) scale(1.2) rotate(120deg);
-            opacity: 0.25;
-          }
-          66% {
-            transform: translateY(-12px) translateX(-12px) scale(0.8) rotate(240deg);
-            opacity: 0.10;
-          }
-        }
-        
-        @keyframes pulse-glow {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(150, 117, 188, 0.3), 0 0 40px rgba(241, 179, 190, 0.2);
+            background-position: 0% 50%;
           }
           50% {
-            box-shadow: 0 0 30px rgba(150, 117, 188, 0.5), 0 0 60px rgba(241, 179, 190, 0.4);
-          }
-        }
-        
-        @keyframes text-glow {
-          0%, 100% {
-            text-shadow: 0 0 10px rgba(255, 224, 219, 0.3);
-          }
-          50% {
-            text-shadow: 0 0 20px rgba(255, 224, 219, 0.6), 0 0 30px rgba(241, 179, 190, 0.4);
-          }
-        }
-        
-        @keyframes progress-glow {
-          0%, 100% {
-            box-shadow: 0 0 10px rgba(241, 179, 190, 0.4);
-          }
-          50% {
-            box-shadow: 0 0 20px rgba(241, 179, 190, 0.8);
+            background-position: 100% 50%;
           }
         }
         
@@ -1776,15 +1789,10 @@ const CommunityApp: React.FC = () => {
           to { transform: rotate(360deg); }
         }
         
-        @keyframes spin-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        
         @keyframes fade-in-up {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;
@@ -1795,7 +1803,7 @@ const CommunityApp: React.FC = () => {
         @keyframes message-entrance {
           from {
             opacity: 0;
-            transform: translateX(-20px) scale(0.95);
+            transform: translateX(-15px) scale(0.98);
           }
           to {
             opacity: 1;
@@ -1806,7 +1814,7 @@ const CommunityApp: React.FC = () => {
         @keyframes modal-entrance {
           from {
             opacity: 0;
-            transform: scale(0.9) translateY(20px);
+            transform: scale(0.95) translateY(15px);
           }
           to {
             opacity: 1;
@@ -1814,74 +1822,33 @@ const CommunityApp: React.FC = () => {
           }
         }
         
-        @keyframes error-pulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
-        }
-        
-        @keyframes wave {
-          0%, 60%, 100% {
-            transform: initial;
-          }
-          30% {
-            transform: translateY(-15px);
-          }
-        }
-        
         .animate-float {
-          animation: float 6s ease-in-out infinite;
+          animation: float 5s ease-in-out infinite;
         }
         
         .animate-dream-float {
-          animation: dream-float 8s ease-in-out infinite;
+          animation: dream-float 7s ease-in-out infinite;
         }
         
-        .animate-dream-bubble {
-          animation: dream-bubble 10s ease-in-out infinite;
-        }
-        
-        .animate-pulse-glow {
-          animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        .animate-text-glow {
-          animation: text-glow 3s ease-in-out infinite;
-        }
-        
-        .animate-progress-glow {
-          animation: progress-glow 1.5s ease-in-out infinite;
+        .animate-text-shimmer {
+          background-size: 200% 200%;
+          animation: text-shimmer 4s ease-in-out infinite;
         }
         
         .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        
-        .animate-spin-reverse {
-          animation: spin-reverse 15s linear infinite;
+          animation: spin-slow 15s linear infinite;
         }
         
         .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out;
+          animation: fade-in-up 0.5s ease-out;
         }
         
         .animate-message-entrance {
-          animation: message-entrance 0.4s ease-out;
+          animation: message-entrance 0.3s ease-out;
         }
         
         .animate-modal-entrance {
-          animation: modal-entrance 0.3s ease-out;
-        }
-        
-        .animate-error-pulse {
-          animation: error-pulse 2s ease-in-out infinite;
-        }
-        
-        .animate-wave {
-          animation: wave 2s ease-in-out infinite;
+          animation: modal-entrance 0.25s ease-out;
         }
       `}</style>
     </div>
