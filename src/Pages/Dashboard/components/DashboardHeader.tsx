@@ -31,7 +31,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const navigate = useNavigate();
 
   const profileMenuItems = [
-    { icon: User, label: 'Mi Perfil', action: () => navigate('/profile') },
+    { icon: User, label: 'Mi Perfil', action: () => navigate('/dashboard/profile/profile') },
     { icon: Settings, label: 'Configuración', action: () => console.log('Configuración') },
     { icon: Shield, label: 'Privacidad', action: () => console.log('Privacidad') },
     { icon: Bell, label: 'Notificaciones', action: () => console.log('Notificaciones') },
@@ -39,7 +39,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     { icon: HelpCircle, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
 
-  const navigationItems = ['Chatbot', 'Análisis', 'Psicólogos', 'Comunidad'];
+  // ✅ Navegación: label + ruta
+  const navigationItems = [
+    { label: 'Chatbot', path: '/chatbot' },
+    { label: 'Análisis', path: '/analysis' },
+    { label: 'Psicólogos', path: '/psychologists' },
+    { label: 'Comunidad', path: '/communities' }, // 👈 lo que pediste
+  ];
 
   // Función para obtener las iniciales del usuario
   const getUserInitials = (username: string): string => {
@@ -305,15 +311,18 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </h4>
             {navigationItems.map((item, index) => (
               <div
-                key={item}
+                key={item.label}
                 className={`transform transition-all duration-500 ${
                   showMobileMenu ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
                 }`}
                 style={{transitionDelay: `${index * 100}ms`}}
               >
                 <NavigationLink 
-                  item={item} 
-                  onClick={() => setShowMobileMenu(false)}
+                  item={item.label} 
+                  onClick={() => {
+                    navigate(item.path);
+                    setShowMobileMenu(false);
+                  }}
                   isMobile={true}
                 />
               </div>
@@ -360,7 +369,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   </div>
 
                   {/* Efecto de destello lateral */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_lightpink/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 delay-100"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-oniria_lightpink/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 </button>
               );
             })}
@@ -464,8 +473,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="hidden lg:flex items-center">
             <ul className="flex gap-6 xl:gap-8 text-sm xl:text-base font-inter">
               {navigationItems.map((item) => (
-                <li key={item} className="group relative">
-                  <NavigationLink item={item} />
+                <li key={item.label} className="group relative">
+                  <NavigationLink 
+                    item={item.label}
+                    onClick={() => navigate(item.path)}
+                  />
                 </li>
               ))}
             </ul>
