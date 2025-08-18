@@ -1,4 +1,4 @@
-// App.tsx
+// App.tsx - Updated with Profile Routes
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
@@ -165,8 +165,36 @@ function App() {
             } 
           />
           
+          {/* Rutas del perfil con subrutas */}
           <Route 
-            path="/profile" 
+            path="/dashboard/profile" 
+            element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard/profile/profile" replace />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/dashboard/profile/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/dashboard/profile/privacy" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/dashboard/profile/security" 
             element={
               <ProtectedRoute>
                 <Profile />
