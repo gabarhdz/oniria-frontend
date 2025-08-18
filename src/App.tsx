@@ -7,6 +7,7 @@ import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
 import Profile from './Pages/Profile/Profile';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
+import CommunityApp from './Pages/Community/Community';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
@@ -197,6 +198,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } 
+          />
+           {/* Nueva ruta para comunidades */}
+          <Route 
+            path="/communities" 
+            element={
+              <ProtectedRoute>
+                <CommunityApp />
               </ProtectedRoute>
             } 
           />
