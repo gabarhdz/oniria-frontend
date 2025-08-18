@@ -6,6 +6,7 @@ import Home1 from './Pages/Home/Home';
 import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
 import Profile from './Pages/Profile/Profile';
+import CommunityApp from './Pages/Community/components/Community';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -163,6 +164,8 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          
           
           {/* Rutas del perfil con subrutas */}
           <Route 
@@ -209,6 +212,16 @@ function App() {
                 <PsychologistDashboard />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Ruta de la comunidad */}
+          <Route 
+            path="/communities" 
+            element={
+              <ProtectedRoute>
+                <CommunityApp />
+              </ProtectedRoute>
+            }
           />
           
           {/* Ruta 404 */}
