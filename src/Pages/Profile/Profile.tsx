@@ -21,7 +21,9 @@ interface UserProfile {
   is_psychologist: boolean;
   date_joined?: string;
 }
-
+interface ProfileProps {
+  viewOnly?: boolean;
+}
 interface PrivacySettings {
   profile_visibility: 'public' | 'friends' | 'private';
   email_visibility: boolean;
@@ -37,8 +39,6 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-// Interceptor para agregar el token de autenticación
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
@@ -47,12 +47,8 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
-
-// Interceptor para manejo de errores
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
@@ -65,53 +61,45 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Componente Breadcrumbs integrado
+// Breadcrumbs
 interface BreadcrumbItem {
   label: string;
   path?: string;
   isActive?: boolean;
 }
-
 interface ProfileBreadcrumbsProps {
   activeSection: 'profile' | 'privacy' | 'security';
+  viewOnly?: boolean;
+  username?: string;
 }
-
-const ProfileBreadcrumbs: React.FC<ProfileBreadcrumbsProps> = ({ activeSection }) => {
+const ProfileBreadcrumbs: React.FC<ProfileBreadcrumbsProps> = ({ activeSection, viewOnly = false, username }) => {
   const getSectionLabel = (section: string) => {
     switch (section) {
-      case 'profile': return 'Perfil';
+      case 'profile': return viewOnly ? 'Perfil de Usuario' : 'Mi Perfil';
       case 'privacy': return 'Privacidad';
       case 'security': return 'Seguridad';
-      default: return 'Perfil';
+      default: return viewOnly ? 'Perfil de Usuario' : 'Mi Perfil';
     }
   };
-
-  const breadcrumbItems: BreadcrumbItem[] = [
-    {
-      label: 'Dashboard',
-      path: '/dashboard'
-    },
-    {
-      label: 'Mi Perfil',
-      path: '/dashboard/profile/profile'
-    },
-    {
-      label: getSectionLabel(activeSection),
-      isActive: true
-    }
+  
+  const breadcrumbItems: BreadcrumbItem[] = viewOnly ? [
+    { label: 'Comunidades', path: '/communities' },
+    { label: `Perfil de ${username || 'Usuario'}`, isActive: true }
+  ] : [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Mi Perfil', path: '/dashboard/profile/profile' },
+    { label: getSectionLabel(activeSection), isActive: true }
   ];
-
+  
   return (
     <nav className="flex items-center space-x-2 text-sm mb-6">
       <div className="flex items-center space-x-2 bg-[#ffe0db]/10 backdrop-blur-sm rounded-full px-4 py-2 border border-[#ffe0db]/20">
         <Home className="w-4 h-4 text-[#f1b3be]" />
-        
         {breadcrumbItems.map((item, index) => (
           <React.Fragment key={index}>
             {index > 0 && (
               <ChevronRight className="w-4 h-4 text-[#ffe0db]/40" />
             )}
-            
             {item.isActive ? (
               <span className="text-[#ffe0db] font-semibold flex items-center space-x-1">
                 <User className="w-4 h-4" />
@@ -132,63 +120,57 @@ const ProfileBreadcrumbs: React.FC<ProfileBreadcrumbsProps> = ({ activeSection }
   );
 };
 
-// Loading screen component matching App.tsx
-const LoadingScreen: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {Array.from({ length: 20 }, (_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white/10 animate-pulse"
-            style={{
-              width: `${Math.random() * 4 + 2}px`,
-              height: `${Math.random() * 4 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${Math.random() * 2 + 2}s`,
-            }}
+// Loading screen
+const LoadingScreen: React.FC = () => (
+  <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center relative overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden">
+      {Array.from({ length: 20 }, (_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full bg-white/10 animate-pulse"
+          style={{
+            width: `${Math.random() * 4 + 2}px`,
+            height: `${Math.random() * 4 + 2}px`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${Math.random() * 2 + 2}s`,
+          }}
+        />
+      ))}
+    </div>
+    <div className="text-center z-10">
+      <div className="relative mb-8">
+        <div className="w-32 h-32 mx-auto bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+          <img 
+            src="/img/Oniria.svg" 
+            alt="Oniria" 
+            className="w-24 h-24 object-contain drop-shadow-lg" 
           />
-        ))}
-      </div>
-
-      <div className="text-center z-10">
-        <div className="relative mb-8">
-          <div className="w-32 h-32 mx-auto bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-            <img 
-              src="/img/Oniria.svg" 
-              alt="Oniria" 
-              className="w-24 h-24 object-contain drop-shadow-lg" 
-            />
-          </div>
         </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <Loader2 className="w-8 h-8 text-[#f1b3be] animate-spin" />
-            <h2 className="text-2xl font-bold text-[#ffe0db]">
-              Cargando tu perfil...
-            </h2>
-          </div>
-          
-          <div className="flex justify-center space-x-1 mt-6">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 bg-[#9675bc] rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.3}s` }}
-              />
-            ))}
-          </div>
+      </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-center space-x-3">
+          <Loader2 className="w-8 h-8 text-[#f1b3be] animate-spin" />
+          <h2 className="text-2xl font-bold text-[#ffe0db]">
+            Cargando perfil...
+          </h2>
+        </div>
+        <div className="flex justify-center space-x-1 mt-6">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-2 h-2 bg-[#9675bc] rounded-full animate-bounce"
+              style={{ animationDelay: `${i * 0.3}s` }}
+            />
+          ))}
         </div>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
-// TwinklingStars component matching dashboard
+// TwinklingStars
 const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ count = 30, className = '' }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -198,7 +180,6 @@ const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ coun
     delay: Math.random() * 5,
     duration: Math.random() * 4 + 2,
   }));
-
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>
       {stars.map((star) => (
@@ -219,9 +200,15 @@ const TwinklingStars: React.FC<{ count?: number; className?: string }> = ({ coun
   );
 };
 
-// Profile Header Component
-const ProfileHeader: React.FC<{ activeTab: string }> = ({ activeTab }) => {
+// Profile Header
+const ProfileHeader: React.FC<{ activeTab: string; viewOnly?: boolean; username?: string }> = ({ 
+  activeTab, 
+  viewOnly = false, 
+  username 
+}) => {
   const getTabTitle = () => {
+    if (viewOnly) return `Perfil de ${username || 'Usuario'}`;
+    
     switch (activeTab) {
       case 'profile': return 'Mi Perfil';
       case 'privacy': return 'Configuración de Privacidad';
@@ -229,8 +216,10 @@ const ProfileHeader: React.FC<{ activeTab: string }> = ({ activeTab }) => {
       default: return 'Mi Perfil';
     }
   };
-
+  
   const getTabDescription = () => {
+    if (viewOnly) return 'Explora el perfil público de este usuario';
+    
     switch (activeTab) {
       case 'profile': return 'Gestiona tu identidad en Noctiria';
       case 'privacy': return 'Controla quién puede ver tu información';
@@ -238,18 +227,20 @@ const ProfileHeader: React.FC<{ activeTab: string }> = ({ activeTab }) => {
       default: return 'Gestiona tu identidad en Noctiria';
     }
   };
-
+  
+  const backPath = viewOnly ? '/communities' : '/dashboard';
+  const backText = viewOnly ? 'Volver a Comunidades' : 'Volver al Dashboard';
+  
   return (
     <header className="relative z-10 p-6 border-b border-[#f1b3be]/20 backdrop-blur-xl bg-[#252c3e]/30">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <Link 
-          to="/dashboard"
+          to={backPath}
           className="flex items-center space-x-3 text-[#ffe0db]/80 hover:text-[#ffe0db] transition-colors group"
         >
           <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Volver al Dashboard</span>
+          <span className="font-medium">{backText}</span>
         </Link>
-
         <div className="flex items-center space-x-4">
           <div className="text-right">
             <h1 className="text-2xl font-bold text-[#ffe0db]">{getTabTitle()}</h1>
@@ -263,22 +254,18 @@ const ProfileHeader: React.FC<{ activeTab: string }> = ({ activeTab }) => {
 };
 
 // Componente principal
-const Profile: React.FC = () => {
+const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
   const { user: authUser, logout } = useAuth(); 
-  const { section } = useParams<{ section?: string }>();
-  
-  // Estados principales
+  const { section, userId } = useParams<{ section?: string; userId?: string }>();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
     profile_visibility: 'public',
     email_visibility: false,
     dream_sharing: true,
     community_notifications: true,
   });
-
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -290,15 +277,13 @@ const Profile: React.FC = () => {
   );
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Efectos
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 200);
     return () => clearTimeout(timer);
   }, []);
-
+  
   useEffect(() => {
     if (selectedFile) {
       const url = URL.createObjectURL(selectedFile);
@@ -306,25 +291,25 @@ const Profile: React.FC = () => {
       return () => URL.revokeObjectURL(url);
     }
   }, [selectedFile]);
-
-  // Update active tab based on URL parameter
+  
   useEffect(() => {
     if (section && ['profile', 'privacy', 'security'].includes(section)) {
       setActiveTab(section as 'profile' | 'privacy' | 'security');
     }
   }, [section]);
-
-  // Cargar datos del usuario actual
+  
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const fetchUser = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await apiClient.get('/users/me/');
+        let response;
+        if (viewOnly && userId) {
+          response = await apiClient.get(`/users/${userId}/`);
+        } else {
+          response = await apiClient.get('/users/me/');
+        }
         const userData = response.data;
-        
-        // Mapear los datos de Django al formato esperado
         const userProfile: UserProfile = {
           id: userData.id,
           username: userData.username,
@@ -334,16 +319,16 @@ const Profile: React.FC = () => {
           is_psychologist: userData.is_psychologist,
           date_joined: userData.date_joined || new Date().toISOString()
         };
-        
         setUser(userProfile);
         setEditData(userProfile);
-        
       } catch (err) {
         console.error('Error fetching user data:', err);
         if (axios.isAxiosError(err)) {
           if (err.response?.status === 401) {
             setError('Sesión expirada. Por favor, inicia sesión nuevamente.');
             logout();
+          } else if (err.response?.status === 404) {
+            setError('Usuario no encontrado.');
           } else {
             setError('Error al cargar los datos del usuario. Por favor, intenta nuevamente.');
           }
@@ -354,9 +339,8 @@ const Profile: React.FC = () => {
         setLoading(false);
       }
     };
-
-    fetchCurrentUser();
-  }, [logout]);
+    fetchUser();
+  }, [logout, viewOnly, userId]);
 
   // Funciones de manejo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -535,7 +519,7 @@ const Profile: React.FC = () => {
             {user?.username ? getUserInitials(user.username) : '??'}
           </div>
           
-          {editable && isEditing && (
+          {editable && isEditing && !viewOnly && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
                  onClick={() => fileInputRef.current?.click()}>
               <Camera className="w-8 h-8 text-[#ffe0db]" />
@@ -644,53 +628,57 @@ const Profile: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-[#252c3e]/60 via-[#214d72]/50 to-[#9675bc]/40 backdrop-blur-[0.5px]"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#9675bc]/3 to-transparent"></div>
 
-      {/* Input oculto para archivos */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      {/* Input oculto para archivos - solo si no es viewOnly */}
+      {!viewOnly && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      )}
 
       {/* Notificación */}
       <Notification />
 
-      {/* Modal de eliminación */}
-      <DeleteConfirmModal />
+      {/* Modal de eliminación - solo si no es viewOnly */}
+      {!viewOnly && <DeleteConfirmModal />}
 
       {/* Header */}
-      <ProfileHeader activeTab={activeTab} />
+      <ProfileHeader activeTab={activeTab} viewOnly={viewOnly} username={user?.username} />
 
       {/* Contenido principal */}
       <main className={`relative z-10 p-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <div className="max-w-6xl mx-auto">
           
           {/* Breadcrumbs usando el componente creado */}
-          <ProfileBreadcrumbs activeSection={activeTab} />
+          <ProfileBreadcrumbs activeSection={activeTab} viewOnly={viewOnly} username={user?.username} />
           
-          {/* Pestañas de navegación */}
-          <div className="flex space-x-2 mb-8 bg-[#ffe0db]/10 backdrop-blur-xl rounded-2xl p-2">
-            {[
-              { key: 'profile', label: 'Perfil', icon: User, path: '/dashboard/profile/profile' },
-              { key: 'privacy', label: 'Privacidad', icon: Shield, path: '/dashboard/profile/privacy' },
-              { key: 'security', label: 'Seguridad', icon: Settings, path: '/dashboard/profile/security' }
-            ].map(({ key, label, icon: Icon, path }) => (
-              <Link
-                key={key}
-                to={path}
-                onClick={() => setActiveTab(key as any)}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                  activeTab === key
-                    ? 'bg-gradient-to-r from-[#9675bc] to-[#f1b3be] text-[#ffe0db] shadow-lg'
-                    : 'text-[#ffe0db]/70 hover:text-[#ffe0db] hover:bg-[#ffe0db]/10'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{label}</span>
-              </Link>
-            ))}
-          </div>
+          {/* Pestañas de navegación - solo si no es viewOnly */}
+          {!viewOnly && (
+            <div className="flex space-x-2 mb-8 bg-[#ffe0db]/10 backdrop-blur-xl rounded-2xl p-2">
+              {[
+                { key: 'profile', label: 'Perfil', icon: User, path: '/dashboard/profile/profile' },
+                { key: 'privacy', label: 'Privacidad', icon: Shield, path: '/dashboard/profile/privacy' },
+                { key: 'security', label: 'Seguridad', icon: Settings, path: '/dashboard/profile/security' }
+              ].map(({ key, label, icon: Icon, path }) => (
+                <Link
+                  key={key}
+                  to={path}
+                  onClick={() => setActiveTab(key as any)}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    activeTab === key
+                      ? 'bg-gradient-to-r from-[#9675bc] to-[#f1b3be] text-[#ffe0db] shadow-lg'
+                      : 'text-[#ffe0db]/70 hover:text-[#ffe0db] hover:bg-[#ffe0db]/10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Tab: Perfil */}
           {activeTab === 'profile' && (
@@ -708,10 +696,10 @@ const Profile: React.FC = () => {
                     <div className="mb-8">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-6">
-                          <ProfileAvatar size="large" editable={true} />
+                          <ProfileAvatar size="large" editable={!viewOnly} />
                           <div>
                             <div className="flex items-center space-x-3">
-                              {isEditing ? (
+                              {isEditing && !viewOnly ? (
                                 <input
                                   type="text"
                                   value={editData?.username || ''}
@@ -729,7 +717,7 @@ const Profile: React.FC = () => {
                             </div>
                             <div className="flex items-center space-x-2 mt-2">
                               <Mail className="w-4 h-4 text-[#f1b3be]" />
-                              {isEditing ? (
+                              {isEditing && !viewOnly ? (
                                 <input
                                   type="email"
                                   value={editData?.email || ''}
@@ -737,7 +725,7 @@ const Profile: React.FC = () => {
                                   className="bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-3 py-1 text-[#f1b3be] focus:ring-2 focus:ring-[#f1b3be]"
                                 />
                               ) : (
-                                <span className="text-[#f1b3be]">{user.email}</span>
+                                <span className="text-[#f1b3be]">{viewOnly ? '***@***.com' : user.email}</span>
                               )}
                             </div>
                             <div className="flex items-center space-x-2 mt-1 text-sm text-[#ffe0db]/60">
@@ -747,7 +735,7 @@ const Profile: React.FC = () => {
                           </div>
                         </div>
                         
-                        {!isEditing && (
+                        {!isEditing && !viewOnly && (
                           <button
                             onClick={() => setIsEditing(true)}
                             className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-[#ffe0db] font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-[#f1b3be]/50"
@@ -758,8 +746,8 @@ const Profile: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Botones de edición debajo del perfil */}
-                      {isEditing && (
+                      {/* Botones de edición debajo del perfil - solo si no es viewOnly */}
+                      {isEditing && !viewOnly && (
                         <div className="flex justify-end space-x-3 pt-4 border-t border-[#ffe0db]/20">
                           <button
                             onClick={handleCancel}
@@ -788,9 +776,9 @@ const Profile: React.FC = () => {
                     <div className="mb-8">
                       <h3 className="text-xl font-semibold text-[#ffe0db] mb-4 flex items-center">
                         <Heart className="w-5 h-5 text-[#f1b3be] mr-2" />
-                        Sobre mi mundo onírico
+                        {viewOnly ? `El mundo onírico de ${user.username}` : 'Sobre mi mundo onírico'}
                       </h3>
-                      {isEditing ? (
+                      {isEditing && !viewOnly ? (
                         <textarea
                           value={editData?.description || ''}
                           onChange={(e) => setEditData(editData ? {...editData, description: e.target.value} : null)}
@@ -801,7 +789,7 @@ const Profile: React.FC = () => {
                         />
                       ) : (
                         <p className="text-[#ffe0db]/80 leading-relaxed">
-                          {user.description || 'Aún no has compartido tu historia onírica...'}
+                          {user.description || (viewOnly ? 'Este usuario no ha compartido su historia onírica aún...' : 'Aún no has compartido tu historia onírica...')}
                         </p>
                       )}
                     </div>
@@ -839,10 +827,12 @@ const Profile: React.FC = () => {
                       <span className="text-[#ffe0db]/70">Verificación</span>
                       <span className="text-green-400 font-medium">✓ Verificado</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#ffe0db]/70">Privacidad</span>
-                      <span className="text-blue-400 font-medium capitalize">{privacySettings.profile_visibility}</span>
-                    </div>
+                    {!viewOnly && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#ffe0db]/70">Privacidad</span>
+                        <span className="text-blue-400 font-medium capitalize">{privacySettings.profile_visibility}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-[#ffe0db]/70">Tipo de Cuenta</span>
                       <span className="text-[#f1b3be] font-medium">
@@ -872,30 +862,53 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Card de Acciones Rápidas */}
-                <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-6">
-                  <h3 className="text-xl font-semibold text-[#ffe0db] mb-4">Acciones Rápidas</h3>
-                  <div className="space-y-3">
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#9675bc]/20 hover:bg-[#9675bc]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
-                      <Moon className="w-5 h-5 text-[#9675bc] group-hover:rotate-12 transition-transform" />
-                      <span>Registrar Sueño</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#f1b3be]/20 hover:bg-[#f1b3be]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
-                      <Star className="w-5 h-5 text-[#f1b3be] group-hover:scale-110 transition-transform" />
-                      <span>Ver Análisis</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
-                      <Globe className="w-5 h-5 text-blue-300 group-hover:rotate-180 transition-transform" />
-                      <span>Explorar Comunidad</span>
-                    </button>
+                {/* Card de Acciones Rápidas - solo si no es viewOnly */}
+                {!viewOnly && (
+                  <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-6">
+                    <h3 className="text-xl font-semibold text-[#ffe0db] mb-4">Acciones Rápidas</h3>
+                    <div className="space-y-3">
+                      <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#9675bc]/20 hover:bg-[#9675bc]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                        <Moon className="w-5 h-5 text-[#9675bc] group-hover:rotate-12 transition-transform" />
+                        <span>Registrar Sueño</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#f1b3be]/20 hover:bg-[#f1b3be]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                        <Star className="w-5 h-5 text-[#f1b3be] group-hover:scale-110 transition-transform" />
+                        <span>Ver Análisis</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                        <Globe className="w-5 h-5 text-blue-300 group-hover:rotate-180 transition-transform" />
+                        <span>Explorar Comunidad</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Card para contactar usuario - solo si es viewOnly */}
+                {viewOnly && (
+                  <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-6">
+                    <h3 className="text-xl font-semibold text-[#ffe0db] mb-4">Conectar</h3>
+                    <div className="space-y-3">
+                      <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#9675bc]/20 hover:bg-[#9675bc]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                        <User className="w-5 h-5 text-[#9675bc] group-hover:scale-110 transition-transform" />
+                        <span>Agregar Amigo</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-4 py-3 bg-[#f1b3be]/20 hover:bg-[#f1b3be]/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                        <Mail className="w-5 h-5 text-[#f1b3be] group-hover:rotate-12 transition-transform" />
+                        <span>Enviar Mensaje</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-[#ffe0db] transition-all duration-300 group">
+                        <Star className="w-5 h-5 text-blue-300 group-hover:rotate-180 transition-transform" />
+                        <span>Ver Sueños Públicos</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Tab: Privacidad */}
-          {activeTab === 'privacy' && (
+          {/* Tab: Privacidad - solo si no es viewOnly */}
+          {activeTab === 'privacy' && !viewOnly && (
             <div className="animate-fade-in">
               <div className="bg-[#ffe0db]/10 backdrop-blur-2xl rounded-3xl border border-[#ffe0db]/20 shadow-2xl p-8">
                 <div className="flex items-center space-x-3 mb-8">
@@ -1003,8 +1016,8 @@ const Profile: React.FC = () => {
             </div>
           )}
 
-          {/* Tab: Seguridad */}
-          {activeTab === 'security' && (
+          {/* Tab: Seguridad - solo si no es viewOnly */}
+          {activeTab === 'security' && !viewOnly && (
             <div className="animate-fade-in">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 

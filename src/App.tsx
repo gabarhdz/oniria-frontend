@@ -165,6 +165,14 @@ function App() {
             } 
           />
 
+          <Route 
+          path="/dashboard/profile/view/:userId" 
+            element={
+          <ProtectedRoute>
+            <Profile viewOnly={true} />
+           </ProtectedRoute>
+          } 
+          />
           
           
           {/* Rutas del perfil con subrutas */}

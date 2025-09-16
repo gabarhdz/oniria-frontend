@@ -633,12 +633,14 @@ const FilterDropdown: React.FC<{
   );
 };
 
-// Profile Avatar Component (Como en DashboardHeader)
+// Profile Avatar Component (Como en DashboardHeader) - MODIFICADO
 const ProfileAvatar: React.FC<{ 
   user: User; 
   size: 'small' | 'medium' | 'large'; 
-  showRing?: boolean 
-}> = ({ user, size, showRing = false }) => {
+  showRing?: boolean;
+  onClick?: () => void; // NUEVO
+  className?: string; // NUEVO
+}> = ({ user, size, showRing = false, onClick, className = "" }) => {
   const [imageError, setImageError] = useState(false);
   
   const sizeClasses = {
@@ -680,8 +682,8 @@ const ProfileAvatar: React.FC<{
     setImageError(true);
   };
 
-  return (
-    <div className={`${sizeClasses} ${ringClasses} rounded-full overflow-hidden bg-gradient-to-br from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 flex items-center justify-center relative`}>
+  const AvatarContent = () => (
+    <div className={`${sizeClasses} ${ringClasses} rounded-full overflow-hidden bg-gradient-to-br from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 flex items-center justify-center relative ${className}`}>
       {profileImageUrl && !imageError ? (
         <img 
           src={profileImageUrl}
@@ -696,6 +698,21 @@ const ProfileAvatar: React.FC<{
       )}
     </div>
   );
+
+  // Si hay onClick, envolver en button
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className="transition-all duration-300 hover:scale-110 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-oniria_purple/50 rounded-full"
+        title={`Ver perfil de ${user.username}`}
+      >
+        <AvatarContent />
+      </button>
+    );
+  }
+
+  return <AvatarContent />;
 };
 
 // Members Modal Component
@@ -738,7 +755,17 @@ const MembersModal: React.FC<{
                 className={`flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-white/50 to-white/30 backdrop-blur-sm border border-white/20 hover:bg-white/60 transition-all duration-300 transform hover:scale-[1.02] animate-fade-in-up`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <ProfileAvatar user={member} size="medium" showRing={member.id === community.owner?.id} />
+                // En MembersModal, actualizar el ProfileAvatar:
+<ProfileAvatar 
+  user={member} 
+  size="medium" 
+  showRing={member.id === community.owner?.id}
+  onClick={() => {
+    // Navegar al perfil del usuario
+    window.location.href = `/dashboard/profile/view/${member.id}`;
+  }}
+  className="hover:ring-2 hover:ring-oniria_purple/50"
+/>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
@@ -995,12 +1022,20 @@ const PostCard: React.FC<{
         {/* Post header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-3 flex-1">
-            {/* Avatar usando ProfileAvatar - CORREGIDO */}
+            {/* Avatar usando ProfileAvatar - CORREGIDO Y CLICKEABLE */}
             <div className="relative flex-shrink-0">
-              <ProfileAvatar user={post.author} size="medium" />
-              {/* Online indicator */}
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white/20 animate-pulse" />
-            </div>
+  <           ProfileAvatar 
+              user={post.author} 
+              size="medium" 
+              onClick={() => {
+              // Navegar al perfil del usuario
+              window.location.href = `/dashboard/profile/view/${post.author.id}`;
+    }}
+    className="hover:ring-2 hover:ring-oniria_purple/50"
+  />
+  {/* Online indicator */}
+  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white/20 animate-pulse" />
+</div>
             
             {/* Content */}
             <div className="flex-1 space-y-2 min-w-0">
@@ -1678,13 +1713,7 @@ const handleJoinCommunity = async (communityId: string) => {
   }
 
   try {
-    // Sincronizar con backend en segundo plano
     await api.joinCommunity(communityId);
-    
-    // Opcional: Recargar datos del servidor para asegurar consistencia
-    // const updatedCommunities = await api.getCommunities();
-    // setCommunities(updatedCommunities);
-    
   } catch (error: any) {
     // En caso de error, revertir cambios
     setCommunities(originalCommunities);
@@ -1700,7 +1729,6 @@ const handleJoinCommunity = async (communityId: string) => {
     setError(handleApiError(error, 'Error al actualizar la membresía.'));
   }
 };
-
   
 const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
   if (!user || !selectedCommunity) return;
@@ -1723,7 +1751,6 @@ const handleCreatePost = async (data: { title: string; text: string; community: 
   setParentPost(null);
 
   try {
-    // Sincronizar con backend en segundo plano
     await api.createPost(data);
     
     // Recargar posts para obtener el post real del servidor
