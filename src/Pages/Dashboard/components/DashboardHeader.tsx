@@ -428,8 +428,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <div className="flex justify-between items-center p-3 sm:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8"
              onClick={handleOutsideClick}>
           
-          {/* Logo con texto NOCTIRIA - Más pegado a la izquierda */}
-          <div className="relative flex-shrink-0 -ml-6 sm:-ml-8">
+          {/* Logo con responsive mejorado */}
+          <div className="relative flex-shrink-0 flex items-center ml-4 sm:ml-6 md:ml-8">
             <div className="flex gap-2 sm:gap-3 items-center">
               <div className="relative">
                 <div className="flex items-center">
