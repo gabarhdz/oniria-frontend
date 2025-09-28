@@ -7,11 +7,10 @@ interface User {
   id: string;
   username: string;
   email: string;
-  profile_image?: string;
+  profile_pic?: string; // <-- usa el mismo nombre que WelcomeSection
   description?: string;
   is_psychologist?: boolean;
 }
-
 interface Community {
   id: string;
   name: string;
@@ -633,60 +632,36 @@ const FilterDropdown: React.FC<{
   );
 };
 
-// Profile Avatar Component (Como en DashboardHeader) - MODIFICADO
 const ProfileAvatar: React.FC<{ 
   user: User; 
   size: 'small' | 'medium' | 'large'; 
   showRing?: boolean;
-  onClick?: () => void; // NUEVO
-  className?: string; // NUEVO
+  onClick?: () => void;
+  className?: string;
 }> = ({ user, size, showRing = false, onClick, className = "" }) => {
   const [imageError, setImageError] = useState(false);
-  
+
   const sizeClasses = {
     small: 'w-8 h-8',
     medium: 'w-10 h-10',
     large: 'w-16 h-16'
   }[size];
-  
+
   const textSize = {
     small: 'text-xs',
     medium: 'text-sm',
     large: 'text-lg'
   }[size];
-  
+
   const ringClasses = showRing ? 'ring-2 ring-oniria_purple/30' : '';
-  
-  // Función para generar URL completa de la imagen de perfil
-  const getProfileImageUrl = (profilePic?: string): string | null => {
-    if (!profilePic) return null;
-    
-    // Si ya es una URL completa, la devolvemos tal como está
-    if (profilePic.startsWith('http://') || profilePic.startsWith('https://')) {
-      return profilePic;
-    }
-    
-    // Si es una ruta relativa, la construimos con el dominio del API
-    const cleanPath = profilePic.startsWith('/') ? profilePic : `/${profilePic}`;
-    return `http://127.0.0.1:8000${cleanPath}`;
-  };
-  
-  // Función para obtener las iniciales del usuario
-  const getUserInitials = (username: string): string => {
-    return username.split(' ').map(name => name.charAt(0)).join('').toUpperCase().slice(0, 2);
-  };
 
-  const profileImageUrl = getProfileImageUrl(user.profile_image);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
+  const handleImageError = () => setImageError(true);
 
   const AvatarContent = () => (
     <div className={`${sizeClasses} ${ringClasses} rounded-full overflow-hidden bg-gradient-to-br from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 flex items-center justify-center relative ${className}`}>
-      {profileImageUrl && !imageError ? (
+      {user.profile_pic && !imageError ? (
         <img 
-          src={profileImageUrl}
+          src={user.profile_pic}
           alt={`Avatar de ${user.username}`}
           className="w-full h-full object-cover"
           onError={handleImageError}
@@ -699,7 +674,6 @@ const ProfileAvatar: React.FC<{
     </div>
   );
 
-  // Si hay onClick, envolver en button
   if (onClick) {
     return (
       <button
@@ -715,7 +689,16 @@ const ProfileAvatar: React.FC<{
   return <AvatarContent />;
 };
 
-// Members Modal Component
+const getUserInitials = (username: string): string => {
+  return username
+    .split(' ')
+    .map(name => name.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+// MembersModal corregido
 const MembersModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -726,7 +709,6 @@ const MembersModal: React.FC<{
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-gradient-to-br from-white/95 via-white/90 to-white/85 backdrop-blur-xl rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl border border-white/20 animate-modal-entrance mx-4">
-        
         {/* Header */}
         <div className="p-6 border-b border-oniria_purple/20 bg-gradient-to-r from-oniria_purple/10 to-oniria_pink/10">
           <div className="flex items-center justify-between">
@@ -755,18 +737,24 @@ const MembersModal: React.FC<{
                 className={`flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-white/50 to-white/30 backdrop-blur-sm border border-white/20 hover:bg-white/60 transition-all duration-300 transform hover:scale-[1.02] animate-fade-in-up`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                // En MembersModal, actualizar el ProfileAvatar:
-<ProfileAvatar 
-  user={member} 
-  size="medium" 
-  showRing={member.id === community.owner?.id}
-  onClick={() => {
-    // Navegar al perfil del usuario
-    window.location.href = `/dashboard/profile/view/${member.id}`;
-  }}
-  className="hover:ring-2 hover:ring-oniria_purple/50"
-/>
-                
+                {/* Imagen o iniciales */}
+                {member.profile_pic ? (
+                  <img
+                    src={member.profile_pic}
+                    alt={member.username}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-oniria_pink/50 shadow cursor-pointer hover:ring-2 hover:ring-oniria_purple/50"
+                    onClick={() => window.location.href = `/dashboard/profile/view/${member.id}`}
+                    onError={e => { e.currentTarget.src = '/img/default-avatar.png'; }}
+                  />
+                ) : (
+                  <div
+                    className="w-10 h-10 bg-gradient-to-br from-oniria_purple to-oniria_pink rounded-full flex items-center justify-center font-bold text-white text-lg cursor-pointer"
+                    onClick={() => window.location.href = `/dashboard/profile/view/${member.id}`}
+                  >
+                    {getUserInitials(member.username)}
+                  </div>
+                )}
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
                     <h4 className="font-semibold text-oniria_darkblue truncate">{member.username}</h4>
@@ -806,7 +794,6 @@ const MembersModal: React.FC<{
     </div>
   );
 };
-
 // COMMUNITY CARD CORREGIDA - MÁS ANCHA Y ACOMODANDO MEJOR EL TEXTO
 const CommunityCard: React.FC<{ 
   community: Community; 
@@ -1434,7 +1421,7 @@ const ChatPostCreator: React.FC<{
   );
 };
 
-// Enhanced Post Modal (Chat-like input)
+// PostModal corregido (solo avatar del autor, resto igual)
 const PostModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -1459,7 +1446,6 @@ const PostModal: React.FC<{
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-gradient-to-br from-white/95 via-white/90 to-white/85 backdrop-blur-xl rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20 animate-modal-entrance mx-4">
-        
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-oniria_purple to-oniria_pink rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -1472,7 +1458,6 @@ const PostModal: React.FC<{
             Compartiendo en: <span className="font-semibold text-oniria_purple">{community.name}</span>
           </p>
         </div>
-        
         <div className="bg-gradient-to-br from-oniria_darkblue via-oniria_blue to-oniria_purple rounded-2xl p-6">
           <ChatPostCreator
             onSubmit={handleChatSubmit}
@@ -1482,7 +1467,6 @@ const PostModal: React.FC<{
             placeholder="Comparte tus pensamientos, sueños y experiencias..."
           />
         </div>
-        
         <div className="flex justify-end pt-4">
           <button
             onClick={onClose}
@@ -1570,20 +1554,22 @@ const CommunityApp: React.FC = () => {
   }, []);
 
   // Load posts for selected community
-  const loadCommunityPosts = useCallback(async (communityId: string) => {
+ const loadCommunityPosts = useCallback(
+  async (communityId: string, showLoader: boolean = true) => {
     try {
-      setIsActionLoading(true);
+      if (showLoader) setIsActionLoading(true);
       setLoadingMessage('Cargando posts...');
       setError(null);
       const postsData = await api.getPostsByCommunity(communityId);
       setPosts(postsData);
     } catch (error: any) {
-      console.error('Error loading community posts:', error);
       setError(handleApiError(error, 'Error al cargar los posts de la comunidad.'));
     } finally {
-      setIsActionLoading(false);
+      if (showLoader) setIsActionLoading(false);
     }
-  }, []);
+  },
+  []
+);
 
   useEffect(() => {
     loadInitialData();
@@ -1730,12 +1716,13 @@ const handleJoinCommunity = async (communityId: string) => {
   }
 };
   
+// En handleCreatePost, llama SIN loader:
 const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
   if (!user || !selectedCommunity) return;
-  
+
   // Crear post temporal para mostrar inmediatamente
   const tempPost: Post = {
-    id: `temp-${Date.now()}`, // ID temporal
+    id: `temp-${Date.now()}`,
     title: data.title,
     text: data.text,
     created_at: new Date().toISOString(),
@@ -1746,64 +1733,62 @@ const handleCreatePost = async (data: { title: string; text: string; community: 
     dislikes: []
   };
 
-  // Actualizar UI inmediatamente
   setPosts(prev => [tempPost, ...prev]);
   setParentPost(null);
 
   try {
     await api.createPost(data);
-    
-    // Recargar posts para obtener el post real del servidor
+    // Recargar posts SIN pantalla de carga
     if (selectedCommunity) {
-      await loadCommunityPosts(selectedCommunity.id);
+      await loadCommunityPosts(selectedCommunity.id, false);
     }
   } catch (error: any) {
-    // En caso de error, remover el post temporal
     setPosts(prev => prev.filter(p => p.id !== tempPost.id));
-    console.error('Error creating post:', error);
     setError(handleApiError(error, 'Error al crear el post.'));
   }
 };
 
 // ========== AC
-  const handleUpdatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
-    if (!editingPost) return;
-    
-    try {
-      setIsActionLoading(true);
-      setLoadingMessage('Actualizando post...');
-      setError(null);
-      
-      await api.updatePost(editingPost.id, { title: data.title, text: data.text });
-      
-      if (selectedCommunity) {
-        await loadCommunityPosts(selectedCommunity.id);
-      }
-      
-      setEditingPost(null);
-    } catch (error: any) {
-      console.error('Error updating post:', error);
-      setError(handleApiError(error, 'Error al actualizar el post.'));
-    } finally {
-      setIsActionLoading(false);
+ const handleUpdatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
+  if (!editingPost) return;
+
+  // Actualiza el post en el frontend inmediatamente (optimistic update)
+  setPosts(prev =>
+    prev.map(post =>
+      post.id === editingPost.id
+        ? { ...post, title: data.title, text: data.text }
+        : post
+    )
+  );
+  setEditingPost(null);
+
+  try {
+    await api.updatePost(editingPost.id, { title: data.title, text: data.text });
+    // Sincroniza con el backend SIN pantalla de carga
+    if (selectedCommunity) {
+      await loadCommunityPosts(selectedCommunity.id, false);
     }
-  };
+  } catch (error: any) {
+    setError(handleApiError(error, 'Error al actualizar el post.'));
+    // Opcional: podrías revertir el cambio si el backend falla
+  }
+};
 
   // ========== ACTUALIZACIÓN OPTIMISTA PARA ELIMINAR POSTS ==========
 
-const handleDeletePost = async (postId: string) => {
-  const originalPosts = [...posts];
-  
-  // Remover post inmediatamente de la UI
+ const handleDeletePost = async (postId: string) => {
+  // Elimina el post del frontend inmediatamente
   setPosts(prev => prev.filter(p => p.id !== postId));
-  
+
   try {
     await api.deletePost(postId);
+    // Sincroniza con el backend SIN pantalla de carga
+    if (selectedCommunity) {
+      await loadCommunityPosts(selectedCommunity.id, false);
+    }
   } catch (error: any) {
-    // Revertir en caso de error
-    setPosts(originalPosts);
-    console.error('Error deleting post:', error);
     setError(handleApiError(error, 'Error al eliminar el post.'));
+    // Opcional: podrías volver a agregar el post si el backend falla
   }
 };
 
