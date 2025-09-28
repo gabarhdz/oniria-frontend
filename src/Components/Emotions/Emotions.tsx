@@ -220,7 +220,7 @@ const Emotions = () => {
               fontFamily: 'var(--font-inter)'
             }}
           >
-            Visualiza y controla el estado emocional de tus sueños
+            Visualiza y controla el estado emocional de tus mente
           </p>
         </div>
 
@@ -486,7 +486,7 @@ const Emotions = () => {
                 }}
               >
                 <Sparkles className="mr-2" size={screenSize === 'mobile' ? 16 : 20} />
-                Análisis del Estado Onírico
+                Análisis del Estado Cognitivo
               </h3>
               <p 
                 className={`leading-relaxed ${
@@ -498,10 +498,10 @@ const Emotions = () => {
                 }}
               >
                 {emotions.diversion > 70 && emotions.calma > 60 
-                  ? "Tu estado onírico refleja armonía y serenidad. Los sueños pueden ser particularmente vividos y positivos."
+                  ? "Tu estado refleja armonía y serenidad. Los sueños pueden ser particularmente vividos y positivos."
                   : emotions.tristeza > 50 || emotions.ansiedad > 60
-                  ? "Detectamos cierta turbulencia emocional. Considera técnicas de relajación antes de dormir."
-                  : "Tu equilibrio emocional es estable. Estado ideal para sueños reparadores y creativos."
+                  ? "Detectamos cierta turbulencia emocional. Considera técnicas de relajación."
+                  : "Tu equilibrio emocional es estable. Estado ideal para llevar al maximo tu vida cotidiana."
                 }
               </p>
             </div>

@@ -448,7 +448,7 @@ const HeroSection: React.FC = () => {
                 />
                 <span className={theme.textPrimary}> de </span>
                 <AnimatedGradientText
-                  text="tus sueños"
+                  text="tus emociones"
                   className="italic"
                   isDarkMode={isDarkMode}
                 />
@@ -459,7 +459,7 @@ const HeroSection: React.FC = () => {
             <BlurIn delay={0.3}>
               <p className={`text-lg sm:text-xl lg:text-2xl ${theme.textSecondary} max-w-lg mx-auto lg:mx-0`}>
                 <span className="block">Explora tu subconsciente con análisis avanzado</span>
-                <span className="block">y descubre las emociones ocultas en tus sueños.</span>
+                <span className="block">y descubre el la mejor manera de controlar las emociones.</span>
               </p>
             </BlurIn>
 
