@@ -6,7 +6,7 @@ import Home1 from './Pages/Home/Home';
 import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
 import Profile from './Pages/Profile/Profile';
-import CommunityApp from './Pages/Community/components/Community';
+import CommunityApp from './Pages/Communities/Community/Community';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
