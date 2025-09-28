@@ -27,8 +27,27 @@ const Emotions = () => {
   });
 
   const [isAnimating, setIsAnimating] = useState(false);
+  const [screenSize, setScreenSize] = useState('desktop');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
+
+  // Screen size detection
+  useEffect(() => {
+    const updateScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize('mobile');
+      } else if (width < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -46,7 +65,7 @@ const Emotions = () => {
       alpha: number;
     };
     const particles: Particle[] = [];
-    const particleCount = 50;
+    const particleCount = screenSize === 'mobile' ? 20 : screenSize === 'tablet' ? 35 : 50;
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
@@ -78,7 +97,7 @@ const Emotions = () => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, []);
+  }, [screenSize]);
 
   const updateEmotion = (emotion: string, value: number) => {
     setEmotions(prev => ({ ...prev, [emotion]: value }));
@@ -87,19 +106,56 @@ const Emotions = () => {
   };
 
   const getEmotionSize = (value: number) => {
-    return Math.max(30, Math.min(150, (value / 100) * 150));
+    const baseSize = screenSize === 'mobile' ? 40 : screenSize === 'tablet' ? 50 : 60;
+    const maxSize = screenSize === 'mobile' ? 80 : screenSize === 'tablet' ? 100 : 150;
+    return Math.max(baseSize, Math.min(maxSize, (value / 100) * maxSize));
   };
 
   const getEmotionPosition = (index: number, total: number) => {
     const angle = (index / total) * 2 * Math.PI;
-    const radius = window.innerWidth < 768 ? 120 : 180;
-    const centerX = window.innerWidth < 768 ? 180 : 250;
-    const centerY = window.innerWidth < 768 ? 180 : 250;
+    let radius, centerX, centerY;
+    
+    if (screenSize === 'mobile') {
+      radius = 80;
+      centerX = 140;
+      centerY = 140;
+    } else if (screenSize === 'tablet') {
+      radius = 120;
+      centerX = 180;
+      centerY = 180;
+    } else {
+      radius = 180;
+      centerX = 250;
+      centerY = 250;
+    }
+    
     return {
       x: centerX + Math.cos(angle) * radius,
       y: centerY + Math.sin(angle) * radius
     };
   };
+
+  const getVisualizationDimensions = () => {
+    if (screenSize === 'mobile') {
+      return { width: 280, height: 280 };
+    } else if (screenSize === 'tablet') {
+      return { width: 360, height: 360 };
+    } else {
+      return { width: 500, height: 500 };
+    }
+  };
+
+  const getCentralCoreSize = () => {
+    if (screenSize === 'mobile') {
+      return 'w-12 h-12';
+    } else if (screenSize === 'tablet') {
+      return 'w-16 h-16';
+    } else {
+      return 'w-20 h-20 sm:w-24 sm:h-24';
+    }
+  };
+
+  const dimensions = getVisualizationDimensions();
 
   return (
     <div 
@@ -118,13 +174,13 @@ const Emotions = () => {
       {/* Aurora effect */}
       <div className="absolute inset-0 opacity-15">
         <div 
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse"
+          className={`absolute top-0 left-1/4 ${screenSize === 'mobile' ? 'w-48 h-48' : 'w-96 h-96'} rounded-full blur-3xl animate-pulse`}
           style={{ 
             background: 'radial-gradient(circle, var(--color-oniria_purple)40 0%, var(--color-oniria_pink)40 100%)' 
           }}
         ></div>
         <div 
-          className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse"
+          className={`absolute bottom-0 right-1/4 ${screenSize === 'mobile' ? 'w-48 h-48' : 'w-96 h-96'} rounded-full blur-3xl animate-pulse`}
           style={{ 
             background: 'radial-gradient(circle, var(--color-oniria_blue)40 0%, var(--color-oniria_purple)40 100%)',
             animationDelay: '1s'
@@ -132,11 +188,17 @@ const Emotions = () => {
         ></div>
       </div>
 
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+      <div className="relative z-10 p-3 sm:p-4 md:p-6 lg:p-8">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <h1 
-            className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 animate-pulse"
+            className={`${
+              screenSize === 'mobile' 
+                ? 'text-2xl' 
+                : screenSize === 'tablet' 
+                ? 'text-3xl' 
+                : 'text-3xl sm:text-4xl lg:text-6xl'
+            } font-bold mb-2 sm:mb-4 animate-pulse`}
             style={{ 
               fontFamily: 'var(--font-playfair)',
               background: 'linear-gradient(45deg, var(--color-oniria_lightpink), var(--color-oniria_pink), var(--color-oniria_purple))',
@@ -148,7 +210,11 @@ const Emotions = () => {
             Mapea tus emociones
           </h1>
           <p 
-            className="text-lg sm:text-xl opacity-90 px-4"
+            className={`${
+              screenSize === 'mobile' 
+                ? 'text-sm px-2' 
+                : 'text-base sm:text-lg lg:text-xl px-4'
+            } opacity-90`}
             style={{ 
               color: 'var(--color-oniria_lightpink)',
               fontFamily: 'var(--font-inter)'
@@ -158,17 +224,21 @@ const Emotions = () => {
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto space-y-8 lg:space-y-12">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-12">
           {/* Emotion Visualization Area - TOP SECTION */}
           <div 
-            className="backdrop-blur-xl rounded-3xl p-4 sm:p-6 lg:p-8 border shadow-2xl"
+            className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-6 lg:p-8 border shadow-2xl"
             style={{ 
               backgroundColor: 'rgba(37,44,62,0.25)',
               borderColor: 'var(--color-oniria_purple)'
             }}
           >
             <h2 
-              className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 text-center"
+              className={`${
+                screenSize === 'mobile' 
+                  ? 'text-xl mb-4' 
+                  : 'text-2xl sm:text-3xl mb-6 sm:mb-8'
+              } font-semibold text-center`}
               style={{ 
                 color: 'var(--color-oniria_lightpink)',
                 fontFamily: 'var(--font-playfair)'
@@ -177,19 +247,25 @@ const Emotions = () => {
               Mapa Emocional Onírico
             </h2>
             
-            <div className="flex justify-center">
-              <div className="relative w-[360px] h-[360px] sm:w-[450px] sm:h-[450px] lg:w-[500px] lg:h-[500px] mx-auto">
+            <div className="flex justify-center overflow-hidden">
+              <div 
+                className="relative mx-auto"
+                style={{
+                  width: dimensions.width,
+                  height: dimensions.height
+                }}
+              >
                 {/* Central dream core */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                   <div 
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full animate-spin shadow-lg"
+                    className={`${getCentralCoreSize()} rounded-full animate-spin shadow-lg`}
                     style={{ 
                       background: 'linear-gradient(45deg, var(--color-oniria_purple), var(--color-oniria_pink))',
                       boxShadow: '0 0 30px var(--color-oniria_purple)'
                     }}
                   ></div>
                   <div 
-                    className="absolute inset-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full animate-ping opacity-20"
+                    className={`absolute inset-0 ${getCentralCoreSize()} rounded-full animate-ping opacity-20`}
                     style={{ 
                       background: 'linear-gradient(45deg, var(--color-oniria_purple), var(--color-oniria_pink))'
                     }}
@@ -202,6 +278,7 @@ const Emotions = () => {
                   const size = getEmotionSize(value);
                   const config = emotionConfig[emotion as EmotionKey];
                   const IconComponent = config.icon;
+                  const iconSize = screenSize === 'mobile' ? 14 : Math.max(16, size * 0.35);
 
                   return (
                     <div
@@ -217,8 +294,8 @@ const Emotions = () => {
                       }}
                     >
                       <div
-                        className={`w-full h-full rounded-full shadow-xl hover:scale-110 transition-all duration-300 cursor-pointer animate-pulse
-                          flex items-center justify-center group relative overflow-hidden`}
+                        className="w-full h-full rounded-full shadow-xl hover:scale-110 transition-all duration-300 cursor-pointer animate-pulse
+                          flex items-center justify-center group relative overflow-hidden"
                         style={{
                           backgroundColor: config.color,
                           boxShadow: `0 15px 40px ${config.color}40`,
@@ -230,7 +307,7 @@ const Emotions = () => {
                         
                         <IconComponent 
                           className="z-10" 
-                          size={Math.max(16, size * 0.35)}
+                          size={iconSize}
                           style={{ color: config.textColor }}
                         />
                         
@@ -244,9 +321,13 @@ const Emotions = () => {
                       </div>
                       
                       {/* Floating label */}
-                      <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
+                      <div className={`absolute ${screenSize === 'mobile' ? '-bottom-8' : '-bottom-10'} left-1/2 transform -translate-x-1/2`}>
                         <span 
-                          className="text-sm sm:text-base font-medium capitalize px-3 py-1 rounded-full backdrop-blur-sm whitespace-nowrap"
+                          className={`${
+                            screenSize === 'mobile' 
+                              ? 'text-xs px-2 py-0.5' 
+                              : 'text-sm sm:text-base px-3 py-1'
+                          } font-medium capitalize rounded-full backdrop-blur-sm whitespace-nowrap`}
                           style={{ 
                             color: 'var(--color-oniria_lightpink)',
                             backgroundColor: 'var(--color-oniria_darkblue)',
@@ -260,45 +341,51 @@ const Emotions = () => {
                   );
                 })}
 
-                {/* Connecting lines */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
-                  {Object.keys(emotions).map((_, index) => {
-                    const pos1 = getEmotionPosition(index, Object.keys(emotions).length);
-                    const pos2 = getEmotionPosition((index + 1) % Object.keys(emotions).length, Object.keys(emotions).length);
-                    return (
-                      <line
-                        key={index}
-                        x1={pos1.x}
-                        y1={pos1.y}
-                        x2={pos2.x}
-                        y2={pos2.y}
-                        stroke="url(#gradient)"
-                        strokeWidth="3"
-                        className="animate-pulse"
-                      />
-                    );
-                  })}
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="var(--color-oniria_purple)" />
-                      <stop offset="100%" stopColor="var(--color-oniria_pink)" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                {/* Connecting lines - hidden on mobile for clarity */}
+                {screenSize !== 'mobile' && (
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+                    {Object.keys(emotions).map((_, index) => {
+                      const pos1 = getEmotionPosition(index, Object.keys(emotions).length);
+                      const pos2 = getEmotionPosition((index + 1) % Object.keys(emotions).length, Object.keys(emotions).length);
+                      return (
+                        <line
+                          key={index}
+                          x1={pos1.x}
+                          y1={pos1.y}
+                          x2={pos2.x}
+                          y2={pos2.y}
+                          stroke="url(#gradient)"
+                          strokeWidth={screenSize === 'tablet' ? "2" : "3"}
+                          className="animate-pulse"
+                        />
+                      );
+                    })}
+                    <defs>
+                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="var(--color-oniria_purple)" />
+                        <stop offset="100%" stopColor="var(--color-oniria_pink)" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                )}
               </div>
             </div>
           </div>
 
           {/* Controls Panel - BOTTOM SECTION */}
           <div 
-            className="backdrop-blur-xl rounded-3xl p-4 sm:p-6 lg:p-8 border shadow-2xl"
+            className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-6 lg:p-8 border shadow-2xl"
             style={{ 
               backgroundColor: 'rgba(37,44,62,0.25)',
               borderColor: 'var(--color-oniria_purple)'
             }}
           >
             <h2 
-              className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 text-center"
+              className={`${
+                screenSize === 'mobile' 
+                  ? 'text-xl mb-4' 
+                  : 'text-2xl sm:text-3xl mb-6 sm:mb-8'
+              } font-semibold text-center`}
               style={{ 
                 color: 'var(--color-oniria_lightpink)',
                 fontFamily: 'var(--font-playfair)'
@@ -307,23 +394,44 @@ const Emotions = () => {
               Panel de Control Emocional
             </h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`grid gap-4 sm:gap-6 ${
+              screenSize === 'mobile' 
+                ? 'grid-cols-1' 
+                : screenSize === 'tablet'
+                ? 'grid-cols-1'
+                : 'grid-cols-1 lg:grid-cols-2'
+            }`}>
               {Object.entries(emotions).map(([emotion, value]) => {
                 const config = emotionConfig[emotion as EmotionKey];
                 const IconComponent = config.icon;
                 return (
                   <div key={emotion} className="group">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-3 rounded-lg shadow-lg group-hover:scale-110 transition-transform duration-300"
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="flex items-center space-x-2 sm:space-x-3">
+                        <div className={`${
+                          screenSize === 'mobile' ? 'p-2' : 'p-3'
+                        } rounded-lg shadow-lg group-hover:scale-110 transition-transform duration-300`}
                           style={{ backgroundColor: config.color }}>
-                          <IconComponent className="text-white" size={24} />
+                          <IconComponent 
+                            className="text-white" 
+                            size={screenSize === 'mobile' ? 18 : 24} 
+                          />
                         </div>
-                        <span className="font-medium capitalize text-lg sm:text-xl" style={{ color: 'var(--color-oniria_purple)' }}>
+                        <span 
+                          className={`font-medium capitalize ${
+                            screenSize === 'mobile' ? 'text-base' : 'text-lg sm:text-xl'
+                          }`} 
+                          style={{ color: 'var(--color-oniria_purple)' }}
+                        >
                           {emotion}
                         </span>
                       </div>
-                      <span className="font-bold text-lg sm:text-xl" style={{ color: 'var(--color-oniria_pink)' }}>
+                      <span 
+                        className={`font-bold ${
+                          screenSize === 'mobile' ? 'text-base' : 'text-lg sm:text-xl'
+                        }`} 
+                        style={{ color: 'var(--color-oniria_pink)' }}
+                      >
                         {value}%
                       </span>
                     </div>
@@ -335,7 +443,9 @@ const Emotions = () => {
                         max="100"
                         value={value}
                         onChange={(e) => updateEmotion(emotion, parseInt(e.target.value))}
-                        className="w-full h-4 rounded-lg appearance-none cursor-pointer slider"
+                        className={`w-full ${
+                          screenSize === 'mobile' ? 'h-3' : 'h-4'
+                        } rounded-lg appearance-none cursor-pointer slider`}
                         style={{
                           background: `linear-gradient(to right, ${config.color} 0%, ${config.color} ${value}%, #4B5563 ${value}%, #4B5563 100%)`
                         }}
@@ -343,7 +453,12 @@ const Emotions = () => {
                       <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300 blur-sm pointer-events-none"></div>
                     </div>
                     
-                    <div className="flex justify-between mt-2 text-xs sm:text-sm" style={{ color: 'var(--color-oniria_purple)' }}>
+                    <div 
+                      className={`flex justify-between mt-1 sm:mt-2 ${
+                        screenSize === 'mobile' ? 'text-xs' : 'text-xs sm:text-sm'
+                      }`} 
+                      style={{ color: 'var(--color-oniria_purple)' }}
+                    >
                       <span>Bajo</span>
                       <span>Moderado</span>
                       <span>Alto</span>
@@ -355,24 +470,28 @@ const Emotions = () => {
 
             {/* Dream analysis */}
             <div 
-              className="mt-8 p-4 sm:p-6 rounded-xl border"
+              className={`mt-6 sm:mt-8 p-3 sm:p-4 md:p-6 rounded-xl border`}
               style={{ 
                 background: 'linear-gradient(135deg, var(--color-oniria_purple)30, var(--color-oniria_pink)30)',
                 borderColor: 'var(--color-oniria_pink)'
               }}
             >
               <h3 
-                className="text-lg sm:text-xl font-semibold mb-4 flex items-center"
+                className={`${
+                  screenSize === 'mobile' ? 'text-base' : 'text-lg sm:text-xl'
+                } font-semibold mb-3 sm:mb-4 flex items-center`}
                 style={{ 
                   color: 'var(--color-oniria_lightpink)',
                   fontFamily: 'var(--font-playfair)'
                 }}
               >
-                <Sparkles className="mr-2" size={20} />
+                <Sparkles className="mr-2" size={screenSize === 'mobile' ? 16 : 20} />
                 Análisis del Estado Onírico
               </h3>
               <p 
-                className="leading-relaxed text-sm sm:text-base"
+                className={`leading-relaxed ${
+                  screenSize === 'mobile' ? 'text-sm' : 'text-sm sm:text-base'
+                }`}
                 style={{ 
                   color: 'var(--color-oniria_lightpink)',
                   fontFamily: 'var(--font-inter)'
@@ -400,8 +519,8 @@ const Emotions = () => {
         }
         .slider::-webkit-slider-thumb {
           appearance: none;
-          height: 24px;
-          width: 24px;
+          height: ${screenSize === 'mobile' ? '18px' : '24px'};
+          width: ${screenSize === 'mobile' ? '18px' : '24px'};
           border-radius: 50%;
           background: linear-gradient(45deg, var(--color-oniria_purple), var(--color-oniria_pink));
           cursor: pointer;
@@ -413,8 +532,8 @@ const Emotions = () => {
           box-shadow: 0 0 35px var(--color-oniria_purple);
         }
         .slider::-moz-range-thumb {
-          height: 24px;
-          width: 24px;
+          height: ${screenSize === 'mobile' ? '18px' : '24px'};
+          width: ${screenSize === 'mobile' ? '18px' : '24px'};
           border-radius: 50%;
           background: linear-gradient(45deg, var(--color-oniria_purple), var(--color-oniria_pink));
           cursor: pointer;
@@ -422,7 +541,13 @@ const Emotions = () => {
           border: 2px solid var(--color-oniria_lightpink);
         }
         
-        @media (max-width: 768px) {
+        /* Touch-friendly interactions on mobile */
+        @media (max-width: 640px) {
+          .slider {
+            touch-action: pan-x;
+          }
+          
+          /* Larger touch targets */
           .slider::-webkit-slider-thumb {
             height: 20px;
             width: 20px;
@@ -430,6 +555,27 @@ const Emotions = () => {
           .slider::-moz-range-thumb {
             height: 20px;
             width: 20px;
+          }
+          
+          /* Improved hover states for touch devices */
+          .group:active .group-hover\\:scale-110 {
+            transform: scale(1.1);
+          }
+          
+          .group:active .group-hover\\:opacity-100 {
+            opacity: 1;
+          }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 641px) and (max-width: 1023px) {
+          .slider::-webkit-slider-thumb {
+            height: 22px;
+            width: 22px;
+          }
+          .slider::-moz-range-thumb {
+            height: 22px;
+            width: 22px;
           }
         }
       `}</style>
