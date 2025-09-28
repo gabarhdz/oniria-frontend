@@ -657,7 +657,7 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
           
           {/* Pestañas de navegación - solo si no es viewOnly */}
           {!viewOnly && (
-            <div className="flex space-x-2 mb-8 bg-[#ffe0db]/10 backdrop-blur-xl rounded-2xl p-2">
+            <div className="flex space-x-2 mb-8 bg-[#ffe0db]/10 backdrop-blur-xl rounded-2xl p-2 overflow-x-auto">
               {[
                 { key: 'profile', label: 'Perfil', icon: User, path: '/dashboard/profile/profile' },
                 { key: 'privacy', label: 'Privacidad', icon: Shield, path: '/dashboard/profile/privacy' },
@@ -667,14 +667,14 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
                   key={key}
                   to={path}
                   onClick={() => setActiveTab(key as any)}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  className={`flex items-center space-x-2 px-3 sm:px-6 py-3 rounded-xl font-medium transition-all duration-300 whitespace-nowrap ${
                     activeTab === key
                       ? 'bg-gradient-to-r from-[#9675bc] to-[#f1b3be] text-[#ffe0db] shadow-lg'
                       : 'text-[#ffe0db]/70 hover:text-[#ffe0db] hover:bg-[#ffe0db]/10'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{label}</span>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-sm sm:text-base">{label}</span>
                 </Link>
               ))}
             </div>
@@ -694,23 +694,23 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
                   <div className="relative z-10">
                     {/* Header de la card */}
                     <div className="mb-8">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                       <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
                           <ProfileAvatar size="large" editable={!viewOnly} />
-                          <div>
-                            <div className="flex items-center space-x-3">
+                          <div className="w-full sm:w-auto">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
                               {isEditing && !viewOnly ? (
                                 <input
                                   type="text"
                                   value={editData?.username || ''}
                                   onChange={(e) => setEditData(editData ? {...editData, username: e.target.value} : null)}
-                                  className="text-3xl font-bold bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-2 text-[#ffe0db] focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be]"
+                                  className="text-2xl sm:text-3xl font-bold bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-2 text-[#ffe0db] focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be] w-full sm:w-auto"
                                 />
                               ) : (
-                                <h2 className="text-3xl font-bold text-[#ffe0db]">{user.username}</h2>
+                                <h2 className="text-2xl sm:text-3xl font-bold text-[#ffe0db]">{user.username}</h2>
                               )}
                               {user.is_psychologist && (
-                                <div className="bg-gradient-to-r from-blue-500 to-[#9675bc] rounded-full p-2">
+                                <div className="bg-gradient-to-r from-blue-500 to-[#9675bc] rounded-full p-2 w-fit">
                                   <UserCheck className="w-5 h-5 text-[#ffe0db]" />
                                 </div>
                               )}
@@ -722,10 +722,10 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
                                   type="email"
                                   value={editData?.email || ''}
                                   onChange={(e) => setEditData(editData ? {...editData, email: e.target.value} : null)}
-                                  className="bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-3 py-1 text-[#f1b3be] focus:ring-2 focus:ring-[#f1b3be]"
+                                  className="bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-lg px-3 py-1 text-[#f1b3be] focus:ring-2 focus:ring-[#f1b3be] w-full sm:w-auto"
                                 />
                               ) : (
-                                <span className="text-[#f1b3be]">{viewOnly ? '***@***.com' : user.email}</span>
+                                <span className="text-[#f1b3be] text-sm sm:text-base">{viewOnly ? '***@***.com' : user.email}</span>
                               )}
                             </div>
                             <div className="flex items-center space-x-2 mt-1 text-sm text-[#ffe0db]/60">
@@ -738,7 +738,7 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
                         {!isEditing && !viewOnly && (
                           <button
                             onClick={() => setIsEditing(true)}
-                            className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-[#ffe0db] font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-[#f1b3be]/50"
+                            className="group flex items-center justify-center space-x-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-[#ffe0db] font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-[#f1b3be]/50 w-full sm:w-auto"
                           >
                             <Edit3 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                             <span>Editar</span>
@@ -748,10 +748,10 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
 
                       {/* Botones de edición debajo del perfil - solo si no es viewOnly */}
                       {isEditing && !viewOnly && (
-                        <div className="flex justify-end space-x-3 pt-4 border-t border-[#ffe0db]/20">
+                        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-[#ffe0db]/20">
                           <button
                             onClick={handleCancel}
-                            className="flex items-center space-x-2 px-6 py-3 bg-[#252c3e]/50 hover:bg-[#252c3e]/70 rounded-xl text-[#ffe0db] transition-all duration-300 hover:scale-105"
+                            className="flex items-center justify-center space-x-2 px-6 py-3 bg-[#252c3e]/50 hover:bg-[#252c3e]/70 rounded-xl text-[#ffe0db] transition-all duration-300 hover:scale-105"
                           >
                             <X className="w-4 h-4" />
                             <span>Cancelar</span>
@@ -795,18 +795,18 @@ const Profile: React.FC<ProfileProps> = ({ viewOnly = false }) => {
                     </div>
 
                     {/* Estadísticas */}
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                       {[
                         { label: 'Sueños Registrados', value: '47', icon: Moon, color: 'from-[#9675bc] to-indigo-500' },
                         { label: 'Días Activo', value: '89', icon: Calendar, color: 'from-[#f1b3be] to-rose-500' },
                         { label: 'Análisis Completos', value: '23', icon: Star, color: 'from-amber-500 to-[#ffe0db]' }
                       ].map((stat, index) => (
-                        <div key={stat.label} className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-2xl p-6 border border-[#ffe0db]/20 hover:bg-[#ffe0db]/15 transition-all duration-300 group">
-                          <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                            <stat.icon className="w-6 h-6 text-[#ffe0db]" />
+                        <div key={stat.label} className="bg-[#ffe0db]/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-[#ffe0db]/20 hover:bg-[#ffe0db]/15 transition-all duration-300 group">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
+                            <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[#ffe0db]" />
                           </div>
-                          <div className="text-3xl font-bold text-[#ffe0db] mb-1">{stat.value}</div>
-                          <div className="text-[#ffe0db]/60 text-sm">{stat.label}</div>
+                          <div className="text-2xl sm:text-3xl font-bold text-[#ffe0db] mb-1">{stat.value}</div>
+                          <div className="text-[#ffe0db]/60 text-xs sm:text-sm">{stat.label}</div>
                         </div>
                       ))}
                     </div>
