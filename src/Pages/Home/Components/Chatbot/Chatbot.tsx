@@ -3,9 +3,9 @@ import { IoIosSend } from "react-icons/io";
 
 const OniriaChatbot = () => {
   const [messages, setMessages] = useState([
-    { type: 'user', text: '¡Hola! ¿Qué sueño quieres analizar hoy?' },
+    { type: 'user', text: '¡Hola! ¿Qué quieres analizar hoy?' },
     { type: 'bot', text: '¡Hola que tal! Me encantaría que me ayudes...' },
-    { type: 'bot', text: 'En el sueño me encontraba perdido en un bosque y con mucho miedo...' }
+    { type: 'bot', text: 'Ultimamente me sentido demasiado deprimido al despertarme todos los dias...' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -150,12 +150,12 @@ const OniriaChatbot = () => {
         <div className="text-center mb-12">
           <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-oniria_lightpink)] via-[var(--color-oniria_pink)] to-[var(--color-oniria_purple)] text-4xl md:text-5xl italic mb-4 transition-all duration-1000" 
               style={{fontFamily: 'var(--font-playfair)'}}>
-            Tu asistente de sueños personal
+            Tu asistente de mente personal
           </h2>
           <p className="text-[var(--color-oniria_lightpink)]/90 text-lg max-w-2xl mx-auto transition-all duration-1000" 
              style={{ transitionDelay: '0.3s', fontFamily: 'var(--font-inter)' }}>
             Conversa con nuestro chatbot inteligente para recibir análisis personalizados 
-            sobre tus sueños y descubrir su significado oculto
+            sobre tus problemas emocionales y descubrir su significado oculto
           </p>
         </div>
 

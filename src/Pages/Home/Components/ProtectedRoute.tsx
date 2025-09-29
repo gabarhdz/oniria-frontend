@@ -1,6 +1,6 @@
 // src/components/ProtectedRoute.tsx
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { Loader2, Lock, Shield, Moon, Star } from 'lucide-react';
 
 interface ProtectedRouteProps {

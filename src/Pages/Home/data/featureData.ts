@@ -15,8 +15,8 @@ export interface featureData {
 export const getfeatureData = (): featureData[] => [
     {
         number: 1,
-        title: 'Análisis de sueños', 
-        description: 'Descubre patrones ocultos en tus sueños con nuestro análisis avanzado basado en IA.',
+        title: 'Análisis de patrones', 
+        description: 'Descubre patrones ocultos en tus emociones con nuestro análisis avanzado basado en IA.',
         color: '#252c3e',
         Icon: BsFillCloudFill,
     },

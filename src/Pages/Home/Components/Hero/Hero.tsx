@@ -428,15 +428,15 @@ const HeroSection: React.FC = () => {
 
   const theme = getThemeColors();
 
-  return (
+    return (
     <section className={`${theme.background} min-h-screen flex items-center overflow-hidden relative transition-all duration-1000`}>
       {/* Fondo con estrellas parpadeantes */}
       <TwinklingStars count={20} isDarkMode={isDarkMode} />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-4 lg:gap-2 items-center">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8 lg:gap-2 items-center">
           {/* Left Content */}
-          <div className="space-y-6 sm:space-y-8 ml-4 sm:ml-8 lg:ml-12 text-center lg:text-left">
+          <div className="space-y-6 sm:space-y-8 ml-4 sm:ml-8 lg:ml-12 text-center lg:text-left mt-10 lg:mt-0">
             {/* Título con texto animado */}
             <FadeIn delay={0.1} direction="up">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
@@ -448,7 +448,7 @@ const HeroSection: React.FC = () => {
                 />
                 <span className={theme.textPrimary}> de </span>
                 <AnimatedGradientText
-                  text="tus sueños"
+                  text="tus emociones"
                   className="italic"
                   isDarkMode={isDarkMode}
                 />
@@ -459,47 +459,40 @@ const HeroSection: React.FC = () => {
             <BlurIn delay={0.3}>
               <p className={`text-lg sm:text-xl lg:text-2xl ${theme.textSecondary} max-w-lg mx-auto lg:mx-0`}>
                 <span className="block">Explora tu subconsciente con análisis avanzado</span>
-                <span className="block">y descubre las emociones ocultas en tus sueños.</span>
+                <span className="block">y descubre el la mejor manera de controlar las emociones.</span>
               </p>
             </BlurIn>
 
             {/* Botón con efecto shimmer */}
             <FadeIn delay={0.5} direction="up">
-            <Link to="/signup">
-              <ShimmerButton  className={`${theme.buttonBg} text-white font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-lg text-lg sm:text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300`}
-                isDarkMode={isDarkMode}
-              >
-              Comenzar ahora
-             </ShimmerButton>
-          </Link>
-          </FadeIn>
-
+              <Link to="/signup">
+                <ShimmerButton
+                  className={`${theme.buttonBg} text-white font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-lg text-lg sm:text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto`}
+                  isDarkMode={isDarkMode}
+                >
+                  Comenzar ahora
+                </ShimmerButton>
+              </Link>
+            </FadeIn>
           </div>
 
           {/* Right Content */}
-          <div className="flex justify-center lg:justify-end mr-4 sm:mr-12 lg:mr-20">
+          <div className="flex justify-center lg:justify-end mr-4 sm:mr-12 lg:mr-20 mb-8 lg:mb-0">
             <FadeIn delay={0.2} direction="right">
               <div className="relative">
-                {/* Contenedor principal */}
                 <MagneticEffect strength={25}>
                   <div className="relative group cursor-pointer" onClick={toggleDarkMode}>
-                    {/* Forma de fondo */}
                     <MorphingShape 
                       className="w-80 h-80 sm:w-96 sm:h-96 lg:w-[400px] lg:h-[400px] -top-8 -left-8 transition-all duration-1000"
                       color={theme.morphingShape}
                     />
-                    
-                    {/* Efecto de brillo principal */}
                     <GlowEffect 
                       className="w-72 h-72 sm:w-88 sm:h-88 lg:w-96 lg:h-96 rounded-full transition-all duration-1000"
                       intensity="medium"
                       color={theme.glowEffect}
                     />
-                    
-                    {/* Contenedor de imagen */}
                     <BreathEffect duration={6}>
                       <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 flex items-center justify-center transform transition-all duration-500 group-hover:scale-110 relative z-10">
-                        {/* Imagen principal */}
                         <BlurIn delay={0.4}>
                           <div className="relative w-full h-full">
                             <div className={`w-full h-full bg-gradient-to-br ${theme.imageContainer} rounded-full flex items-center justify-center transition-all duration-1000`}>
@@ -511,8 +504,6 @@ const HeroSection: React.FC = () => {
                             </div>
                           </div>
                         </BlurIn>
-                        
-                        {/* Imagen de fondo */}
                         <BlurIn delay={0.6}>
                           <div className="absolute inset-0 w-full h-full">
                             <div className={`w-full h-full bg-gradient-to-br ${theme.backgroundImage} rounded-full opacity-70 transition-all duration-1000 group-hover:opacity-50 flex items-center justify-center`}>
@@ -524,7 +515,6 @@ const HeroSection: React.FC = () => {
                         </BlurIn>
                       </div>
                     </BreathEffect>
-
                     {/* Anillos flotantes */}
                     <FloatingRing 
                       className="top-8 right-8 sm:top-12 sm:right-12 transition-all duration-1000"
@@ -544,7 +534,6 @@ const HeroSection: React.FC = () => {
                       color={theme.ringColors.tertiary}
                       duration={3}
                     />
-
                     {/* Orbes pulsantes */}
                     <PulsingOrb 
                       className="-top-4 -right-4 sm:-top-6 sm:-right-6 transition-all duration-1000"
@@ -570,7 +559,6 @@ const HeroSection: React.FC = () => {
                       color={theme.orbColors.quaternary}
                       delay={1.5}
                     />
-
                     {/* Elementos flotantes adicionales */}
                     <FadeIn delay={0.8}>
                       <div className={`absolute top-4 left-4 sm:top-8 sm:left-8 w-2 h-2 sm:w-3 sm:h-3 rounded-full ${theme.floatingElements.primary} opacity-80 animate-bounce transition-all duration-1000`}>
@@ -582,7 +570,6 @@ const HeroSection: React.FC = () => {
                         <div className={`absolute inset-0 rounded-full ${theme.floatingElements.secondary} animate-ping`}></div>
                       </div>
                     </FadeIn>
-
                     {/* Efecto de glow */}
                     <div className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-30 transition-all duration-700 bg-gradient-to-r ${theme.glowEffect} blur-xl transform scale-125 animate-pulse`}></div>
                   </div>
@@ -592,10 +579,6 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
       </div>
-
-      
-
-      {/* Animación CSS personalizada */}
       <style>{`
         @keyframes gradient {
           0% { background-position: 0% 50%; }
@@ -634,6 +617,7 @@ const HeroSection: React.FC = () => {
       `}</style>
     </section>
   );
+
 };
 
 export default HeroSection;
