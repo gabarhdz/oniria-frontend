@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, ArrowLeft } from 'lucide-react';
+import { Plus, Search, ArrowLeft, RefreshCw } from 'lucide-react';
 import { DashboardFooter } from '../../Dashboard/components/DashboardFooter';
 
 // Importar todos los componentes modulares
@@ -9,6 +9,7 @@ import { UniversalLoader, ActionLoadingModal } from './CommunityComponents/Loadi
 import { ErrorAlert, ConfirmationModal } from './CommunityComponents/ModalComponents';
 import { FilterDropdown } from './CommunityComponents/FilterAndAvatarComponents';
 import { MembersModal } from './CommunityComponents/MembersModal';
+// Importar CommunityCard mejorado - usa el del archivo CommunityCard.tsx pero asegúrate que tenga las mejoras
 import { CommunityCard } from './CommunityComponents/CommunityCard';
 import { PostCard } from './CommunityComponents/PostComponents';
 import { CommunityModal, PostModal } from './CommunityComponents/CommunityPostModals';
@@ -63,6 +64,7 @@ const CommunityApp: React.FC = () => {
   // Loading states
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   
   // Error states
@@ -83,20 +85,51 @@ const CommunityApp: React.FC = () => {
     isDestructive: false
   });
 
-  // Load initial data
+  // Load initial data - Optimizada para mostrar rápido
   const loadInitialData = useCallback(async () => {
     try {
       setIsInitialLoading(true);
       setError(null);
       const communitiesData = await api.getCommunities();
+      
+      // Mostrar comunidades inmediatamente sin esperar todo
       setCommunities(communitiesData);
+      setIsInitialLoading(false);
     } catch (error: any) {
       console.error('Error loading initial data:', error);
       setError(handleApiError(error, 'Error al cargar las comunidades.'));
-    } finally {
       setIsInitialLoading(false);
     }
   }, []);
+
+  // Refresh communities
+  const handleRefreshCommunities = async () => {
+    try {
+      setIsRefreshing(true);
+      const communitiesData = await api.getCommunities();
+      setCommunities(communitiesData);
+    } catch (error: any) {
+      console.error('Error refreshing communities:', error);
+      setError(handleApiError(error, 'Error al actualizar las comunidades.'));
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Refresh posts
+  const handleRefreshPosts = async () => {
+    if (!selectedCommunity) return;
+    try {
+      setIsRefreshing(true);
+      const postsData = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(postsData);
+    } catch (error: any) {
+      console.error('Error refreshing posts:', error);
+      setError(handleApiError(error, 'Error al actualizar los posts.'));
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Load posts for selected community
   const loadCommunityPosts = useCallback(
@@ -123,6 +156,7 @@ const CommunityApp: React.FC = () => {
   // Community handlers
   const handleCreateCommunity = async (data: { name: string; description: string; profile_image?: File }) => {
     try {
+      setShowCommunityModal(false); // Cerrar modal primero
       setIsActionLoading(true);
       setLoadingMessage('Creando comunidad...');
       const formData = new FormData();
@@ -133,7 +167,6 @@ const CommunityApp: React.FC = () => {
       }
       await api.createCommunity(formData);
       await loadInitialData();
-      setShowCommunityModal(false);
     } catch (error: any) {
       setError(handleApiError(error, 'Error al crear la comunidad.'));
     } finally {
@@ -144,6 +177,8 @@ const CommunityApp: React.FC = () => {
   const handleUpdateCommunity = async (data: { name: string; description: string; profile_image?: File }) => {
     if (!editingCommunity) return;
     try {
+      setShowCommunityModal(false); // Cerrar modal primero
+      setEditingCommunity(null);
       setIsActionLoading(true);
       setLoadingMessage('Actualizando comunidad...');
       const formData = new FormData();
@@ -154,8 +189,6 @@ const CommunityApp: React.FC = () => {
       }
       await api.updateCommunity(editingCommunity.id, formData);
       await loadInitialData();
-      setEditingCommunity(null);
-      setShowCommunityModal(false);
       if (selectedCommunity?.id === editingCommunity.id) {
         const updated = communities.find(c => c.id === editingCommunity.id);
         if (updated) setSelectedCommunity(updated);
@@ -169,6 +202,7 @@ const CommunityApp: React.FC = () => {
 
   const handleDeleteCommunity = async (id: string) => {
     try {
+      setConfirmModal({ ...confirmModal, isOpen: false }); // Cerrar modal primero
       setIsActionLoading(true);
       setLoadingMessage('Eliminando comunidad...');
       await api.deleteCommunity(id);
@@ -184,92 +218,250 @@ const CommunityApp: React.FC = () => {
     }
   };
 
+  // ✨ OPTIMISTIC UPDATE: Join/Leave Community
   const handleJoinCommunity = async (id: string) => {
+    if (!user) return;
+
+    // Guardar estado anterior para rollback
+    const previousCommunities = [...communities];
+    const previousSelectedCommunity = selectedCommunity ? { ...selectedCommunity } : null;
+
     try {
-      setIsActionLoading(true);
-      setLoadingMessage('Procesando...');
-      await api.joinCommunity(id);
-      await loadInitialData();
+      const community = communities.find(c => c.id === id);
+      if (!community) return;
+
+      const isMember = community.users.some(u => u.id === user.id);
+      
+      // 1. Actualización optimista en frontend
+      const updatedCommunities = communities.map(c => {
+        if (c.id === id) {
+          return {
+            ...c,
+            users: isMember 
+              ? c.users.filter(u => u.id !== user.id)
+              : [...c.users, user]
+          };
+        }
+        return c;
+      });
+      
+      setCommunities(updatedCommunities);
+      
+      // Actualizar selectedCommunity si es la misma
       if (selectedCommunity?.id === id) {
-        const updated = communities.find(c => c.id === id);
+        const updated = updatedCommunities.find(c => c.id === id);
+        if (updated) setSelectedCommunity(updated);
+      }
+
+      // 2. Sincronizar con backend
+      await api.joinCommunity(id);
+      
+      // 3. Recargar datos reales del backend
+      const freshData = await api.getCommunities();
+      setCommunities(freshData);
+      if (selectedCommunity?.id === id) {
+        const updated = freshData.find(c => c.id === id);
         if (updated) setSelectedCommunity(updated);
       }
     } catch (error: any) {
+      // Rollback en caso de error
+      setCommunities(previousCommunities);
+      if (previousSelectedCommunity) {
+        setSelectedCommunity(previousSelectedCommunity);
+      }
       setError(handleApiError(error, 'Error al unirse/salir de la comunidad.'));
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
-  // Post handlers
+  // ✨ OPTIMISTIC UPDATE: Create Post
   const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
+    if (!user || !selectedCommunity) return;
+
+    // Verificar que el usuario es miembro de la comunidad
+    const isMember = selectedCommunity.users.some(u => u.id === user.id);
+    if (!isMember) {
+      setError('Debes ser miembro de la comunidad para publicar.');
+      return;
+    }
+
+    // Guardar estado anterior
+    const previousPosts = [...posts];
+
     try {
-      setIsActionLoading(true);
-      setLoadingMessage('Creando post...');
-      await api.createPost(data);
-      if (selectedCommunity) {
-        await loadCommunityPosts(selectedCommunity.id, false);
-      }
+      // 1. Crear post temporal para UI
+      const tempPost: Post = {
+        id: `temp-${Date.now()}`,
+        title: data.title,
+        text: data.text,
+        created_at: new Date().toISOString(),
+        community: selectedCommunity,
+        parent_post: data.parent_post ? posts.find(p => p.id === data.parent_post) : undefined,
+        author: user,
+        likes: [],
+        dislikes: []
+      };
+
+      // 2. Actualización optimista en frontend - AGREGAR AL FINAL
+      setPosts([...posts, tempPost]);
       setShowPostModal(false);
       setParentPost(null);
+
+      // 3. Sincronizar con backend
+      await api.createPost(data);
+      
+      // 4. Recargar posts reales
+      const freshPosts = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(freshPosts);
     } catch (error: any) {
+      // Rollback
+      setPosts(previousPosts);
       setError(handleApiError(error, 'Error al crear el post.'));
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
+  // ✨ OPTIMISTIC UPDATE: Update Post
   const handleUpdatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
-    if (!editingPost) return;
+    if (!editingPost || !selectedCommunity) return;
+
+    // Guardar estado anterior
+    const previousPosts = [...posts];
+    
     try {
-      setIsActionLoading(true);
-      setLoadingMessage('Actualizando post...');
-      await api.updatePost(editingPost.id, { title: data.title, text: data.text });
-      if (selectedCommunity) {
-        await loadCommunityPosts(selectedCommunity.id, false);
-      }
+      // 1. Actualización optimista
+      const updatedPosts = posts.map(p => {
+        if (p.id === editingPost.id) {
+          return { ...p, title: data.title, text: data.text };
+        }
+        return p;
+      });
+      
+      setPosts(updatedPosts);
       setEditingPost(null);
       setShowPostModal(false);
+
+      // 2. Sincronizar con backend
+      await api.updatePost(editingPost.id, { title: data.title, text: data.text });
+      
+      // 3. Recargar datos reales
+      const freshPosts = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(freshPosts);
     } catch (error: any) {
+      // Rollback
+      setPosts(previousPosts);
       setError(handleApiError(error, 'Error al actualizar el post.'));
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
+  // ✨ OPTIMISTIC UPDATE: Delete Post
   const handleDeletePost = async (postId: string) => {
+    if (!selectedCommunity) return;
+
+    // Guardar estado anterior
+    const previousPosts = [...posts];
+    
     try {
-      setIsActionLoading(true);
-      setLoadingMessage('Eliminando post...');
+      // 1. Actualización optimista
+      setPosts(posts.filter(p => p.id !== postId));
+
+      // 2. Sincronizar con backend
       await api.deletePost(postId);
-      if (selectedCommunity) {
-        await loadCommunityPosts(selectedCommunity.id, false);
-      }
+      
+      // 3. Recargar datos reales
+      const freshPosts = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(freshPosts);
     } catch (error: any) {
+      // Rollback
+      setPosts(previousPosts);
       setError(handleApiError(error, 'Error al eliminar el post.'));
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
+  // ✨ OPTIMISTIC UPDATE: Like Post
   const handleLikePost = async (postId: string) => {
+    if (!user || !selectedCommunity) return;
+
+    // Guardar estado anterior
+    const previousPosts = [...posts];
+
     try {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const hasLiked = post.likes.some(u => u.id === user.id);
+      const hasDisliked = post.dislikes.some(u => u.id === user.id);
+
+      // 1. Actualización optimista
+      const updatedPosts = posts.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            likes: hasLiked 
+              ? p.likes.filter(u => u.id !== user.id)
+              : [...p.likes, user],
+            dislikes: hasDisliked 
+              ? p.dislikes.filter(u => u.id !== user.id)
+              : p.dislikes
+          };
+        }
+        return p;
+      });
+
+      setPosts(updatedPosts);
+
+      // 2. Sincronizar con backend
       await api.likePost(postId);
-      if (selectedCommunity) {
-        await loadCommunityPosts(selectedCommunity.id, false);
-      }
+      
+      // 3. Recargar datos reales
+      const freshPosts = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(freshPosts);
     } catch (error: any) {
+      // Rollback
+      setPosts(previousPosts);
       setError(handleApiError(error, 'Error al dar like.'));
     }
   };
 
+  // ✨ OPTIMISTIC UPDATE: Dislike Post
   const handleDislikePost = async (postId: string) => {
+    if (!user || !selectedCommunity) return;
+
+    // Guardar estado anterior
+    const previousPosts = [...posts];
+
     try {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const hasLiked = post.likes.some(u => u.id === user.id);
+      const hasDisliked = post.dislikes.some(u => u.id === user.id);
+
+      // 1. Actualización optimista
+      const updatedPosts = posts.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            dislikes: hasDisliked 
+              ? p.dislikes.filter(u => u.id !== user.id)
+              : [...p.dislikes, user],
+            likes: hasLiked 
+              ? p.likes.filter(u => u.id !== user.id)
+              : p.likes
+          };
+        }
+        return p;
+      });
+
+      setPosts(updatedPosts);
+
+      // 2. Sincronizar con backend
       await api.dislikePost(postId);
-      if (selectedCommunity) {
-        await loadCommunityPosts(selectedCommunity.id, false);
-      }
+      
+      // 3. Recargar datos reales
+      const freshPosts = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(freshPosts);
     } catch (error: any) {
+      // Rollback
+      setPosts(previousPosts);
       setError(handleApiError(error, 'Error al dar dislike.'));
     }
   };
@@ -322,7 +514,7 @@ const CommunityApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-oniria_darkblue via-oniria_blue to-oniria_purple relative overflow-hidden overscroll-none">
       
-      {/* Background decorations - Más dinámicos */}
+      {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {Array.from({ length: 20 }, (_, i) => (
           <div
@@ -343,15 +535,13 @@ const CommunityApp: React.FC = () => {
       {/* Main content */}
       <div className="relative z-10 px-3 sm:px-6 py-4 sm:py-8">
         
-        {/* Header - Completamente responsivo */}
+        {/* Header */}
         <div className="max-w-7xl mx-auto">
           {currentView === 'communities' ? (
             // Communities view header
             <div className="mb-6 sm:mb-8">
               <div className="flex flex-col space-y-4 sm:space-y-6">
-                {/* Botón de regreso y título */}
                 <div className="flex items-start space-x-3 sm:space-x-4">
-                  {/* Botón regresar a Dashboard */}
                   <button
                     onClick={() => window.location.href = '/dashboard'}
                     className="p-2 sm:p-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl text-oniria_lightpink hover:bg-white/20 hover:scale-105 transition-all duration-300 flex-shrink-0 group"
@@ -369,7 +559,6 @@ const CommunityApp: React.FC = () => {
                     </p>
                   </div>
                   
-                  {/* Botón crear en desktop junto al título */}
                   {user && (
                     <button
                       onClick={() => {
@@ -385,7 +574,6 @@ const CommunityApp: React.FC = () => {
                   )}
                 </div>
 
-                {/* Botón crear en móvil - full width */}
                 {user && (
                   <button
                     onClick={() => {
@@ -399,9 +587,7 @@ const CommunityApp: React.FC = () => {
                   </button>
                 )}
 
-                {/* Search and Filter - Stack en móvil */}
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                  {/* Search bar */}
                   <div className="relative flex-1">
                     <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-oniria_lightpink/60 w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-300" />
                     <input
@@ -413,7 +599,6 @@ const CommunityApp: React.FC = () => {
                     />
                   </div>
                   
-                  {/* Filter dropdown */}
                   <FilterDropdown
                     filterBy={filterBy}
                     setFilterBy={setFilterBy}
@@ -425,10 +610,9 @@ const CommunityApp: React.FC = () => {
               </div>
             </div>
           ) : (
-            // Community posts view header - Responsivo
+            // Community posts view header
             <div className="mb-6 sm:mb-8">
               <div className="flex flex-col space-y-4">
-                {/* Back button y título */}
                 <div className="flex items-start space-x-3 sm:space-x-4">
                   <button
                     onClick={() => {
@@ -450,9 +634,7 @@ const CommunityApp: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Actions - Stack en móvil */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-                  {/* Members button - Más prominente */}
                   {selectedCommunity && (
                     <button
                       onClick={() => setShowMembersModal(true)}
@@ -464,8 +646,7 @@ const CommunityApp: React.FC = () => {
                     </button>
                   )}
 
-                  {/* Create post button */}
-                  {user && selectedCommunity && (
+                  {user && selectedCommunity && selectedCommunity.users.some(u => u.id === user.id) && (
                     <button
                       onClick={() => {
                         setEditingPost(null);
@@ -487,7 +668,7 @@ const CommunityApp: React.FC = () => {
         {/* Content Area */}
         <div className="max-w-7xl mx-auto">
           {currentView === 'communities' ? (
-            // Communities Grid - Responsivo
+            // Communities Grid
             filteredCommunities.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {filteredCommunities.map((community, index) => (
@@ -558,6 +739,13 @@ const CommunityApp: React.FC = () => {
                     onLike={handleLikePost}
                     onDislike={handleDislikePost}
                     onReply={(post) => {
+                      // Verificar que el usuario es miembro antes de responder
+                      if (!user) return;
+                      const isMember = selectedCommunity?.users.some(u => u.id === user.id);
+                      if (!isMember) {
+                        setError('Debes ser miembro de la comunidad para responder.');
+                        return;
+                      }
                       setParentPost(post);
                       setShowPostModal(true);
                     }}
@@ -579,6 +767,7 @@ const CommunityApp: React.FC = () => {
                     }}
                     currentUser={user}
                     isOwner={user?.id === post.author.id}
+                    isMember={user ? selectedCommunity?.users.some(u => u.id === user.id) : false}
                   />
                 ))
               ) : (
