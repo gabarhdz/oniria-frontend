@@ -363,10 +363,10 @@ const LogIn: React.FC = () => {
             if (errorMessage.toLowerCase().includes('invalid credentials') || 
                 errorMessage.toLowerCase().includes('unable to log in') ||
                 errorMessage.toLowerCase().includes('credenciales inválidas')) {
-              errorMessage = '🌙 Las credenciales ingresadas no son correctas.\n\nVerifica tu nombre de soñador y tu llave secreta, o contacta con nuestros guías si necesitas ayuda para recuperar el acceso a tu mundo onírico.';
+              errorMessage = '🌙 Las credenciales ingresadas no son correctas.\n\nVerifica tu nombre y tu llave secreta, o contacta con nuestros guías si necesitas ayuda para recuperar el acceso a tu mundo cognitivo.';
             } else if (errorMessage.toLowerCase().includes('account disabled') ||
                       errorMessage.toLowerCase().includes('cuenta deshabilitada')) {
-              errorMessage = '🔒 Tu cuenta de soñador ha sido temporalmente suspendida.\n\nContacta con nuestros guías oníricas para obtener más información y restaurar el acceso a Noctiria.';
+              errorMessage = '🔒 Tu cuenta de usuario ha sido temporalmente suspendida.\n\nContacta con nuestros guías oníricas para obtener más información y restaurar el acceso a Noctiria.';
             }
             
             throw new Error(errorMessage || 'Error de autenticación');
@@ -415,10 +415,10 @@ const LogIn: React.FC = () => {
         
         setShowAlert({
           type: 'success',
-          title: '¡Bienvenido de vuelta!',
-          message: `Hola de nuevo, soñador. Tu sesión ha sido iniciada exitosamente.${
+          title: '¡Bienvenido de vuelta a Noctiria!',
+          message: `Hola de nuevo. Tu sesión ha sido iniciada exitosamente.${
             rememberMe ? '\n\nTu nombre de usuario ha sido recordado para próximas visitas.' : ''
-          }\n\nTus sueños te esperan en Noctiria...`
+          }\n\nTus pesamientos te esperan en Noctiria...`
         });
         
         reset();
@@ -523,11 +523,11 @@ const LogIn: React.FC = () => {
             Bienvenido de vuelta
           </h1>
           <p className="text-xl text-[#ffe0db]/90 mb-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Regresa a tu mundo de sueños en Noctiria
+            Regresa a tu mundo de emociones en Noctiria
           </p>
           <div className="flex items-center justify-center space-x-2 text-[#f1b3be]/80 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             <Moon className="w-5 h-5 animate-pulse" />
-            <span className="text-sm">Tus sueños te esperan</span>
+            <span className="text-sm">Tus pensamientos te esperan</span>
             <Star className="w-4 h-4 animate-pulse" style={{ animationDelay: '0.5s' }} />
           </div>
         </div>
@@ -544,21 +544,21 @@ const LogIn: React.FC = () => {
               <div className="group/field animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
                 <label className="block text-sm font-semibold text-[#252c3e] mb-2 flex items-center transition-all duration-300 group-hover/field:text-[#214d72]">
                   <User className="w-4 h-4 mr-2 text-[#9675bc] transition-colors duration-200" />
-                  Tu nombre de soñador *
+                  Tu nombre de usuario *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-xl blur-sm opacity-0 group-hover/field:opacity-100 transition-opacity duration-300"></div>
                   <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#9675bc]/60 group-hover/field:text-[#9675bc] transition-colors duration-200 z-10" />
                   <input
                     {...registerField('username', { 
-                      required: 'Tu nombre de soñador es requerido',
+                      required: 'Tu nombre de usuario es requerido',
                       minLength: { value: 3, message: 'Mínimo 3 caracteres' }
                     })}
                     type="text"
                     onFocus={() => setFocusedField('username')}
                     onBlur={() => setFocusedField('')}
                     className="relative w-full pl-12 pr-4 py-4 border-2 border-[#9675bc]/20 rounded-xl focus:ring-2 focus:ring-[#9675bc]/40 focus:border-[#9675bc] transition-all duration-300 bg-white/70 backdrop-blur-sm hover:bg-white/90 hover:border-[#9675bc]/40 hover:shadow-lg focus:shadow-xl focus:scale-[1.02] placeholder-[#252c3e]/50"
-                    placeholder="Ingresa tu nombre de soñador"
+                    placeholder="Ingresa tu nombre de usuario"
                     disabled={isLoading}
                   />
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
@@ -626,7 +626,7 @@ const LogIn: React.FC = () => {
                     )}
                   </div>
                   <label htmlFor="remember-me" className="ml-3 block text-sm text-[#252c3e]/80 group-hover/check:text-[#252c3e] transition-colors">
-                    Recordar mi nombre de soñador
+                    Recordar mi nombre de usuario
                   </label>
                 </div>
 
@@ -656,13 +656,13 @@ const LogIn: React.FC = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-6 h-6 animate-spin" />
-                        <span>Conectando con tus sueños...</span>
+                        <span>Conectando con Noctiria...</span>
                         <Moon className="w-5 h-5 animate-pulse" />
                       </>
                     ) : (
                       <>
                         <LoginIcon className="w-6 h-6" />
-                        <span>Entrar a mi mundo onírico</span>
+                        <span>Entrar a mi mundo cognitivo</span>
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
@@ -715,7 +715,7 @@ const LogIn: React.FC = () => {
                   <div className="w-8 h-8 bg-gradient-to-br from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-md group-hover/signup:scale-110 transition-transform duration-300">
                     <User className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-base font-semibold">Crear mi primera cuenta de sueños</span>
+                  <span className="text-base font-semibold">Crear mi primera cuenta de usuario</span>
                   <Sparkles className="w-5 h-5 text-[#9675bc] group-hover/signup:text-[#f1b3be] transition-colors duration-300" />
                 </div>
                 
@@ -730,7 +730,7 @@ const LogIn: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-lg blur-sm opacity-0 group-hover/support:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative bg-white/40 backdrop-blur-sm px-6 py-3 rounded-lg border border-[#f1b3be]/20">
                   <p className="text-sm text-[#252c3e]/80">
-                    ¿Problemas para acceder a tu mundo de sueños?{' '}
+                    ¿Problemas para acceder a tu mundo magico?{' '}
                     <button
                       type="button"
                       onClick={() => setShowAlert({
