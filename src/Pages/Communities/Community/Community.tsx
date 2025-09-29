@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, ArrowLeft } from 'lucide-react';
+import { Plus, Search, ArrowLeft, RefreshCw } from 'lucide-react';
 import { DashboardFooter } from '../../Dashboard/components/DashboardFooter';
 
 // Importar todos los componentes modulares
@@ -9,6 +9,7 @@ import { UniversalLoader, ActionLoadingModal } from './CommunityComponents/Loadi
 import { ErrorAlert, ConfirmationModal } from './CommunityComponents/ModalComponents';
 import { FilterDropdown } from './CommunityComponents/FilterAndAvatarComponents';
 import { MembersModal } from './CommunityComponents/MembersModal';
+// Importar CommunityCard mejorado - usa el del archivo CommunityCard.tsx pero asegúrate que tenga las mejoras
 import { CommunityCard } from './CommunityComponents/CommunityCard';
 import { PostCard } from './CommunityComponents/PostComponents';
 import { CommunityModal, PostModal } from './CommunityComponents/CommunityPostModals';
@@ -63,6 +64,7 @@ const CommunityApp: React.FC = () => {
   // Loading states
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   
   // Error states
@@ -83,20 +85,51 @@ const CommunityApp: React.FC = () => {
     isDestructive: false
   });
 
-  // Load initial data
+  // Load initial data - Optimizada para mostrar rápido
   const loadInitialData = useCallback(async () => {
     try {
       setIsInitialLoading(true);
       setError(null);
       const communitiesData = await api.getCommunities();
+      
+      // Mostrar comunidades inmediatamente sin esperar todo
       setCommunities(communitiesData);
+      setIsInitialLoading(false);
     } catch (error: any) {
       console.error('Error loading initial data:', error);
       setError(handleApiError(error, 'Error al cargar las comunidades.'));
-    } finally {
       setIsInitialLoading(false);
     }
   }, []);
+
+  // Refresh communities
+  const handleRefreshCommunities = async () => {
+    try {
+      setIsRefreshing(true);
+      const communitiesData = await api.getCommunities();
+      setCommunities(communitiesData);
+    } catch (error: any) {
+      console.error('Error refreshing communities:', error);
+      setError(handleApiError(error, 'Error al actualizar las comunidades.'));
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Refresh posts
+  const handleRefreshPosts = async () => {
+    if (!selectedCommunity) return;
+    try {
+      setIsRefreshing(true);
+      const postsData = await api.getPostsByCommunity(selectedCommunity.id);
+      setPosts(postsData);
+    } catch (error: any) {
+      console.error('Error refreshing posts:', error);
+      setError(handleApiError(error, 'Error al actualizar los posts.'));
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Load posts for selected community
   const loadCommunityPosts = useCallback(
@@ -123,6 +156,7 @@ const CommunityApp: React.FC = () => {
   // Community handlers
   const handleCreateCommunity = async (data: { name: string; description: string; profile_image?: File }) => {
     try {
+      setShowCommunityModal(false); // Cerrar modal primero
       setIsActionLoading(true);
       setLoadingMessage('Creando comunidad...');
       const formData = new FormData();
@@ -133,7 +167,6 @@ const CommunityApp: React.FC = () => {
       }
       await api.createCommunity(formData);
       await loadInitialData();
-      setShowCommunityModal(false);
     } catch (error: any) {
       setError(handleApiError(error, 'Error al crear la comunidad.'));
     } finally {
@@ -144,6 +177,8 @@ const CommunityApp: React.FC = () => {
   const handleUpdateCommunity = async (data: { name: string; description: string; profile_image?: File }) => {
     if (!editingCommunity) return;
     try {
+      setShowCommunityModal(false); // Cerrar modal primero
+      setEditingCommunity(null);
       setIsActionLoading(true);
       setLoadingMessage('Actualizando comunidad...');
       const formData = new FormData();
@@ -154,8 +189,6 @@ const CommunityApp: React.FC = () => {
       }
       await api.updateCommunity(editingCommunity.id, formData);
       await loadInitialData();
-      setEditingCommunity(null);
-      setShowCommunityModal(false);
       if (selectedCommunity?.id === editingCommunity.id) {
         const updated = communities.find(c => c.id === editingCommunity.id);
         if (updated) setSelectedCommunity(updated);
@@ -169,6 +202,7 @@ const CommunityApp: React.FC = () => {
 
   const handleDeleteCommunity = async (id: string) => {
     try {
+      setConfirmModal({ ...confirmModal, isOpen: false }); // Cerrar modal primero
       setIsActionLoading(true);
       setLoadingMessage('Eliminando comunidad...');
       await api.deleteCommunity(id);
@@ -243,6 +277,13 @@ const CommunityApp: React.FC = () => {
   const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
     if (!user || !selectedCommunity) return;
 
+    // Verificar que el usuario es miembro de la comunidad
+    const isMember = selectedCommunity.users.some(u => u.id === user.id);
+    if (!isMember) {
+      setError('Debes ser miembro de la comunidad para publicar.');
+      return;
+    }
+
     // Guardar estado anterior
     const previousPosts = [...posts];
 
@@ -260,8 +301,8 @@ const CommunityApp: React.FC = () => {
         dislikes: []
       };
 
-      // 2. Actualización optimista en frontend
-      setPosts([tempPost, ...posts]);
+      // 2. Actualización optimista en frontend - AGREGAR AL FINAL
+      setPosts([...posts, tempPost]);
       setShowPostModal(false);
       setParentPost(null);
 
@@ -605,7 +646,7 @@ const CommunityApp: React.FC = () => {
                     </button>
                   )}
 
-                  {user && selectedCommunity && (
+                  {user && selectedCommunity && selectedCommunity.users.some(u => u.id === user.id) && (
                     <button
                       onClick={() => {
                         setEditingPost(null);
@@ -698,6 +739,13 @@ const CommunityApp: React.FC = () => {
                     onLike={handleLikePost}
                     onDislike={handleDislikePost}
                     onReply={(post) => {
+                      // Verificar que el usuario es miembro antes de responder
+                      if (!user) return;
+                      const isMember = selectedCommunity?.users.some(u => u.id === user.id);
+                      if (!isMember) {
+                        setError('Debes ser miembro de la comunidad para responder.');
+                        return;
+                      }
                       setParentPost(post);
                       setShowPostModal(true);
                     }}
@@ -719,6 +767,7 @@ const CommunityApp: React.FC = () => {
                     }}
                     currentUser={user}
                     isOwner={user?.id === post.author.id}
+                    isMember={user ? selectedCommunity?.users.some(u => u.id === user.id) : false}
                   />
                 ))
               ) : (
