@@ -9,7 +9,7 @@ import Profile from './Pages/Profile/Profile';
 import CommunityApp from './Pages/Communities/Community/Community';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import ProtectedRoute from './Components/ProtectedRoute';
+import ProtectedRoute from './Pages/Home/Components/ProtectedRoute';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 
 // Componente para rutas públicas que redirige si ya está autenticado
