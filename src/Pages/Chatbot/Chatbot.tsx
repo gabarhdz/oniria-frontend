@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Trash2, Download, Copy, Check, MessageSquare, User, Loader, Star, Plus, Menu } from 'lucide-react';
+import { Send, Trash2, Download, Copy, Check, MessageSquare, User, Loader, Star, Plus, Menu, RefreshCw, ArrowLeft } from 'lucide-react';
 
 // Enhanced Orb Component
 const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' | 'medium' | 'large' }) => {
@@ -158,7 +158,7 @@ const OniriaChatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -254,10 +254,11 @@ const OniriaChatbot = () => {
   }, []);
 
   // Generate conversation title from first message
-  const generateTitle = (firstUserMessage: string) => {
-    return firstUserMessage.length > 40 
-      ? firstUserMessage.substring(0, 40) + '...'
+  const generateTitle = (firstUserMessage: string, conversationNumber: number) => {
+    const preview = firstUserMessage.length > 30 
+      ? firstUserMessage.substring(0, 30) + '...'
       : firstUserMessage;
+    return `#${conversationNumber}: ${preview}`;
   };
 
   const handleSend = async () => {
@@ -271,13 +272,14 @@ const OniriaChatbot = () => {
     };
 
     // Update conversation with user message
-    const updatedConversations = conversations.map(conv => {
+    const updatedConversations = conversations.map((conv, index) => {
       if (conv.id === currentConversationId) {
         const updatedMessages = [...conv.messages, userMessage];
         
-        // Update title if it's the first user message
-        const title = conv.title === 'Nueva Conversación' 
-          ? generateTitle(input)
+        // Update title if it's the default title
+        const conversationNumber = conversations.length - index;
+        const title = conv.title.startsWith('Conversación #') 
+          ? generateTitle(input, conversationNumber)
           : conv.title;
 
         return {
@@ -305,7 +307,7 @@ const OniriaChatbot = () => {
         timestamp: new Date()
       };
       
-      const finalConversations = conversations.map(conv => {
+      const finalConversations = conversations.map((conv, index) => {
         if (conv.id === currentConversationId) {
           return {
             ...conv,
@@ -325,7 +327,7 @@ const OniriaChatbot = () => {
         timestamp: new Date()
       };
       
-      const finalConversations = conversations.map(conv => {
+      const finalConversations = conversations.map((conv, index) => {
         if (conv.id === currentConversationId) {
           return {
             ...conv,
@@ -382,6 +384,16 @@ const OniriaChatbot = () => {
     navigator.clipboard.writeText(content);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleRefresh = () => {
+    setShowIntro(true);
+    setInput('');
+    setIsLoading(false);
+    setCopiedId(null);
+    setTimeout(() => {
+      setShowIntro(false);
+    }, 3000);
   };
 
   // Create initial conversation if none exists
@@ -445,15 +457,15 @@ const OniriaChatbot = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-64 sm:w-72 bg-white/10 backdrop-blur-xl border-r border-white/20 transform transition-transform duration-300 ${showSidebar ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <div className={`fixed inset-y-0 left-0 z-40 w-64 sm:w-72 bg-white/10 backdrop-blur-xl border-r border-white/20 transform transition-transform duration-300 ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="h-full flex flex-col p-4">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-oniria_lightpink">Conversaciones</h2>
             <button
               onClick={() => setShowSidebar(false)}
-              className="lg:hidden p-2 hover:bg-white/10 rounded-lg transition-all"
+              className="p-2 hover:bg-white/10 rounded-lg transition-all"
             >
-              <MessageSquare className="w-5 h-5 text-oniria_lightpink" />
+              <ArrowLeft className="w-5 h-5 text-oniria_lightpink" />
             </button>
           </div>
 
@@ -501,7 +513,7 @@ const OniriaChatbot = () => {
       </div>
 
       {/* Main Content */}
-      <div className={`relative z-10 h-screen flex flex-col transition-all duration-300 ${showSidebar ? 'lg:ml-72' : 'lg:ml-72'}`}>
+      <div className={`relative z-10 h-screen flex flex-col transition-all duration-300 ${showSidebar ? 'ml-0 sm:ml-72' : 'ml-0'}`}>
         
         {/* Header */}
         <div className="bg-white/10 backdrop-blur-xl border-b border-white/20 px-4 py-4 sm:px-6 sm:py-5">
@@ -509,7 +521,7 @@ const OniriaChatbot = () => {
             <div className="flex items-center space-x-3 sm:space-x-4">
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="lg:hidden p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all"
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all hover:scale-105"
               >
                 <Menu className="w-5 h-5 text-oniria_lightpink" />
               </button>
@@ -527,6 +539,20 @@ const OniriaChatbot = () => {
             </div>
             
             <div className="flex items-center space-x-2">
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-oniria_lightpink transition-all duration-300 hover:scale-105"
+                title="Volver al dashboard"
+              >
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+              <button
+                onClick={handleRefresh}
+                className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-oniria_lightpink transition-all duration-300 hover:scale-105 hover:rotate-180"
+                title="Refrescar página"
+              >
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300" />
+              </button>
               <button
                 onClick={exportChat}
                 className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-oniria_lightpink transition-all duration-300 hover:scale-105"
@@ -664,7 +690,7 @@ const OniriaChatbot = () => {
       {/* Sidebar overlay for mobile */}
       {showSidebar && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-30 sm:hidden"
           onClick={() => setShowSidebar(false)}
         />
       )}
