@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Trash2, Download, Copy, Check, MessageSquare, User, Loader, Star, Plus, Menu, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Send, Trash2, Download, Copy, Check, Star, Plus, Menu, RefreshCw, ArrowLeft, Loader } from 'lucide-react';
 
 // Enhanced Orb Component
 const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' | 'medium' | 'large' }) => {
@@ -43,7 +43,6 @@ const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' 
       const centerY = height / 2;
       const baseRadius = Math.min(width, height) * 0.35;
 
-      // Create gradient with more vibrant colors
       const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, baseRadius * 1.2);
       
       if (isActive) {
@@ -58,7 +57,6 @@ const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' 
         gradient.addColorStop(1, 'rgba(155, 66, 254, 0.1)');
       }
 
-      // Draw main circle with pulse effect
       const pulse = isActive ? Math.sin(time * 3) * 0.15 + 1 : Math.sin(time) * 0.05 + 1;
       const radius = baseRadius * pulse;
 
@@ -67,7 +65,6 @@ const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' 
       ctx.fillStyle = gradient;
       ctx.fill();
 
-      // Draw outer glow
       const glowGradient = ctx.createRadialGradient(centerX, centerY, radius * 0.5, centerX, centerY, radius * 1.5);
       glowGradient.addColorStop(0, 'rgba(254, 163, 204, 0)');
       glowGradient.addColorStop(0.5, 'rgba(234, 88, 164, 0.3)');
@@ -78,7 +75,6 @@ const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' 
       ctx.fillStyle = glowGradient;
       ctx.fill();
 
-      // Draw rotating particles
       const particleCount = isActive ? 12 : 8;
       for (let i = 0; i < particleCount; i++) {
         const angle = (time * (isActive ? 2 : 0.5) + i * (Math.PI * 2) / particleCount) % (Math.PI * 2);
@@ -98,7 +94,6 @@ const Orb = ({ isActive, size = 'medium' }: { isActive: boolean; size?: 'small' 
         ctx.fill();
       }
 
-      // Draw energy waves when active
       if (isActive) {
         for (let i = 0; i < 3; i++) {
           const waveRadius = (radius * 0.5) + (time * 50 + i * 50) % (radius * 0.8);
@@ -150,6 +145,9 @@ interface UserData {
   profile_pic?: string;
 }
 
+// API Configuration - Ajusta esto según tu puerto
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
+
 // Main Chatbot Component
 const OniriaChatbot = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -159,10 +157,10 @@ const OniriaChatbot = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Get user data from localStorage
   const getUserData = (): UserData | null => {
     const userData = localStorage.getItem('user_data');
     if (userData) {
@@ -177,7 +175,6 @@ const OniriaChatbot = () => {
 
   const user = getUserData();
 
-  // Load conversations from localStorage
   useEffect(() => {
     const savedConversations = localStorage.getItem('noctiria_conversations');
     if (savedConversations) {
@@ -194,7 +191,6 @@ const OniriaChatbot = () => {
         }));
         setConversations(conversationsWithDates);
         
-        // Set the most recent conversation as current
         if (conversationsWithDates.length > 0) {
           setCurrentConversationId(conversationsWithDates[0].id);
         }
@@ -204,17 +200,14 @@ const OniriaChatbot = () => {
     }
   }, []);
 
-  // Save conversations to localStorage
   const saveConversations = (convs: Conversation[]) => {
     localStorage.setItem('noctiria_conversations', JSON.stringify(convs));
     setConversations(convs);
   };
 
-  // Get current conversation
   const currentConversation = conversations.find(c => c.id === currentConversationId);
   const messages = currentConversation?.messages || [];
 
-  // Create new conversation
   const createNewConversation = () => {
     const conversationNumber = conversations.length + 1;
     const newConversation: Conversation = {
@@ -236,7 +229,6 @@ const OniriaChatbot = () => {
     setShowSidebar(false);
   };
 
-  // Auto scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -245,7 +237,6 @@ const OniriaChatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Hide intro animation after 3 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
@@ -253,7 +244,6 @@ const OniriaChatbot = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Generate conversation title from first message
   const generateTitle = (firstUserMessage: string, conversationNumber: number) => {
     const preview = firstUserMessage.length > 30 
       ? firstUserMessage.substring(0, 30) + '...'
@@ -271,12 +261,10 @@ const OniriaChatbot = () => {
       timestamp: new Date()
     };
 
-    // Update conversation with user message
     const updatedConversations = conversations.map((conv, index) => {
       if (conv.id === currentConversationId) {
         const updatedMessages = [...conv.messages, userMessage];
         
-        // Update title if it's the default title
         const conversationNumber = conversations.length - index;
         const title = conv.title.startsWith('Conversación #') 
           ? generateTitle(input, conversationNumber)
@@ -293,21 +281,60 @@ const OniriaChatbot = () => {
     });
 
     saveConversations(updatedConversations);
+    const userInput = input;
     setInput('');
     setIsLoading(true);
+    setError(null);
 
-    // Simulate API call - Replace with actual DeepSeek API integration
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        throw new Error('No estás autenticado. Por favor, inicia sesión.');
+      }
+
+      console.log('Enviando mensaje a:', `${API_BASE_URL}/chat/`);
+      console.log('Token presente:', !!token);
+
+      const response = await fetch(`${API_BASE_URL}/chat/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: userInput })
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error response:', errorData);
+        
+        if (response.status === 401) {
+          throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+        } else if (response.status === 500) {
+          const errorMsg = errorData.error || 'Error en el servidor';
+          throw new Error(`Error del servidor: ${errorMsg}`);
+        } else if (response.status === 404) {
+          throw new Error('Endpoint no encontrado. Verifica que el backend esté corriendo.');
+        }
+        
+        const errorMsg = errorData.error || errorData.detail || 'Error desconocido';
+        throw new Error(`Error ${response.status}: ${errorMsg}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta recibida exitosamente');
       
       const aiMessage: Message = {
         id: `msg-${Date.now() + 1}`,
         role: 'assistant',
-        content: `Esta es una respuesta simulada de Noctiria AI.\n\nTu mensaje fue: "${input}"\n\nEn una implementación real, aquí se integraría la API de DeepSeek para obtener respuestas inteligentes.`,
+        content: data.message,
         timestamp: new Date()
       };
       
-      const finalConversations = conversations.map((conv, index) => {
+      const finalConversations = conversations.map((conv) => {
         if (conv.id === currentConversationId) {
           return {
             ...conv,
@@ -319,19 +346,24 @@ const OniriaChatbot = () => {
       });
 
       saveConversations(finalConversations);
-    } catch (error) {
-      const errorMessage: Message = {
+    } catch (error: any) {
+      console.error('Error calling AI:', error);
+      
+      const errorMessage = error.message || 'Lo siento, ocurrió un error al procesar tu mensaje.';
+      setError(errorMessage);
+      
+      const errorMsg: Message = {
         id: `msg-${Date.now() + 1}`,
         role: 'assistant',
-        content: 'Lo siento, ocurrió un error al procesar tu mensaje. Por favor, intenta nuevamente.',
+        content: errorMessage,
         timestamp: new Date()
       };
       
-      const finalConversations = conversations.map((conv, index) => {
+      const finalConversations = conversations.map((conv) => {
         if (conv.id === currentConversationId) {
           return {
             ...conv,
-            messages: [...conv.messages, userMessage, errorMessage],
+            messages: [...conv.messages, userMessage, errorMsg],
             updatedAt: new Date()
           };
         }
@@ -391,12 +423,12 @@ const OniriaChatbot = () => {
     setInput('');
     setIsLoading(false);
     setCopiedId(null);
+    setError(null);
     setTimeout(() => {
       setShowIntro(false);
     }, 3000);
   };
 
-  // Create initial conversation if none exists
   useEffect(() => {
     if (conversations.length === 0 && !showIntro) {
       createNewConversation();
@@ -408,33 +440,48 @@ const OniriaChatbot = () => {
       
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: 20 }, (_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white/5 animate-float blur-sm"
-            style={{
-              width: `${Math.random() * 250 + 100}px`,
-              height: `${Math.random() * 250 + 100}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${Math.random() * 25 + 15}s`,
-            }}
-          />
-        ))}
-        {Array.from({ length: 15 }, (_, i) => (
-          <Star
-            key={`star-${i}`}
-            className="absolute text-oniria_lightpink/20 animate-pulse"
-            style={{
-              width: `${Math.random() * 8 + 4}px`,
-              height: `${Math.random() * 8 + 4}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-            }}
-          />
-        ))}
+        {[...Array(20)].map((_, i) => {
+          const size = i * 15 + 100;
+          const left = (i * 4.5) % 100;
+          const top = (i * 7.3) % 100;
+          const delay = i * 0.5;
+          const duration = i + 20;
+          
+          return (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white/5 animate-float blur-sm"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${left}%`,
+                top: `${top}%`,
+                animationDelay: `${delay}s`,
+                animationDuration: `${duration}s`,
+              }}
+            />
+          );
+        })}
+        {[...Array(15)].map((_, i) => {
+          const size = (i % 3) + 4;
+          const left = (i * 6.7) % 100;
+          const top = (i * 8.2) % 100;
+          const delay = i * 0.2;
+          
+          return (
+            <Star
+              key={`star-${i}`}
+              className="absolute text-oniria_lightpink/20 animate-pulse"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${left}%`,
+                top: `${top}%`,
+                animationDelay: `${delay}s`,
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* Intro Animation */}
@@ -564,6 +611,21 @@ const OniriaChatbot = () => {
           </div>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-500/20 border-b border-red-500/30 px-4 py-3">
+            <div className="max-w-5xl mx-auto flex items-center justify-between">
+              <p className="text-sm text-red-200">{error}</p>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-200 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
@@ -575,7 +637,6 @@ const OniriaChatbot = () => {
                 }`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                {/* Avatar */}
                 <div className="flex-shrink-0">
                   {message.role === 'assistant' ? (
                     <div className="relative w-12 h-12 sm:w-14 sm:h-14">
@@ -596,7 +657,6 @@ const OniriaChatbot = () => {
                   )}
                 </div>
 
-                {/* Message Content */}
                 <div className={`flex-1 ${message.role === 'user' ? 'flex justify-end' : ''}`}>
                   <div
                     className={`relative group max-w-[85%] sm:max-w-[75%] ${
@@ -632,7 +692,6 @@ const OniriaChatbot = () => {
               </div>
             ))}
 
-            {/* Loading indicator */}
             {isLoading && (
               <div className="flex items-start space-x-3 sm:space-x-4 animate-fade-in-up">
                 <div className="relative w-12 h-12 sm:w-14 sm:h-14">
@@ -666,6 +725,7 @@ const OniriaChatbot = () => {
                   className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-white/10 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-oniria_pink text-oniria_lightpink placeholder-oniria_lightpink/50 resize-none text-sm sm:text-base transition-all backdrop-blur-sm"
                   rows={1}
                   style={{ minHeight: '52px', maxHeight: '120px' }}
+                  disabled={isLoading}
                 />
               </div>
               <button
@@ -718,14 +778,6 @@ const OniriaChatbot = () => {
           from { transform: scale(0.8); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
         }
-        @keyframes modal-entrance {
-          from { transform: scale(0.95); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
         .animate-float {
           animation: float 20s ease-in-out infinite;
         }
@@ -737,12 +789,6 @@ const OniriaChatbot = () => {
         }
         .animate-scale-in {
           animation: scale-in 0.6s ease-out;
-        }
-        .animate-modal-entrance {
-          animation: modal-entrance 0.3s ease-out;
-        }
-        .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
         }
       `}</style>
     </div>
