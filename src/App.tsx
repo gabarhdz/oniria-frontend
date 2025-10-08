@@ -6,6 +6,7 @@ import Home1 from './Pages/Home/Home';
 import LogIn from './Pages/LogIn/LogIn';
 import SignUp from './Pages/SignUp/SignUp';
 import Profile from './Pages/Profile/Profile';
+import Chatbot from './Pages/Chatbot/Chatbot';
 import CommunityApp from './Pages/Communities/Community/Community';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -228,6 +229,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <CommunityApp />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Ruta del chatbot */}
+          <Route 
+            path="/chatbot"
+            element={
+              <ProtectedRoute>
+                <Chatbot />
               </ProtectedRoute>
             }
           />
