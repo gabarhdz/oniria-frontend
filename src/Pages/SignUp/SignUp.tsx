@@ -16,7 +16,8 @@ interface RegisterData {
 
 interface User {
   url: string;
-  id: string;
+  id: string; 
+  
   username: string;
   email: string;
   SleepState: any;
@@ -376,7 +377,7 @@ const SignUp: React.FC = () => {
                 String(err).includes('ya existe') || 
                 String(err).includes('unique')
               )) {
-                errorMessage = '💫 Este email ya pertenece a otro soñador en Noctiria.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión o usa un email diferente para comenzar tu nueva aventura onírica.';
+                errorMessage = '💫 Este email ya pertenece a otro usuario.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión o usa un email diferente para comenzar tu nueva aventura.';
               } else {
                 errorMessage = `Email: ${emailErrors.join(', ')}`;
               }
@@ -390,7 +391,7 @@ const SignUp: React.FC = () => {
                 String(err).includes('ya existe') || 
                 String(err).includes('unique')
               )) {
-                errorMessage += (errorMessage ? '\n\n' : '') + '🌙 Este nombre de soñador ya está en uso.\n\nElige un nombre único para tu identidad en el mundo de los sueños.';
+                errorMessage += (errorMessage ? '\n\n' : '') + '🌙 Este nombre de usuario ya está en uso.\n\nElige un nombre único para tu identidad en el mundo cognitivo.';
               } else {
                 errorMessage += (errorMessage ? '\n\n' : '') + `Usuario: ${usernameErrors.join(', ')}`;
               }
@@ -561,11 +562,11 @@ const SignUp: React.FC = () => {
             Únete a Noctiria
           </h1>
           <p className="text-xl text-[#ffe0db]/90 mb-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Donde tus sueños cobran vida y encuentran significado
+            Donde tus emociones cobran vida y encuentran significado
           </p>
           <div className="flex items-center justify-center space-x-2 text-[#f1b3be]/80 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             <Shield className="w-5 h-5 animate-pulse" />
-            <span className="text-sm">Espacio seguro para explorar tu mundo onírico</span>
+            <span className="text-sm">Espacio seguro para explorar tu mundo cognitivo</span>
           </div>
         </div>
 
@@ -583,21 +584,21 @@ const SignUp: React.FC = () => {
                 <div className="group/field animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
                   <label className="block text-sm font-semibold text-[#252c3e] mb-2 flex items-center transition-all duration-300 group-hover/field:text-[#214d72]">
                     <User className="w-4 h-4 mr-2 text-[#9675bc] transition-colors duration-200" />
-                    Tu nombre en el mundo de los sueños *
+                    Tu nombre en el mundo cognitivo *
                   </label>
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-xl blur-sm opacity-0 group-hover/field:opacity-100 transition-opacity duration-300"></div>
                     <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#9675bc]/60 group-hover/field:text-[#9675bc] transition-colors duration-200 z-10" />
                     <input
                       {...registerField('username', { 
-                        required: 'Tu nombre de soñador es requerido',
-                        minLength: { value: 3, message: 'Mínimo 3 caracteres para tu identidad onírica' }
+                        required: 'Tu nombre de usuario es requerido',
+                        minLength: { value: 3, message: 'Mínimo 3 caracteres para tu identidad' }
                       })}
                       type="text"
                       onFocus={() => setFocusedField('username')}
                       onBlur={() => setFocusedField('')}
                       className="relative w-full pl-12 pr-4 py-4 border-2 border-[#9675bc]/20 rounded-xl focus:ring-2 focus:ring-[#9675bc]/40 focus:border-[#9675bc] transition-all duration-300 bg-white/70 backdrop-blur-sm hover:bg-white/90 hover:border-[#9675bc]/40 hover:shadow-lg focus:shadow-xl focus:scale-[1.02] placeholder-[#252c3e]/50"
-                      placeholder="¿Cómo te llamas, soñador?"
+                      placeholder="¿Cómo te llamas?"
                     />
                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                       <Sparkles className="w-4 h-4 text-[#f1b3be]/60 animate-pulse" />
@@ -614,14 +615,14 @@ const SignUp: React.FC = () => {
                 <div className="group/field animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
                   <label className="block text-sm font-semibold text-[#252c3e] mb-2 flex items-center transition-all duration-300 group-hover/field:text-[#214d72]">
                     <Mail className="w-4 h-4 mr-2 text-[#9675bc] transition-colors duration-200" />
-                    Tu correo del mundo real *
+                    Tu correo *
                   </label>
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-xl blur-sm opacity-0 group-hover/field:opacity-100 transition-opacity duration-300"></div>
                     <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#9675bc]/60 group-hover/field:text-[#9675bc] transition-colors duration-200 z-10" />
                     <input
                       {...registerField('email', { 
-                        required: 'Necesitamos tu email para conectar realidad y sueños',
+                        required: 'Necesitamos tu email para conectarte con tu mundo magico',
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                           message: 'Formato de email mágico inválido'
@@ -653,7 +654,7 @@ const SignUp: React.FC = () => {
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#214d72]/60 group-hover/field:text-[#214d72] transition-colors duration-200 z-10" />
                   <input
                     {...registerField('password', { 
-                      required: 'Tu llave secreta es esencial para proteger tus sueños',
+                      required: 'Tu llave secreta es esencial para proteger tus pensamientos',
                       pattern: {
                         value: /^(?=(.*[A-Z]){1,})(?=(.*\d){1,})(?=(.*[!@#$%^&*()_+\-=\[\]{}|;:'",.<>\/?]){1,}).{12,}$/,
                         message: 'Tu llave debe ser poderosa: 12+ caracteres, 1 mayúscula, 1 número y 1 símbolo mágico'
@@ -727,7 +728,7 @@ const SignUp: React.FC = () => {
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#214d72]/60 group-hover/field:text-[#214d72] transition-colors duration-200 z-10" />
                   <input
                     {...registerField('password_confirm', {
-                      required: 'Confirma tu llave secreta para asegurar tus sueños',
+                      required: 'Confirma tu llave secreta para asegurar tus pensamientos',
                       validate: value => value === password || 'Las llaves no coinciden, verifica tu magia'
                     })}
                     type={showConfirmPassword ? "text" : "password"}
@@ -770,7 +771,7 @@ const SignUp: React.FC = () => {
                     onFocus={() => setFocusedField('description')}
                     onBlur={() => setFocusedField('')}
                     className="relative w-full px-4 py-4 border-2 border-[#f1b3be]/20 rounded-xl focus:ring-2 focus:ring-[#f1b3be]/40 focus:border-[#f1b3be] transition-all duration-300 bg-white/70 backdrop-blur-sm hover:bg-white/90 resize-none hover:border-[#f1b3be]/40 hover:shadow-lg focus:shadow-xl focus:scale-[1.01] placeholder-[#252c3e]/50"
-                    placeholder="¿Qué sueños te visitan? ¿Qué emociones despiertan en ti? Comparte tu conexión con el mundo onírico..."
+                    placeholder="¿Qué pensamientos te visitan? ¿Qué emociones despiertan en ti? Comparte tu conexión con el mundo cognitivo..."
                     maxLength={15000}
                   />
                 </div>
@@ -789,7 +790,7 @@ const SignUp: React.FC = () => {
               <div className="group/field animate-slide-in-right" style={{ animationDelay: '0.6s' }}>
                 <label className="block text-sm font-semibold text-[#252c3e] mb-2 flex items-center transition-all duration-300 group-hover/field:text-[#214d72]">
                   <Upload className="w-4 h-4 mr-2 text-[#9675bc] transition-colors duration-200" />
-                  Tu avatar en el reino de los sueños
+                  Tu avatar en el reino de las emociones
                 </label>
                 <div className="relative">
                   <input
@@ -865,7 +866,7 @@ const SignUp: React.FC = () => {
                     ) : (
                       <>
                         <UserPlus className="w-6 h-6" />
-                        <span>Comenzar mi viaje onírico</span>
+                        <span>Comenzar mi viaje mágico</span>
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
@@ -897,7 +898,7 @@ const SignUp: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 to-[#f1b3be]/10 rounded-lg blur-sm opacity-0 group-hover/login:opacity-100 transition-opacity duration-300"></div>
                   <div className="relative bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-[#f1b3be]/20">
                     <p className="text-sm text-[#252c3e]/80">
-                      ¿Ya formas parte de nuestra comunidad de soñadores?{' '}
+                      ¿Ya formas parte de nuestra comunidad de usuarios?{' '}
                       <button
                         type="button"
                         onClick={() => window.location.href = '/login'} 
