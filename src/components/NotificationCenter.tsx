@@ -152,9 +152,14 @@ const NotificationItem: React.FC<{
 // Componente principal del centro de notificaciones
 export const NotificationCenter: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('notification_sound');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const prevUnreadCountRef = useRef(0);
+  
   const {
     notifications,
     unreadCount,
@@ -162,16 +167,27 @@ export const NotificationCenter: React.FC = () => {
     markAsRead,
     markAllAsRead,
     clearNotification,
+    playNotificationSound,
   } = useNotifications();
+
+  // Reproducir sonido cuando aumenta el contador de no leídas
+  useEffect(() => {
+    if (unreadCount > prevUnreadCountRef.current && soundEnabled) {
+      console.log('🔊 Playing notification sound...');
+      playNotificationSound();
+    }
+    prevUnreadCountRef.current = unreadCount;
+  }, [unreadCount, soundEnabled, playNotificationSound]);
 
   // Debug: Log cuando cambian las notificaciones
   useEffect(() => {
     console.log('📊 Notifications updated:', { 
       count: notifications.length, 
       unread: unreadCount,
+      soundEnabled,
       notifications 
     });
-  }, [notifications, unreadCount]);
+  }, [notifications, unreadCount, soundEnabled]);
 
   // Calcular posición del dropdown
   useEffect(() => {
@@ -197,8 +213,10 @@ export const NotificationCenter: React.FC = () => {
   }, [isOpen]);
 
   const toggleSound = () => {
-    setSoundEnabled(!soundEnabled);
-    localStorage.setItem('notification_sound', (!soundEnabled).toString());
+    const newValue = !soundEnabled;
+    setSoundEnabled(newValue);
+    localStorage.setItem('notification_sound', newValue.toString());
+    console.log('🔊 Sound', newValue ? 'enabled' : 'disabled');
   };
 
   return (
@@ -269,11 +287,15 @@ export const NotificationCenter: React.FC = () => {
                   {/* Toggle sound */}
                   <button
                     onClick={toggleSound}
-                    className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
-                    title={soundEnabled ? 'Silenciar' : 'Activar sonido'}
+                    className={`p-1.5 rounded-lg transition-all duration-300 ${
+                      soundEnabled 
+                        ? 'bg-emerald-500/20 hover:bg-emerald-500/30' 
+                        : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                    title={soundEnabled ? 'Silenciar notificaciones' : 'Activar sonido de notificaciones'}
                   >
                     {soundEnabled ? (
-                      <Volume2 className="w-4 h-4 text-oniria_lightpink" />
+                      <Volume2 className="w-4 h-4 text-emerald-400" />
                     ) : (
                       <VolumeX className="w-4 h-4 text-oniria_lightpink/50" />
                     )}
