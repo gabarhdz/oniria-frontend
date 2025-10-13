@@ -1,6 +1,7 @@
 // Pages/Dashboard/UserDashboard.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { NotificationCenter } from '../../components/NotificationCenter';
 
 // Components
 import {
@@ -11,7 +12,7 @@ import {
   StatisticsSection,
   ActionsSection,
   DashboardFooter
-} from './components';  
+} from './components';
 
 interface UserStats {
   dreamsLogged: number;
@@ -30,8 +31,6 @@ export const UserDashboard: React.FC = () => {
     dreamCategories: 0
   });
 
-
-  // Función para refrescar datos del usuario
   const handleRefreshData = async () => {
     setIsRefreshing(true);
     try {
@@ -44,7 +43,6 @@ export const UserDashboard: React.FC = () => {
     }
   };
 
-  // Función para manejar logout
   const handleLogout = () => {
     logout();
   };
@@ -68,6 +66,7 @@ export const UserDashboard: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-[#252c3e]/60 via-[#214d72]/50 to-[#9675bc]/40 backdrop-blur-[0.5px]"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#9675bc]/3 to-transparent"></div>
 
+
       <div className="relative z-10 min-h-screen">
         <DashboardHeader
           onRefresh={handleRefreshData}
@@ -75,19 +74,23 @@ export const UserDashboard: React.FC = () => {
           isRefreshing={isRefreshing}
           user={user}
         />
-      <WelcomeSection user={user} />
+
+        <WelcomeSection user={user} />
+
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-          
           <UserInfoCards user={user} />
+          
           <StatisticsSection
             userStats={userStats}
             isLoadingStats={false}
             statsError={null}
             onRetryStats={() => {}}
           />
+          
           <ActionsSection />
         </main>
-         <DashboardFooter />
+
+        <DashboardFooter />
       </div>
     </div>
   );

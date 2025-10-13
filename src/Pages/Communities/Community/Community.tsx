@@ -13,7 +13,7 @@ import { MembersModal } from './CommunityComponents/MembersModal';
 import { CommunityCard } from './CommunityComponents/CommunityCard';
 import { PostCard } from './CommunityComponents/PostComponents';
 import { CommunityModal, PostModal } from './CommunityComponents/CommunityPostModals';
-
+import { useNotifications } from '../../../hooks/useNotification';
 // Hook de autenticación
 const useAuth = () => {
   const userData = localStorage.getItem('user_data');
@@ -43,6 +43,7 @@ const handleApiError = (error: any, defaultMessage: string): string => {
 // Main Community Component
 const CommunityApp: React.FC = () => {
   const { user } = useAuth();
+    const { playNotificationSound } = useNotifications();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
@@ -273,22 +274,18 @@ const CommunityApp: React.FC = () => {
     }
   };
 
-  // ✨ OPTIMISTIC UPDATE: Create Post
-  const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
+   const handleCreatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
     if (!user || !selectedCommunity) return;
 
-    // Verificar que el usuario es miembro de la comunidad
     const isMember = selectedCommunity.users.some(u => u.id === user.id);
     if (!isMember) {
       setError('Debes ser miembro de la comunidad para publicar.');
       return;
     }
 
-    // Guardar estado anterior
     const previousPosts = [...posts];
 
     try {
-      // 1. Crear post temporal para UI
       const tempPost: Post = {
         id: `temp-${Date.now()}`,
         title: data.title,
@@ -301,24 +298,24 @@ const CommunityApp: React.FC = () => {
         dislikes: []
       };
 
-      // 2. Actualización optimista en frontend - AGREGAR AL FINAL
       setPosts([...posts, tempPost]);
       setShowPostModal(false);
       setParentPost(null);
 
-      // 3. Sincronizar con backend
       await api.createPost(data);
       
-      // 4. Recargar posts reales
       const freshPosts = await api.getPostsByCommunity(selectedCommunity.id);
       setPosts(freshPosts);
+      
+      // OPCIONAL: Reproducir sonido cuando el post se crea exitosamente
+      // playNotificationSound();
+      
     } catch (error: any) {
-      // Rollback
       setPosts(previousPosts);
       setError(handleApiError(error, 'Error al crear el post.'));
     }
   };
-
+      
   // ✨ OPTIMISTIC UPDATE: Update Post
   const handleUpdatePost = async (data: { title: string; text: string; community: string; parent_post?: string }) => {
     if (!editingPost || !selectedCommunity) return;

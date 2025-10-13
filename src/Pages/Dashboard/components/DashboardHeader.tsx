@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle, Menu, X } from 'lucide-react';
+import { LogOut, RefreshCw, User, Settings, Shield, Moon, Sun, HelpCircle, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { NotificationCenter } from '../../../components/NotificationCenter';
 
 interface User {
   username: string;
@@ -34,7 +35,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     { icon: User, label: 'Mi Perfil', action: () => navigate('/dashboard/profile/profile') },
     { icon: Settings, label: 'Configuración', action: () => console.log('Configuración') },
     { icon: Shield, label: 'Privacidad', action: () => console.log('Privacidad') },
-    { icon: Bell, label: 'Notificaciones', action: () => console.log('Notificaciones') },
     { icon: darkMode ? Sun : Moon, label: darkMode ? 'Modo Claro' : 'Modo Oscuro', action: () => setDarkMode(!darkMode) },
     { icon: HelpCircle, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
@@ -137,12 +137,31 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <button
       onClick={onClick}
       className={`group relative text-oniria_lightpink hover:text-white transition-all duration-500 ${
-        isMobile ? 'w-full text-left py-4 px-6 rounded-2xl' : 'py-3 px-6 rounded-2xl'
-      } block overflow-hidden cursor-pointer hover:bg-gradient-to-r hover:from-oniria_purple/10 hover:to-oniria_pink/10`}
+        isMobile ? 'w-full text-left py-4 px-6 rounded-2xl' : 'py-3 px-4 lg:px-5 xl:px-6 rounded-2xl'
+      } block overflow-hidden cursor-pointer`}
     >
-      <span className={`relative z-10 font-medium ${isMobile ? 'text-lg' : 'text-base'}`}>
+      {/* Efectos de fondo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_lightpink/5 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
+      
+      {/* Partículas decorativas */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute top-2 left-3 w-1 h-1 bg-oniria_lightpink rounded-full animate-pulse"></div>
+        <div className="absolute bottom-3 right-4 w-1.5 h-1.5 bg-oniria_lightpink/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+      </div>
+      
+      {/* Texto */}
+      <span className={`relative z-10 font-medium group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300 ${isMobile ? 'text-lg' : 'text-sm lg:text-base'}`}>
         {item}
       </span>
+      
+      {/* Línea inferior */}
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_lightpink to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-oniria_lightpink to-white animate-pulse"></div>
+      </div>
+      
+      {/* Efecto de brillo deslizante */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 delay-100"></div>
     </button>
   );
 
@@ -190,22 +209,22 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         }`}
         onClick={() => setShowMobileMenu(false)}
       />
-      <div className={`absolute top-0 right-0 h-full w-80 max-w-[80vw] bg-oniria_darkblue/95 backdrop-blur-2xl border-l border-oniria_purple/30 transform transition-transform duration-500 ${
+      <div className={`absolute top-0 right-0 h-full w-80 max-w-[85vw] sm:max-w-[80vw] bg-oniria_darkblue/95 backdrop-blur-2xl border-l border-oniria_purple/30 transform transition-transform duration-500 ${
         showMobileMenu ? 'translate-x-0' : 'translate-x-full'
       } flex flex-col`}>
-        <div className="flex items-center justify-between p-6 border-b border-oniria_purple/20 flex-shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-oniria_purple/20 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <ProfileAvatar size="medium" />
-            <div>
-              <h3 className="font-semibold text-white text-lg">{user.username}</h3>
-              <p className="text-sm text-oniria_pink/80">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-white text-base sm:text-lg truncate">{user.username}</h3>
+              <p className="text-xs sm:text-sm text-oniria_pink/80 truncate">
                 {user.is_psychologist ? 'Psicólogo' : 'Usuario'}
               </p>
             </div>
           </div>
           <button
             onClick={() => setShowMobileMenu(false)}
-            className="p-2 rounded-full bg-oniria_purple/15 text-oniria_lightpink hover:text-white transition-all duration-300"
+            className="p-2 rounded-full bg-oniria_purple/15 text-oniria_lightpink hover:text-white transition-all duration-300 flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -236,10 +255,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     item.action();
                     setShowMobileMenu(false);
                   }}
-                  className="w-full flex items-center space-x-3 text-oniria_lightpink hover:text-white transition-all duration-300 py-3 px-4 rounded-xl"
+                  className="w-full flex items-center space-x-3 text-oniria_lightpink hover:text-white transition-all duration-300 py-3 px-4 rounded-xl hover:bg-oniria_purple/10"
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm sm:text-base">{item.label}</span>
                 </button>
               );
             })}
@@ -256,14 +275,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-oniria_purple/15 text-oniria_lightpink hover:text-white transition-all duration-300 disabled:opacity-50"
           >
             <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Actualizar</span>
+            <span className="text-sm sm:text-base">Actualizar</span>
           </button>
           <button
             onClick={handleLogoutClick}
             className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-oniria_pink/20 text-oniria_lightpink hover:text-white transition-all duration-300"
           >
             <LogOut className="w-4 h-4" />
-            <span>Cerrar Sesión</span>
+            <span className="text-sm sm:text-base">Cerrar Sesión</span>
           </button>
         </div>
       </div>
@@ -272,21 +291,22 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[70px] sm:h-[90px] border-b border-oniria_purple/20">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[60px] sm:h-[70px] md:h-[80px] lg:h-[90px] border-b border-oniria_purple/20">
         <div
-          className="flex justify-between items-center p-3 sm:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8"
+          className="flex justify-between items-center p-2 sm:p-3 lg:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8"
           onClick={handleOutsideClick}
         >
-          <div className="relative flex-shrink-0 flex items-center ml-4 sm:ml-6 md:ml-8">
-            <div className="relative w-14 h-14 p-1 transition-transform duration-300 hover:scale-105">
+          {/* Logo y título */}
+          <div className="relative flex-shrink-0 flex items-center ml-2 sm:ml-4 md:ml-6 lg:ml-8">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 p-1 transition-transform duration-300 hover:scale-105">
               <img src="/img/Oniria.svg" alt="ONIRIA Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="ml-2 font-bold text-lg sm:text-2xl lg:text-3xl text-oniria_lightpink">NOCTIRIA</span>
+            <span className="ml-1.5 sm:ml-2 font-bold text-base sm:text-xl md:text-2xl lg:text-3xl text-oniria_lightpink whitespace-nowrap">NOCTIRIA</span>
           </div>
 
           {/* Navegación desktop */}
           <div className="hidden lg:flex items-center">
-            <ul className="flex gap-6 xl:gap-8 text-sm xl:text-base">
+            <ul className="flex gap-2 xl:gap-4 2xl:gap-6 text-sm xl:text-base">
               {navigationItems.map((item) => (
                 <li key={item.label}>
                   <NavigationLink item={item.label} onClick={() => navigate(item.path)} />
@@ -296,46 +316,56 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
 
           {/* Botones acción desktop */}
-          <div className="hidden lg:flex items-center gap-3 lg:gap-4">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4 mr-4 xl:mr-6 2xl:mr-8">
+            {/* Botón de actualizar */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="p-2 rounded-full bg-oniria_purple/15 text-oniria_lightpink hover:text-white transition-all duration-300 disabled:opacity-50"
+              className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
               title="Actualizar datos"
             >
-              <RefreshCw className={`w-4 h-4 lg:w-5 lg:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 xl:w-6 xl:h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
+
+            {/* Notification Center - Desktop */}
+            <NotificationCenter />
+
+            {/* Menú de perfil */}
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="p-2 rounded-full bg-oniria_blue/20 text-oniria_lightpink hover:text-white transition-all duration-300"
+                className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
                 title={`Perfil de ${user.username}`}
               >
                 <ProfileAvatar size="small" />
               </button>
-              {/* Dropdown */}
+              
+              {/* Dropdown de perfil */}
               {showProfileMenu && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-oniria_darkblue/95 backdrop-blur-2xl border border-oniria_purple/30 rounded-2xl">
-                  <div className="p-6 border-b border-oniria_purple/20">
-                    <div className="flex items-center space-x-4">
+                <div className="absolute top-full right-0 mt-2 w-72 xl:w-80 bg-oniria_darkblue/95 backdrop-blur-2xl border border-oniria_purple/30 rounded-2xl shadow-2xl overflow-hidden animate-dropdown-enter">
+                  <div className="p-4 xl:p-6 border-b border-oniria_purple/20">
+                    <div className="flex items-center space-x-3 xl:space-x-4">
                       <ProfileAvatar size="large" showRing={true} />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-white text-lg truncate">{user.username}</h3>
-                        <p className="text-sm text-oniria_pink/80 truncate">{user.email || 'Sin email'}</p>
+                        <h3 className="font-semibold text-white text-base xl:text-lg truncate">{user.username}</h3>
+                        <p className="text-xs xl:text-sm text-oniria_pink/80 truncate">{user.email || 'Sin email'}</p>
                       </div>
                     </div>
                   </div>
                   <div className="p-2">
-                    {profileMenuItems.map((item, index) => {
+                    {profileMenuItems.map((item) => {
                       const Icon = item.icon;
                       return (
                         <button
                           key={item.label}
-                          onClick={item.action}
-                          className="w-full flex items-center space-x-3 text-oniria_lightpink hover:text-white transition-all duration-300 py-3 px-4 rounded-xl"
+                          onClick={() => {
+                            item.action();
+                            setShowProfileMenu(false);
+                          }}
+                          className="w-full flex items-center space-x-3 text-oniria_lightpink hover:text-white transition-all duration-300 py-2.5 xl:py-3 px-3 xl:px-4 rounded-xl hover:bg-white/10"
                         >
-                          <Icon className="w-5 h-5" />
-                          <span>{item.label}</span>
+                          <Icon className="w-4 h-4 xl:w-5 xl:h-5 flex-shrink-0" />
+                          <span className="text-sm xl:text-base">{item.label}</span>
                         </button>
                       );
                     })}
@@ -343,42 +373,51 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Botón de cerrar sesión */}
             <button
               onClick={handleLogoutClick}
-              className="flex items-center space-x-2 px-4 py-2 rounded-full bg-oniria_pink/20 text-oniria_lightpink hover:text-white transition-all duration-300"
+              className="flex items-center space-x-1.5 xl:space-x-2 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl bg-oniria_pink/20 hover:bg-oniria_pink/30 text-oniria_lightpink hover:text-white transition-all duration-300 transform hover:scale-105 backdrop-blur-xl border border-oniria_pink/30"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden lg:inline">Salir</span>
+              <span className="hidden xl:inline text-sm xl:text-base">Salir</span>
             </button>
           </div>
 
-          {/* Botones móviles y tablets (todo <lg) */}
-          <div className="flex lg:hidden items-center gap-2">
+          {/* Botones móviles */}
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 mr-2 sm:mr-4">
+            {/* Botón de actualizar móvil */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="p-2 rounded-full bg-oniria_purple/15 text-oniria_lightpink hover:text-white transition-all duration-300 disabled:opacity-50"
+              className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 disabled:opacity-50"
               title="Actualizar datos"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 sm:w-6 sm:h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
+
+            {/* Notification Center - Móvil/Tablet */}
+            <NotificationCenter />
+
+            {/* Botón de menú móvil */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 rounded-full bg-oniria_blue/20 text-oniria_lightpink hover:text-white transition-all duration-300"
+              className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300"
               title="Menú"
             >
-              <div className="flex items-center space-x-2">
-                <Menu className={`w-5 h-5 ${showMobileMenu ? 'rotate-180' : ''}`} />
-                <ProfileAvatar size="small" />
-              </div>
+              <Menu className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 ${showMobileMenu ? 'rotate-90' : ''}`} />
             </button>
           </div>
         </div>
       </header>
 
-      <div className="h-[70px] sm:h-[90px]" />
+      {/* Espaciador para el header fixed */}
+      <div className="h-[60px] sm:h-[70px] md:h-[80px] lg:h-[90px]" />
 
+      {/* Menú móvil */}
       <MobileMenu />
+      
+      {/* Modal de confirmación de logout */}
       <LogoutConfirmModal />
     </>
   );
