@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOut, RefreshCw, User, Settings, Shield, Bell, Moon, Sun, HelpCircle, AlertTriangle, Menu, X } from 'lucide-react';
+import { LogOut, RefreshCw, User, Settings, Shield, Moon, Sun, HelpCircle, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '../../../components/NotificationCenter';
 
@@ -35,7 +35,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     { icon: User, label: 'Mi Perfil', action: () => navigate('/dashboard/profile/profile') },
     { icon: Settings, label: 'Configuración', action: () => console.log('Configuración') },
     { icon: Shield, label: 'Privacidad', action: () => console.log('Privacidad') },
-    { icon: Bell, label: 'Notificaciones', action: () => console.log('Notificaciones') },
     { icon: darkMode ? Sun : Moon, label: darkMode ? 'Modo Claro' : 'Modo Oscuro', action: () => setDarkMode(!darkMode) },
     { icon: HelpCircle, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
@@ -139,11 +138,30 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       onClick={onClick}
       className={`group relative text-oniria_lightpink hover:text-white transition-all duration-500 ${
         isMobile ? 'w-full text-left py-4 px-6 rounded-2xl' : 'py-3 px-6 rounded-2xl'
-      } block overflow-hidden cursor-pointer hover:bg-gradient-to-r hover:from-oniria_purple/10 hover:to-oniria_pink/10`}
+      } block overflow-hidden cursor-pointer`}
     >
-      <span className={`relative z-10 font-medium ${isMobile ? 'text-lg' : 'text-base'}`}>
+      {/* Efectos de fondo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_lightpink/5 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
+      
+      {/* Partículas decorativas */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute top-2 left-3 w-1 h-1 bg-oniria_lightpink rounded-full animate-pulse"></div>
+        <div className="absolute bottom-3 right-4 w-1.5 h-1.5 bg-oniria_lightpink/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+      </div>
+      
+      {/* Texto */}
+      <span className={`relative z-10 font-medium group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300 ${isMobile ? 'text-lg' : 'text-base'}`}>
         {item}
       </span>
+      
+      {/* Línea inferior */}
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_lightpink to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-oniria_lightpink to-white animate-pulse"></div>
+      </div>
+      
+      {/* Efecto de brillo deslizante */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 delay-100"></div>
     </button>
   );
 
@@ -297,26 +315,26 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </ul>
           </div>
 
-          {/* Botones acción desktop - CON NOTIFICACIONES */}
+          {/* Botones acción desktop */}
           <div className="hidden lg:flex items-center gap-3 lg:gap-4">
             {/* Botón de actualizar */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="p-2 lg:p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+              className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
               title="Actualizar datos"
             >
-              <RefreshCw className={`w-4 h-4 lg:w-5 lg:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
 
-            {/* 🔔 NOTIFICATION CENTER - NUEVO */}
+            {/* Notification Center - Desktop */}
             <NotificationCenter />
 
             {/* Menú de perfil */}
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="p-2 lg:p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
+                className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
                 title={`Perfil de ${user.username}`}
               >
                 <ProfileAvatar size="small" />
@@ -335,7 +353,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     </div>
                   </div>
                   <div className="p-2">
-                    {profileMenuItems.map((item, index) => {
+                    {profileMenuItems.map((item) => {
                       const Icon = item.icon;
                       return (
                         <button
@@ -366,31 +384,28 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </button>
           </div>
 
-          {/* Botones móviles y tablets (todo <lg) - CON NOTIFICACIONES */}
+          {/* Botones móviles */}
           <div className="flex lg:hidden items-center gap-2">
             {/* Botón de actualizar móvil */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 disabled:opacity-50"
+              className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 disabled:opacity-50"
               title="Actualizar datos"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
 
-            {/* 🔔 NOTIFICATION CENTER MÓVIL - NUEVO */}
+            {/* Notification Center - Móvil/Tablet */}
             <NotificationCenter />
 
             {/* Botón de menú móvil */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300"
+              className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300"
               title="Menú"
             >
-              <div className="flex items-center space-x-2">
-                <Menu className={`w-5 h-5 transition-transform duration-300 ${showMobileMenu ? 'rotate-90' : ''}`} />
-                <ProfileAvatar size="small" />
-              </div>
+              <Menu className={`w-6 h-6 transition-transform duration-300 ${showMobileMenu ? 'rotate-90' : ''}`} />
             </button>
           </div>
         </div>

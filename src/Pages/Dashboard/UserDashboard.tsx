@@ -66,10 +66,6 @@ export const UserDashboard: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-[#252c3e]/60 via-[#214d72]/50 to-[#9675bc]/40 backdrop-blur-[0.5px]"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#9675bc]/3 to-transparent"></div>
 
-      {/* ✨ AGREGAR NOTIFICATION CENTER AQUÍ ✨ */}
-      <div className="fixed top-4 right-4 z-[100]">
-        <NotificationCenter />
-      </div>
 
       <div className="relative z-10 min-h-screen">
         <DashboardHeader
