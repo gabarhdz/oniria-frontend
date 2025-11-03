@@ -11,6 +11,8 @@ import CommunityApp from './Pages/Communities/Community/Community';
 import UserDashboard from './Pages/Dashboard/UserDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Pages/Home/Components/ProtectedRoute';
+import PsychologistSignUp from './Pages/SignUp/PyschologistSignUp';
+import PsychologistDashboard from './Pages/Dashboard/PyschologistDashboard';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 
 // Componente para rutas públicas que redirige si ya está autenticado
@@ -28,27 +30,6 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// Componente temporal para psicólogos
-const PsychologistDashboard: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
-      <div className="text-center text-[#ffe0db] space-y-6">
-        <div className="w-24 h-24 mx-auto bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-full flex items-center justify-center shadow-2xl">
-          <img src="/img/Oniria.svg" alt="Oniria" className="w-16 h-16 object-contain" />
-        </div>
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent">
-          Panel de Psicólogo
-        </h1>
-        <p className="text-xl">Contenido exclusivo para psicólogos en desarrollo...</p>
-        <div className="flex items-center justify-center space-x-2 text-yellow-400">
-          <Crown className="w-6 h-6" />
-          <span>Acceso Profesional Verificado</span>
-          <Crown className="w-6 h-6" />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Pantalla de carga
 const LoadingScreen: React.FC = () => {
@@ -155,6 +136,7 @@ function App() {
           <Route path="/" element={<Home1 />} />
           <Route path="/login" element={<PublicRoute><LogIn /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+          <Route path="/psychologist-signup" element={<PsychologistSignUp />} />
           
           {/* Rutas protegidas para usuarios autenticados */}
           <Route 
@@ -214,13 +196,13 @@ function App() {
           />
           
           {/* Ruta protegida solo para psicólogos */}
-          <Route 
+         <Route 
             path="/psychologist" 
             element={
               <ProtectedRoute requiredRole="psychologist">
                 <PsychologistDashboard />
               </ProtectedRoute>
-            } 
+           } 
           />
 
           {/* Ruta de la comunidad */}
