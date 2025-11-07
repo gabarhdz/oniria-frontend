@@ -443,42 +443,94 @@ const SignUp: React.FC = () => {
     }
   };
 
-  const onSubmit = async (data: RegisterData) => {
-    setError('');
-    setSuccess('');
-    
-    if (data.password !== data.password_confirm) {
-      setShowAlert({
-        type: 'error',
-        title: 'Error en la validación',
-        message: 'Las contraseñas no coinciden. Por favor verifica que ambas contraseñas sean idénticas.'
-      });
-      return;
-    }
+  // src/Pages/SignUp/SignUp.tsx
+// Solo la función onSubmit actualizada
 
-    const submitData = {
-      ...data,
-      profile_pic: selectedFile || undefined,
-    };
+const onSubmit = async (data: RegisterData) => {
+  setError('');
+  setSuccess('');
+  
+  if (data.password !== data.password_confirm) {
+    setShowAlert({
+      type: 'error',
+      title: 'Error en la validación',
+      message: 'Las contraseñas no coinciden. Por favor verifica que ambas contraseñas sean idénticas.'
+    });
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const formData = new FormData();
     
-    try {
-      const result = await registerUser(submitData);
-      setShowAlert({
-        type: 'success',
-        title: '¡Bienvenido a Noctiria!',
-        message: `¡Hola ${result.username}! Tu cuenta ha sido creada exitosamente. Haz clic en "Continuar" para ir al login y comenzar tu viaje onírico.`
-      });
-      reset();
-      setSelectedFile(null);
-    } catch (err) {
-      console.error('Error de registro:', err); 
-      setShowAlert({
-        type: 'error',
-        title: 'Error en el registro',
-        message: err instanceof Error ? err.message : 'Ha ocurrido un error inesperado durante el registro. Por favor intenta nuevamente.'
-      });
+    // Agregar campos obligatorios
+    formData.append('username', data.username);
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    
+    // Agregar campos opcionales solo si tienen valor
+    if (data.description && data.description.trim()) {
+      formData.append('description', data.description);
     }
-  };
+    
+    // Agregar archivo de imagen directamente
+    if (selectedFile) {
+      formData.append('profile_pic', selectedFile);
+    }
+    
+    formData.append('is_psychologist', 'false');
+
+    // Realizar petición
+    const response = await apiClient.post('/users/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000,
+    });
+
+    setShowAlert({
+      type: 'success',
+      title: '¡Bienvenido a Noctiria!',
+      message: `¡Hola ${response.data.username}! Tu cuenta ha sido creada exitosamente. Haz clic en "Continuar" para ir al login y comenzar tu viaje onírico.`
+    });
+    
+    reset();
+    setSelectedFile(null);
+
+  } catch (err: any) {
+    console.error('Error de registro:', err);
+    
+    let errorMessage = 'Ha ocurrido un error inesperado durante el registro.';
+    
+    if (err?.response?.data) {
+      const data = err.response.data;
+      if (data.email) {
+        errorMessage = '💫 Este email ya está registrado.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión.';
+      } else if (data.username) {
+        errorMessage = '🌙 Este nombre de usuario ya está en uso.\n\nElige un nombre único para tu perfil.';
+      } else if (data.password) {
+        errorMessage = `Contraseña: ${Array.isArray(data.password) ? data.password.join(', ') : data.password}`;
+      } else if (data.profile_pic) {
+        errorMessage = `Error con la imagen: ${Array.isArray(data.profile_pic) ? data.profile_pic.join(', ') : data.profile_pic}`;
+      } else {
+        try {
+          errorMessage = Object.values(data).flat().join('\n');
+        } catch {
+          errorMessage = JSON.stringify(data);
+        }
+      }
+    }
+    
+    setShowAlert({
+      type: 'error',
+      title: 'Error en el registro',
+      message: errorMessage
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
