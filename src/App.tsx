@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './Pages/Home/Components/ProtectedRoute';
 import PsychologistSignUp from './Pages/SignUp/PyschologistSignUp';
 import PsychologistDashboard from './Pages/Dashboard/PyschologistDashboard';
+import PsychologistsPage from './Pages/Pyschologists/PyschologistPage';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 
 // Componente para rutas públicas que redirige si ya está autenticado
@@ -223,6 +224,14 @@ function App() {
                 <Chatbot />
               </ProtectedRoute>
             }
+          />
+          <Route 
+            path="/psychologists" 
+            element={
+              <ProtectedRoute>
+                <PsychologistsPage />
+              </ProtectedRoute>
+            } 
           />
           
           {/* Ruta 404 */}
