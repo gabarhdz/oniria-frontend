@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Upload, User, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Shield, UserPlus, Sparkles, GraduationCap, FileText, Award, Building } from 'lucide-react';
+import { Upload, User, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Shield, UserPlus, GraduationCap, FileText, Award, Building } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// Componente de estrellas (igual que en SignUp)
+// Componente de estrellas
 const TwinklingStars: React.FC<{ count?: number }> = ({ count = 25 }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -123,15 +123,17 @@ const PsychologistSignUp: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Cargar universidades (simulado - deberías traerlas de tu API)
+  // Cargar universidades (solo para display en frontend)
   useEffect(() => {
-    // Simulación de carga de universidades
     setUniversities([
       { id: 1, name: 'Universidad de Costa Rica' },
       { id: 2, name: 'Universidad Nacional' },
       { id: 3, name: 'Universidad Latina' },
       { id: 4, name: 'ULACIT' },
       { id: 5, name: 'Universidad Fidélitas' },
+      { id: 6, name: 'Universidad Autónoma de Centro América (UACA)' },
+      { id: 7, name: 'Universidad Veritas' },
+      { id: 8, name: 'Universidad Santa Paula' },
     ]);
   }, []);
 
@@ -202,7 +204,7 @@ const PsychologistSignUp: React.FC = () => {
         formData.append('profile_pic', selectedFile);
       }
 
-      // Primero crear el usuario
+      // Paso 1: Crear el usuario
       const userResponse = await axios.post('http://127.0.0.1:8000/api/users/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -210,11 +212,27 @@ const PsychologistSignUp: React.FC = () => {
         timeout: 60000,
       });
 
-      // Luego crear el perfil de psicólogo
+      console.log('✅ Usuario creado:', userResponse.data);
+
+      // Paso 2: Hacer login para obtener el token
+      const loginResponse = await axios.post('http://127.0.0.1:8000/api/auth/jwt/create/', {
+        username: data.username,
+        password: data.password
+      });
+
+      const accessToken = loginResponse.data.access;
+      console.log('✅ Token obtenido');
+
+      // Paso 3: Crear el perfil de psicólogo usando el token
+      // Enviamos el nombre de la universidad en lugar del ID
+      const universityName = universities.find(u => u.id === parseInt(data.university))?.name || '';
+      
       const psychologistData = {
-        university: data.university,
+        university: universityName,  // Enviamos el nombre en lugar del ID
         description: data.professional_description || '',
       };
+
+      console.log('📤 Enviando datos de psicólogo:', psychologistData);
 
       await axios.post(
         `http://127.0.0.1:8000/api/psychologists/psychologists/`,
@@ -222,10 +240,12 @@ const PsychologistSignUp: React.FC = () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
         }
       );
+
+      console.log('✅ Perfil de psicólogo creado');
 
       setShowAlert({
         type: 'success',
@@ -241,18 +261,22 @@ const PsychologistSignUp: React.FC = () => {
       }, 2000);
 
     } catch (err: any) {
-      console.error('Error de registro:', err);
+      console.error('❌ Error de registro:', err);
       
       let errorMessage = 'Ha ocurrido un error inesperado durante el registro.';
       
       if (err?.response?.data) {
         const data = err.response.data;
+        console.error('Error data:', data);
+        
         if (data.email) {
           errorMessage = '💫 Este email ya está registrado.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión.';
         } else if (data.username) {
           errorMessage = '🌙 Este nombre de usuario ya está en uso.\n\nElige un nombre único para tu perfil profesional.';
         } else if (data.password) {
           errorMessage = `Contraseña: ${Array.isArray(data.password) ? data.password.join(', ') : data.password}`;
+        } else if (data.error) {
+          errorMessage = data.error;
         } else {
           try {
             errorMessage = Object.values(data).flat().join('\n');
@@ -260,6 +284,8 @@ const PsychologistSignUp: React.FC = () => {
             errorMessage = JSON.stringify(data);
           }
         }
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
       
       setShowAlert({
@@ -566,6 +592,9 @@ const PsychologistSignUp: React.FC = () => {
                           <p className="text-lg text-[#252c3e] font-medium">
                             Arrastra tu foto aquí o haz clic
                           </p>
+                          <p className="text-sm text-[#252c3e]/60">
+                            PNG, JPG o JPEG (máx. 5MB)
+                          </p>
                         </div>
                       )}
                     </div>
@@ -578,7 +607,7 @@ const PsychologistSignUp: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#214d72] via-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:via-[#9675bc] hover:to-[#214d72] text-white font-bold py-5 px-8 rounded-xl transition-all duration-500 disabled:opacity-50 transform hover:scale-[1.02] shadow-2xl"
+                  className="w-full bg-gradient-to-r from-[#214d72] via-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:via-[#9675bc] hover:to-[#214d72] text-white font-bold py-5 px-8 rounded-xl transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-2xl"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center space-x-3">
@@ -654,6 +683,7 @@ const PsychologistSignUp: React.FC = () => {
       `}</style>
 
     </div>
-    );
+  );
 };
+
 export default PsychologistSignUp;

@@ -34,6 +34,7 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
+  
 
   // Mouse tracking for dynamic effects
   const handleMouseMove = (e: React.MouseEvent) => {

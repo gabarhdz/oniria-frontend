@@ -46,7 +46,7 @@ authApiClient.interceptors.request.use(
 );
 
 // Interceptor para manejar respuestas y errores de autenticación
-authApiClient.interceptors.response.use(
+authApiClient.interceptors.response.use( 
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
