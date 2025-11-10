@@ -17,6 +17,10 @@ import {
   Home
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ChatButton } from '../../components/chat/ChatButton';
+import { ChatWindow } from '../../components/chat';
+import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 type University = { id?: number; name?: string };
 type UserObj = { id?: string | number; username?: string };
@@ -30,7 +34,6 @@ type PsychologistType = {
   [key: string]: any;
 };
 
-// Twinkling stars component
 const TwinklingStars: React.FC<{ count?: number }> = ({ count = 30 }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -65,7 +68,8 @@ const PsychologistCard: React.FC<{
   psychologist: PsychologistType;
   onViewProfile: (p: PsychologistType) => void;
   onContact: (p: PsychologistType) => void;
-}> = ({ psychologist, onViewProfile, onContact }) => {
+  isContacting?: boolean; // <--- añadido
+}> = ({ psychologist, onViewProfile, onContact, isContacting = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const displayName = psychologist.user?.username || psychologist.username || 'Psicólogo';
 
@@ -90,6 +94,7 @@ const PsychologistCard: React.FC<{
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#9675bc] to-[#f1b3be] p-1 shadow-lg group-hover:scale-105 transition-transform duration-300">
               <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                 {psychologist.profile_pic ? (
+                  // useBase64Image hook in other components will handle data-urls or external urls
                   <img
                     src={psychologist.profile_pic}
                     alt={displayName}
@@ -169,9 +174,12 @@ const PsychologistCard: React.FC<{
             <Eye className="w-4 h-4" />
             <span>Ver Perfil</span>
           </button>
-          <button
+           <button
             onClick={() => onContact(psychologist)}
-            className="flex items-center justify-center px-4 py-3 bg-white hover:bg-[#ffe0db]/50 rounded-xl text-[#9675bc] font-medium transition-all duration-300 hover:scale-105 border border-[#9675bc]/20 shadow-lg"
+            disabled={isContacting} // <--- deshabilita mientras se crea la conversación
+            className={`flex items-center justify-center px-4 py-3 rounded-xl text-[#9675bc] font-medium transition-all duration-300 hover:scale-105 border border-[#9675bc]/20 shadow-lg ${
+              isContacting ? 'opacity-60 cursor-not-allowed' : 'bg-white hover:bg-[#ffe0db]/50'
+            }`}
           >
             <MessageCircle className="w-4 h-4" />
           </button>
@@ -183,11 +191,17 @@ const PsychologistCard: React.FC<{
 
 const PsychologistsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth(); // current authenticated user (may be null)
   const [psychologists, setPsychologists] = useState<PsychologistType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'disponibles' | 'mejor_valorados'>('all');
   const [isVisible, setIsVisible] = useState(false);
+
+  // Chat-related state (moved to component scope)
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  const [selectedPsychologist, setSelectedPsychologist] = useState<PsychologistType | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 200);
@@ -226,14 +240,48 @@ const PsychologistsPage: React.FC = () => {
   }, []);
 
   const handleViewProfile = (psychologist: PsychologistType) => {
-    // Navegar al perfil del psicólogo en modo viewOnly
     const userId = psychologist.user?.id || psychologist.id;
     navigate(`/dashboard/profile/view/${userId}`);
   };
 
-  const handleContact = (psychologist: PsychologistType) => {
-    console.log('Contactar:', psychologist);
-    // abrir modal / iniciar chat
+  // Single, top-level handler for initiating chat with a psychologist
+  const handleContact = async (psychologist: PsychologistType) => {
+    try {
+      // Save selected psychologist for ChatWindow context
+      setSelectedPsychologist(psychologist);
+
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        alert('Necesitas iniciar sesión para contactar a un psicólogo.');
+        return;
+      }
+
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/chat/conversations/',
+        {
+          psychologist_id: psychologist.user?.id || psychologist.id,
+          initial_message: '¡Hola! Me gustaría consultar contigo.'
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // API should return the conversation id
+      const convId: string = response.data?.id;
+      if (!convId) {
+        throw new Error('No conversation id returned from server');
+      }
+
+      setActiveChatId(convId);
+      setShowChat(true);
+    } catch (error) {
+      console.error('Error al iniciar chat:', error);
+      alert('No se pudo iniciar el chat. Intenta nuevamente.');
+    }
   };
 
   const handleRegisterAsPsychologist = () => {
@@ -242,7 +290,6 @@ const PsychologistsPage: React.FC = () => {
 
   const handleBackToDashboard = () => {
     navigate('/dashboard');
-    // Forzar recarga de la página
     window.location.reload();
   };
 
@@ -267,7 +314,6 @@ const PsychologistsPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center space-x-4">
-                {/* Botón para regresar al dashboard */}
                 <button
                   onClick={handleBackToDashboard}
                   className="p-2 sm:p-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl text-oniria_lightpink hover:bg-white/20 hover:scale-105 transition-all duration-300 flex-shrink-0 group"
@@ -414,6 +460,21 @@ const PsychologistsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Chat window: se renderiza cuando se creó conversación */}
+      {showChat && activeChatId && selectedPsychologist && currentUser && (
+        <ChatWindow
+          conversationId={activeChatId}
+          psychologistName={selectedPsychologist.user?.username || selectedPsychologist.username || 'Psicólogo'}
+          psychologistPic={selectedPsychologist.profile_pic ?? undefined}
+          onClose={() => {
+            setShowChat(false);
+            setActiveChatId(null);
+            setSelectedPsychologist(null);
+          }}
+          currentUserId={currentUser.id}
+        />
+      )}
 
       <style>{`
         @keyframes twinkle {
