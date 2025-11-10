@@ -1,6 +1,7 @@
 // src/Pages/Profile/ProfileComponents/ProfileAvatar.tsx
 import React, { useState, useEffect } from 'react';
 import { Camera, User as UserIcon } from 'lucide-react';
+import { useBase64Image } from '../../../hooks/useBase64Image';
 
 interface UserProfile {
   id: string;
@@ -27,6 +28,8 @@ interface ProfileAvatarProps {
 const getUserInitials = (username: string): string => {
   return username.split(' ').map(name => name.charAt(0)).join('').toUpperCase().slice(0, 2);
 };
+
+
 
 export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ 
   size, 
@@ -81,8 +84,8 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
 
     return null;
   };
+const imageSrc = previewUrl ?? getImageSrc();
 
-  const imageSrc = getImageSrc();
   const getInitials = getUserInitialsProp || getUserInitials;
 
   const handleEditClick = () => {

@@ -21,6 +21,7 @@ import { ChatButton } from '../../components/chat/ChatButton';
 import { ChatWindow } from '../../components/chat';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import { DashboardFooter } from '../Dashboard/components';
 
 type University = { id?: number; name?: string };
 type UserObj = { id?: string | number; username?: string };
@@ -460,6 +461,9 @@ const PsychologistsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <DashboardFooter />
 
       {/* Chat window: se renderiza cuando se creó conversación */}
       {showChat && activeChatId && selectedPsychologist && currentUser && (
@@ -475,6 +479,7 @@ const PsychologistsPage: React.FC = () => {
           currentUserId={currentUser.id}
         />
       )}
+      
 
       <style>{`
         @keyframes twinkle {

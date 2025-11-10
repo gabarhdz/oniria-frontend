@@ -1,4 +1,4 @@
-// src/hooks/useBase64Image.ts
+// ...existing code...
 import { useState, useEffect } from 'react';
 
 declare const process: {
@@ -10,6 +10,8 @@ declare const process: {
 interface UseBase64ImageOptions {
   fallbackInitials?: string;
   onError?: () => void;
+  svgSize?: number;
+  apiBaseUrl?: string;
 }
 
 interface UseBase64ImageReturn {
@@ -19,14 +21,53 @@ interface UseBase64ImageReturn {
   resetError: () => void;
 }
 
-/**
- * Hook personalizado para manejar imágenes en base64
- * Convierte automáticamente base64 a formato data:image si es necesario
- * 
- * @param imageData - String que puede ser base64, URL o path
- * @param options - Opciones adicionales para el hook
- * @returns Objeto con imageUrl procesada, estados de error y carga
- */
+/* Helpers */
+const isDataImage = (s: string) => /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(s.trim());
+const isHttpUrl = (s: string) => /^https?:\/\//i.test(s.trim());
+
+export const toDataImage = (imageData?: string | null, defaultMime = 'jpeg', apiBase?: string) => {
+  if (!imageData) return null;
+  const trimmed = imageData.trim();
+
+  // Already a data URL
+  if (isDataImage(trimmed)) return trimmed;
+
+  // Full HTTP URL
+  if (isHttpUrl(trimmed)) return trimmed;
+
+  // If looks like '/path/to/file' or 'media/..' -> prefix API base
+  if (trimmed.startsWith('/')) {
+    const base = apiBase ?? process.env.REACT_APP_API_URL ?? 'http://127.0.0.1:8000';
+    return `${base}${trimmed}`;
+  }
+  if (/^(media|uploads)\/.+/.test(trimmed)) {
+    const base = apiBase ?? process.env.REACT_APP_API_URL ?? 'http://127.0.0.1:8000';
+    return `${base}/${trimmed}`;
+  }
+
+  // Pure base64 payload without data: prefix -> add default mime
+  // Validate basic base64 chars
+  const candidate = trimmed.replace(/\s+/g, '');
+  if (/^[A-Za-z0-9+/=]+$/.test(candidate) && candidate.length > 50) {
+    return `data:image/${defaultMime};base64,${candidate}`;
+  }
+
+  // Fallback: return null
+  return null;
+};
+
+const createInitialsSvgDataUrl = (initials: string | undefined, size = 128) => {
+  const txt = (initials || 'NA').slice(0, 2).toUpperCase();
+  const bg = '#9675bc';
+  const fg = '#fff';
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>
+    <rect width='100%' height='100%' fill='${bg}' rx='20' ry='20'/>
+    <text x='50%' y='50%' dy='.1em' fill='${fg}' font-family='Helvetica, Arial, sans-serif' font-size='${Math.round(size *
+    0.44)}' font-weight='700' text-anchor='middle'>${txt}</text>
+  </svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+
 export const useBase64Image = (
   imageData?: string | null,
   options: UseBase64ImageOptions = {}
@@ -35,112 +76,50 @@ export const useBase64Image = (
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const apiBase = options.apiBaseUrl || process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+  const svgSize = options.svgSize ?? 128;
+
   useEffect(() => {
+    let mounted = true;
     setIsLoading(true);
     setHasError(false);
 
-    if (!imageData) {
-      setImageUrl(null);
-      setIsLoading(false);
-      return;
-    }
+    (async () => {
+      try {
+        if (!imageData) {
+          if (mounted) setImageUrl(createInitialsSvgDataUrl(options.fallbackInitials, svgSize));
+          return;
+        }
 
-    try {
-      let processedUrl: string | null = null;
+        const processed = toDataImage(imageData, 'jpeg', apiBase);
+        if (mounted && processed) {
+          setImageUrl(processed);
+          return;
+        }
 
-      // 1. Si ya tiene prefijo data:image, usar directamente
-      if (imageData.startsWith('data:image')) {
-        processedUrl = imageData;
+        // fallback initials
+        if (mounted) setImageUrl(createInitialsSvgDataUrl(options.fallbackInitials, svgSize));
+      } catch (err) {
+        console.error('useBase64Image error:', err);
+        if (mounted) {
+          setHasError(true);
+          setImageUrl(createInitialsSvgDataUrl(options.fallbackInitials, svgSize));
+        }
+        options.onError?.();
+      } finally {
+        if (mounted) setIsLoading(false);
       }
-      // 2. Si es base64 puro (típicamente muy largo y sin caracteres de URL)
-      else if (imageData.length > 100 && !imageData.includes('/') && !imageData.includes('http')) {
-        // Determinar el tipo de imagen si es posible
-        const imageType = 'jpeg'; // Por defecto JPEG
-        processedUrl = `data:image/${imageType};base64,${imageData}`;
-      }
-      // 3. Si es URL HTTP/HTTPS completa
-      else if (imageData.startsWith('http://') || imageData.startsWith('https://')) {
-        processedUrl = imageData;
-      }
-      // 4. Si es path relativo del servidor
-      else if (imageData.startsWith('/')) {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-        processedUrl = `${apiUrl}${imageData}`;
-      }
-      // 5. Cualquier otro caso, intentar como base64
-      else if (imageData.length > 50) {
-        processedUrl = `data:image/jpeg;base64,${imageData}`;
-      }
+    })();
 
-      setImageUrl(processedUrl);
-    } catch (error) {
-      console.error('Error processing image:', error);
-      setHasError(true);
-      if (options.onError) {
-        options.onError();
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [imageData, options]);
+    return () => {
+      mounted = false;
+    };
+  }, [imageData, options.fallbackInitials, options.svgSize, options.apiBaseUrl]);
 
-  const resetError = () => {
-    setHasError(false);
-  };
+  const resetError = () => setHasError(false);
 
-  return {
-    imageUrl,
-    hasError,
-    isLoading,
-    resetError
-  };
-};
-
-/**
- * Utilidad para verificar si una string es base64 válido
- */
-export const isValidBase64 = (str: string): boolean => {
-  if (!str || str.length === 0) return false;
-  
-  // Si tiene prefijo data:image, extraer solo el base64
-  const base64Data = str.includes(',') ? str.split(',')[1] : str;
-  
-  try {
-    return btoa(atob(base64Data)) === base64Data;
-  } catch (err) {
-    return false;
-  }
-};
-
-/**
- * Utilidad para obtener el tipo MIME de una imagen base64
- */
-export const getBase64MimeType = (base64: string): string | null => {
-  if (!base64.startsWith('data:')) return null;
-  
-  const matches = base64.match(/data:([^;]+);/);
-  return matches ? matches[1] : null;
-};
-
-/**
- * Utilidad para convertir un File/Blob a base64
- */
-export const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
-};
-
-/**
- * Utilidad para validar el tamaño de una imagen base64
- */
-export const getBase64Size = (base64: string): number => {
-  const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
-  const padding = base64Data.endsWith('==') ? 2 : base64Data.endsWith('=') ? 1 : 0;
-  return (base64Data.length * 0.75) - padding;
+  return { imageUrl, hasError, isLoading, resetError };
 };
 
 export default useBase64Image;
+// ...existing code...
