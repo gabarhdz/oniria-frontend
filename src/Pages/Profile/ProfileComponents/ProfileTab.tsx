@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Edit3, X, Save, Loader2, Heart, Moon, Calendar, Star, Shield,
-  RefreshCw, User, Mail, Globe
+  RefreshCw, User, Mail, Globe, Award, GraduationCap
 } from 'lucide-react';
 import { ProfileAvatar } from './ProfileAvatar';
 import type { UserProfile, PrivacySettings } from './types';
@@ -176,7 +176,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   <div className="text-2xl sm:text-3xl font-bold text-[#ffe0db] mb-1">{stat.value}</div>
                   <div className="text-[#ffe0db]/60 text-xs sm:text-sm">{stat.label}</div>
                 </div>
-              ))}
+              ))
+              }
             </div>
           </div>
         </div>

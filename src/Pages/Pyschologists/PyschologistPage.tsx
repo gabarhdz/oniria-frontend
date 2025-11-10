@@ -11,8 +11,12 @@ import {
   ArrowRight,
   Brain,
   Shield,
-  TrendingUp
+  TrendingUp,
+  ArrowLeft,
+  Eye,
+  Home
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 type University = { id?: number; name?: string };
 type UserObj = { id?: string | number; username?: string };
@@ -162,7 +166,7 @@ const PsychologistCard: React.FC<{
             onClick={() => onViewProfile(psychologist)}
             className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg"
           >
-            <Users className="w-4 h-4" />
+            <Eye className="w-4 h-4" />
             <span>Ver Perfil</span>
           </button>
           <button
@@ -178,6 +182,7 @@ const PsychologistCard: React.FC<{
 };
 
 const PsychologistsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [psychologists, setPsychologists] = useState<PsychologistType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -207,7 +212,6 @@ const PsychologistsPage: React.FC = () => {
         }
 
         const data = await res.json();
-        // soportar paginación (results) o lista directa
         const items = Array.isArray(data) ? data : data.results ?? [];
         setPsychologists(items);
       } catch (error) {
@@ -222,9 +226,9 @@ const PsychologistsPage: React.FC = () => {
   }, []);
 
   const handleViewProfile = (psychologist: PsychologistType) => {
-    // navegar o abrir modal
-    console.log('Ver perfil:', psychologist);
-    // ejemplo: window.location.href = `/psychologists/${psychologist.id}`;
+    // Navegar al perfil del psicólogo en modo viewOnly
+    const userId = psychologist.user?.id || psychologist.id;
+    navigate(`/dashboard/profile/view/${userId}`);
   };
 
   const handleContact = (psychologist: PsychologistType) => {
@@ -234,6 +238,12 @@ const PsychologistsPage: React.FC = () => {
 
   const handleRegisterAsPsychologist = () => {
     window.location.href = '/psychologist-signup';
+  };
+
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+    // Forzar recarga de la página
+    window.location.reload();
   };
 
   const filteredPsychologists = psychologists.filter((psy) => {
@@ -257,6 +267,15 @@ const PsychologistsPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center space-x-4">
+                {/* Botón para regresar al dashboard */}
+                <button
+                  onClick={handleBackToDashboard}
+                  className="p-2 sm:p-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl text-oniria_lightpink hover:bg-white/20 hover:scale-105 transition-all duration-300 flex-shrink-0 group"
+                  title="Regresar al Dashboard"
+                >
+                  <Home className="w-5 h-5 sm:w-6 sm:h-6 group-hover:transform group-hover:-translate-x-1 transition-transform" />
+                </button>
+
                 <div className="w-12 h-12 bg-gradient-to-r from-[#9675bc] via-[#f1b3be] to-[#ffe0db] rounded-xl flex items-center justify-center shadow-lg">
                   <Brain className="w-6 h-6 text-white" />
                 </div>

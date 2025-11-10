@@ -332,14 +332,14 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
               Tu identidad única en el mundo de los sueños y emociones
             </p>
             
-            {/* Special user indicator */}
+            {/* Special user indicator - SIN animación */}
             {user.is_psychologist && (
-              <div className="mt-3 inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#9675bc]/20 to-[#f1b3be]/20 rounded-full border border-[#9675bc]/30">
-                <Crown className="w-4 h-4 text-[#f1b3be]" />
-                <span className="text-sm font-semibold text-[#ffe0db]">Psicólogo Certificado</span>
-                <Star className="w-4 h-4 text-[#ffe0db] animate-pulse" />
-              </div>
-            )}
+             <div className="mt-3 inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#9675bc]/20 to-[#f1b3be]/20 rounded-full border border-[#9675bc]/30">
+              <Crown className="w-4 h-4 text-[#f1b3be]" />
+             <span className="text-sm font-semibold text-[#ffe0db]">Psicólogo Certificado</span>
+              <Star className="w-4 h-4 text-[#ffe0db]" />
+             </div>
+      )}
             
             {/* Decorative elements */}
             <div className="mt-4 flex items-center space-x-2">
