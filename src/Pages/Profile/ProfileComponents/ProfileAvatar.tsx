@@ -1,5 +1,5 @@
 // src/Pages/Profile/ProfileComponents/ProfileAvatar.tsx
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Camera, User as UserIcon } from 'lucide-react';
 import { useBase64Image } from '../../../hooks/useBase64Image';
 
@@ -8,6 +8,7 @@ interface UserProfile {
   username: string;
   email: string;
   description?: string;
+  profile_pic?: string;
   profile_pic_url?: string;
   is_psychologist: boolean;
   date_joined?: string;
@@ -29,8 +30,6 @@ const getUserInitials = (username: string): string => {
   return username.split(' ').map(name => name.charAt(0)).join('').toUpperCase().slice(0, 2);
 };
 
-
-
 export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ 
   size, 
   editable = false,
@@ -42,9 +41,6 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   fileInputRef,
   getUserInitials: getUserInitialsProp
 }) => {
-  const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
   // Definir tamaños según el prop
   const sizeClasses = {
     small: 'w-20 h-20',
@@ -64,29 +60,14 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     large: 'w-8 h-8'
   }[size];
 
-  // Determinar qué imagen mostrar
-  const getImageSrc = (): string | null => {
-    // Prioridad 1: Preview local
-    if (previewUrl) {
-      return previewUrl;
-    }
-
-    // Prioridad 2: Imagen del servidor
-    if (user?.profile_pic_url) {
-      const url = user.profile_pic_url;
-      // Si ya tiene el prefijo, retornarlo tal cual
-      if (url.startsWith('data:image')) {
-        return url;
-      }
-      // Si no, agregarlo
-      return `data:image/jpeg;base64,${url}`;
-    }
-
-    return null;
-  };
-const imageSrc = previewUrl ?? getImageSrc();
-
-  const getInitials = getUserInitialsProp || getUserInitials;
+  // Determinar qué imagen usar
+  // Prioridad: 1) Preview local, 2) profile_pic_url del usuario, 3) profile_pic del usuario
+  const imageToUse = previewUrl || user?.profile_pic_url || user?.profile_pic || null;
+  
+  // Usar el hook para procesar la imagen
+  const { imageUrl, isLoading, hasError } = useBase64Image(imageToUse, {
+    fallbackInitials: user?.username ? (getUserInitialsProp || getUserInitials)(user.username) : 'NA'
+  });
 
   const handleEditClick = () => {
     if (onEditClick) {
@@ -96,60 +77,37 @@ const imageSrc = previewUrl ?? getImageSrc();
     }
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error('ProfileAvatar - Error loading image:', e);
-    setImageError(true);
-    setImageLoaded(false);
-  };
-
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-    setImageError(false);
-  };
-
-  // Reset error state when image source changes
-  useEffect(() => {
-    setImageError(false);
-    setImageLoaded(false);
-  }, [imageSrc]);
-
-  const showImage = imageSrc && !imageError;
-  const showInitials = !showImage;
-
   return (
     <div className={`relative ${sizeClasses} group flex-shrink-0`}>
       {/* Avatar principal */}
       <div className={`${sizeClasses} rounded-full overflow-hidden bg-gradient-to-br from-[#9675bc]/40 via-[#f1b3be]/30 to-[#ffe0db]/20 border-4 border-[#ffe0db]/20 shadow-2xl flex items-center justify-center relative transition-all duration-500 group-hover:scale-105 group-hover:shadow-[#f1b3be]/50`}>
         
-        {showImage ? (
-          <>
-            {/* Loader mientras carga la imagen */}
-            {!imageLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#9675bc]/20 animate-pulse">
-                <UserIcon className="w-8 h-8 text-[#ffe0db]/50" />
-              </div>
-            )}
-            
-            <img
-              src={imageSrc!}
-              alt={`Avatar de ${user?.username || 'Usuario'}`}
-              className={`w-full h-full object-cover transition-all duration-500 ${
-                imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-              } group-hover:scale-105`}
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-              style={{ 
-                display: imageLoaded ? 'block' : 'none',
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
-            />
-          </>
-        ) : showInitials ? (
+        {isLoading ? (
+          // Loader mientras carga
+          <div className="absolute inset-0 flex items-center justify-center bg-[#9675bc]/20 animate-pulse">
+            <UserIcon className="w-8 h-8 text-[#ffe0db]/50" />
+          </div>
+        ) : imageUrl && !hasError ? (
+          // Mostrar imagen
+          <img
+            src={imageUrl}
+            alt={`Avatar de ${user?.username || 'Usuario'}`}
+            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+            style={{ 
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+            onError={(e) => {
+              console.error('Error loading avatar image');
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : (
+          // Fallback: mostrar initials o placeholder
           <span className={`text-[#ffe0db] font-bold ${textSize} select-none`}>
-            {user?.username ? getInitials(user.username) : '??'}
+            {user?.username ? (getUserInitialsProp || getUserInitials)(user.username) : '??'}
           </span>
-        ) : null}
+        )}
         
         {/* Overlay de edición */}
         {editable && isEditing && !viewOnly && (

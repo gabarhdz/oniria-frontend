@@ -1,17 +1,9 @@
-// ...existing code...
+// src/hooks/useBase64Image.ts
 import { useState, useEffect } from 'react';
-
-declare const process: {
-  env: {
-    REACT_APP_API_URL?: string;
-  };
-};
 
 interface UseBase64ImageOptions {
   fallbackInitials?: string;
   onError?: () => void;
-  svgSize?: number;
-  apiBaseUrl?: string;
 }
 
 interface UseBase64ImageReturn {
@@ -21,53 +13,68 @@ interface UseBase64ImageReturn {
   resetError: () => void;
 }
 
-/* Helpers */
-const isDataImage = (s: string) => /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(s.trim());
-const isHttpUrl = (s: string) => /^https?:\/\//i.test(s.trim());
-
-export const toDataImage = (imageData?: string | null, defaultMime = 'jpeg', apiBase?: string) => {
+/**
+ * Procesa diferentes formatos de imagen y los convierte a data URL
+ */
+const processImageData = (imageData?: string | null): string | null => {
   if (!imageData) return null;
+  
   const trimmed = imageData.trim();
-
-  // Already a data URL
-  if (isDataImage(trimmed)) return trimmed;
-
-  // Full HTTP URL
-  if (isHttpUrl(trimmed)) return trimmed;
-
-  // If looks like '/path/to/file' or 'media/..' -> prefix API base
-  if (trimmed.startsWith('/')) {
-    const base = apiBase ?? process.env.REACT_APP_API_URL ?? 'http://127.0.0.1:8000';
-    return `${base}${trimmed}`;
+  
+  // Ya es una data URL completa
+  if (trimmed.startsWith('data:image')) {
+    return trimmed;
   }
-  if (/^(media|uploads)\/.+/.test(trimmed)) {
-    const base = apiBase ?? process.env.REACT_APP_API_URL ?? 'http://127.0.0.1:8000';
-    return `${base}/${trimmed}`;
+  
+  // Es una URL HTTP completa
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
   }
-
-  // Pure base64 payload without data: prefix -> add default mime
-  // Validate basic base64 chars
-  const candidate = trimmed.replace(/\s+/g, '');
-  if (/^[A-Za-z0-9+/=]+$/.test(candidate) && candidate.length > 50) {
-    return `data:image/${defaultMime};base64,${candidate}`;
+  
+  // Es una ruta relativa del servidor
+  if (trimmed.startsWith('/media/') || trimmed.startsWith('/')) {
+    const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+    return `${API_BASE}${trimmed}`;
   }
-
-  // Fallback: return null
+  
+  // Es base64 puro sin prefijo
+  // Validar que sea base64 válido (caracteres permitidos + longitud mínima)
+  const base64Pattern = /^[A-Za-z0-9+/=]+$/;
+  if (base64Pattern.test(trimmed) && trimmed.length > 50) {
+    // Asumir JPEG por defecto
+    return `data:image/jpeg;base64,${trimmed}`;
+  }
+  
+  console.warn('Formato de imagen no reconocido:', trimmed.substring(0, 100));
   return null;
 };
 
-const createInitialsSvgDataUrl = (initials: string | undefined, size = 128) => {
-  const txt = (initials || 'NA').slice(0, 2).toUpperCase();
-  const bg = '#9675bc';
-  const fg = '#fff';
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>
-    <rect width='100%' height='100%' fill='${bg}' rx='20' ry='20'/>
-    <text x='50%' y='50%' dy='.1em' fill='${fg}' font-family='Helvetica, Arial, sans-serif' font-size='${Math.round(size *
-    0.44)}' font-weight='700' text-anchor='middle'>${txt}</text>
-  </svg>`;
+/**
+ * Crea un SVG con las iniciales como fallback
+ */
+const createInitialsSvg = (initials: string = 'NA'): string => {
+  const text = initials.slice(0, 2).toUpperCase();
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'>
+      <rect width='100%' height='100%' fill='#9675bc' rx='20' ry='20'/>
+      <text 
+        x='50%' 
+        y='50%' 
+        dy='.1em' 
+        fill='#fff' 
+        font-family='Helvetica, Arial, sans-serif' 
+        font-size='56' 
+        font-weight='700' 
+        text-anchor='middle'
+      >${text}</text>
+    </svg>
+  `;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
 
+/**
+ * Hook para manejar imágenes en base64 y otros formatos
+ */
 export const useBase64Image = (
   imageData?: string | null,
   options: UseBase64ImageOptions = {}
@@ -76,45 +83,71 @@ export const useBase64Image = (
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const apiBase = options.apiBaseUrl || process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-  const svgSize = options.svgSize ?? 128;
-
   useEffect(() => {
     let mounted = true;
     setIsLoading(true);
     setHasError(false);
 
-    (async () => {
+    const loadImage = async () => {
       try {
+        // Si no hay imagen, usar initials
         if (!imageData) {
-          if (mounted) setImageUrl(createInitialsSvgDataUrl(options.fallbackInitials, svgSize));
+          if (mounted) {
+            setImageUrl(createInitialsSvg(options.fallbackInitials));
+            setIsLoading(false);
+          }
           return;
         }
 
-        const processed = toDataImage(imageData, 'jpeg', apiBase);
-        if (mounted && processed) {
-          setImageUrl(processed);
-          return;
+        // Procesar la imagen
+        const processedUrl = processImageData(imageData);
+        
+        if (processedUrl) {
+          // Validar que la imagen se puede cargar
+          const img = new Image();
+          
+          img.onload = () => {
+            if (mounted) {
+              setImageUrl(processedUrl);
+              setIsLoading(false);
+            }
+          };
+          
+          img.onerror = () => {
+            console.error('Error loading image:', processedUrl.substring(0, 100));
+            if (mounted) {
+              setHasError(true);
+              setImageUrl(createInitialsSvg(options.fallbackInitials));
+              setIsLoading(false);
+              options.onError?.();
+            }
+          };
+          
+          img.src = processedUrl;
+        } else {
+          // Si no se pudo procesar, usar initials
+          if (mounted) {
+            setImageUrl(createInitialsSvg(options.fallbackInitials));
+            setIsLoading(false);
+          }
         }
-
-        // fallback initials
-        if (mounted) setImageUrl(createInitialsSvgDataUrl(options.fallbackInitials, svgSize));
-      } catch (err) {
-        console.error('useBase64Image error:', err);
+      } catch (error) {
+        console.error('Error in useBase64Image:', error);
         if (mounted) {
           setHasError(true);
-          setImageUrl(createInitialsSvgDataUrl(options.fallbackInitials, svgSize));
+          setImageUrl(createInitialsSvg(options.fallbackInitials));
+          setIsLoading(false);
+          options.onError?.();
         }
-        options.onError?.();
-      } finally {
-        if (mounted) setIsLoading(false);
       }
-    })();
+    };
+
+    loadImage();
 
     return () => {
       mounted = false;
     };
-  }, [imageData, options.fallbackInitials, options.svgSize, options.apiBaseUrl]);
+  }, [imageData, options.fallbackInitials]);
 
   const resetError = () => setHasError(false);
 
@@ -122,4 +155,3 @@ export const useBase64Image = (
 };
 
 export default useBase64Image;
-// ...existing code...
