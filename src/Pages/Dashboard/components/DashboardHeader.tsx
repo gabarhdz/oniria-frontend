@@ -56,7 +56,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     { label: 'Análisis', path: '/analysis' },
     { label: 'Psicólogos', path: '/psychologists' },
     { label: 'Comunidad', path: '/communities' },
-    { label: 'Conversaciones', path: '/conversaciones' } // <-- agregado
   ];
 
   const getUserInitials = (username: string): string =>
