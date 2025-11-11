@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { LogOut, RefreshCw, User, Settings, Shield, Moon, Sun, HelpCircle, Menu, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import {
+  LogOut,
+  RefreshCw,
+  User,
+  Settings,
+  Shield,
+  Moon,
+  Sun,
+  HelpCircle,
+  Menu,
+  X,
+  MessageCircle
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '../../../components/NotificationCenter';
 
 interface User {
@@ -63,6 +75,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     e.stopPropagation();
     setShowLogoutConfirm(true);
     setShowMobileMenu(false);
+    setShowProfileMenu(false);
   };
 
   const handleConfirmLogout = (e: React.MouseEvent) => {
@@ -76,13 +89,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setShowLogoutConfirm(false);
-  };
-
-  const handleOutsideClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (!target.closest('.relative') || !target.closest('button')) {
-      setShowProfileMenu(false);
-    }
   };
 
   const ProfileAvatar: React.FC<{ size: 'small' | 'medium' | 'large'; showRing?: boolean }> = ({
@@ -140,27 +146,22 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         isMobile ? 'w-full text-left py-4 px-6 rounded-2xl' : 'py-3 px-4 lg:px-5 xl:px-6 rounded-2xl'
       } block overflow-hidden cursor-pointer`}
     >
-      {/* Efectos de fondo */}
       <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_lightpink/5 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
-      
-      {/* Partículas decorativas */}
+
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
         <div className="absolute top-2 left-3 w-1 h-1 bg-oniria_lightpink rounded-full animate-pulse"></div>
         <div className="absolute bottom-3 right-4 w-1.5 h-1.5 bg-oniria_lightpink/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
       </div>
-      
-      {/* Texto */}
+
       <span className={`relative z-10 font-medium group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300 ${isMobile ? 'text-lg' : 'text-sm lg:text-base'}`}>
         {item}
       </span>
-      
-      {/* Línea inferior */}
+
       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-oniria_lightpink to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center">
         <div className="absolute inset-0 bg-gradient-to-r from-oniria_lightpink to-white animate-pulse"></div>
       </div>
-      
-      {/* Efecto de brillo deslizante */}
+
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 delay-100"></div>
     </button>
   );
@@ -200,18 +201,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   );
 
   const MobileMenu = () => (
-    <div className={`lg:hidden fixed inset-0 z-[60] transition-all duration-500 ${
-      showMobileMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'
-    }`}>
+    <div className={`lg:hidden fixed inset-0 z-[60] transition-all duration-500 ${showMobileMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <div
-        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${
-          showMobileMenu ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${showMobileMenu ? 'opacity-100' : 'opacity-0'}`}
         onClick={() => setShowMobileMenu(false)}
       />
-      <div className={`absolute top-0 right-0 h-full w-80 max-w-[85vw] sm:max-w-[80vw] bg-oniria_darkblue/95 backdrop-blur-2xl border-l border-oniria_purple/30 transform transition-transform duration-500 ${
-        showMobileMenu ? 'translate-x-0' : 'translate-x-full'
-      } flex flex-col`}>
+      <div className={`absolute top-0 right-0 h-full w-80 max-w-[85vw] sm:max-w-[80vw] bg-oniria_darkblue/95 backdrop-blur-2xl border-l border-oniria_purple/30 transform transition-transform duration-500 ${showMobileMenu ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}>
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-oniria_purple/20 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <ProfileAvatar size="medium" />
@@ -267,10 +262,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
         <div className="p-4 border-t border-oniria_purple/20 space-y-3 flex-shrink-0">
           <button
-            onClick={() => {
-              onRefresh();
-              setShowMobileMenu(false);
-            }}
+            onClick={() => { onRefresh(); setShowMobileMenu(false); }}
             disabled={isRefreshing}
             className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-oniria_purple/15 text-oniria_lightpink hover:text-white transition-all duration-300 disabled:opacity-50"
           >
@@ -294,7 +286,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[60px] sm:h-[70px] md:h-[80px] lg:h-[90px] border-b border-oniria_purple/20">
         <div
           className="flex justify-between items-center p-2 sm:p-3 lg:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8"
-          onClick={handleOutsideClick}
         >
           {/* Logo y título */}
           <div className="relative flex-shrink-0 flex items-center ml-2 sm:ml-4 md:ml-6 lg:ml-8">
@@ -317,6 +308,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           {/* Botones acción desktop */}
           <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4 mr-4 xl:mr-6 2xl:mr-8">
+            {/* Botón de conversciones */}
+            <Link
+              to="/conversaciones"
+              className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
+              title="Mis conversaciones"
+            >
+              <MessageCircle className="w-5 h-5 xl:w-6 xl:h-6" />
+            </Link>
+
             {/* Botón de actualizar */}
             <button
               onClick={onRefresh}
@@ -339,8 +339,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               >
                 <ProfileAvatar size="small" />
               </button>
-              
-              {/* Dropdown de perfil */}
+
               {showProfileMenu && (
                 <div className="absolute top-full right-0 mt-2 w-72 xl:w-80 bg-oniria_darkblue/95 backdrop-blur-2xl border border-oniria_purple/30 rounded-2xl shadow-2xl overflow-hidden animate-dropdown-enter">
                   <div className="p-4 xl:p-6 border-b border-oniria_purple/20">
@@ -386,7 +385,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           {/* Botones móviles */}
           <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 mr-2 sm:mr-4">
-            {/* Botón de actualizar móvil */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
@@ -396,10 +394,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <RefreshCw className={`w-5 h-5 sm:w-6 sm:h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
 
-            {/* Notification Center - Móvil/Tablet */}
             <NotificationCenter />
 
-            {/* Botón de menú móvil */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300"
@@ -416,11 +412,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       {/* Menú móvil */}
       <MobileMenu />
-      
+
       {/* Modal de confirmación de logout */}
       <LogoutConfirmModal />
     </>
+
   );
-};
+}
 
 export default DashboardHeader;

@@ -15,6 +15,7 @@ import PsychologistSignUp from './Pages/SignUp/PyschologistSignUp';
 import PsychologistDashboard from './Pages/Dashboard/PyschologistDashboard';
 import PsychologistsPage from './Pages/Pyschologists/PyschologistPage';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
+import ConversationsList from './components/chat/ConversationList';
 
 // Componente para rutas públicas que redirige si ya está autenticado
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -138,6 +139,7 @@ function App() {
           <Route path="/login" element={<PublicRoute><LogIn /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/psychologist-signup" element={<PsychologistSignUp />} />
+         
           
           {/* Rutas protegidas para usuarios autenticados */}
           <Route 
@@ -148,7 +150,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
-
+          <Route 
+            path="/conversaciones" 
+            element={
+              <ProtectedRoute>
+                <ConversationsList />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
           path="/dashboard/profile/view/:userId" 
             element={
