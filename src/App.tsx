@@ -16,6 +16,7 @@ import PsychologistDashboard from './Pages/Dashboard/PyschologistDashboard';
 import PsychologistsPage from './Pages/Pyschologists/PyschologistPage';
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 import ConversationsList from './components/chat/ConversationList';
+import EmotionalDiaryPage from './Pages/EmotionalJournal/EmotionalJournal';
 
 // Componente para rutas públicas que redirige si ya está autenticado
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -242,7 +243,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
+           <Route 
+            path="/emotional-diary" 
+            element={
+              <ProtectedRoute>
+                <EmotionalDiaryPage />
+              </ProtectedRoute>
+            } 
+          />
           {/* Ruta 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -230,8 +230,7 @@ export const ActionsSection: React.FC = () => {
       description: "Descubre los patrones emocionales y psicológicos ocultos en tus sueños",
       gradient: "from-[#f1b3be] to-[#ec4899]",
       onClick: () => {
-        console.log('Navegando a análisis emocional...');
-        // window.location.href = '/analysis';
+         window.location.href = '/emotional-diary';
       }
     },
     {
