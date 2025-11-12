@@ -24,6 +24,7 @@ import {
   Eye,
   Lock
 } from 'lucide-react';
+import { DashboardFooter } from '../Dashboard/components';
 
 // ==================== TIPOS ====================
 interface EmotionalEntry {
@@ -779,6 +780,8 @@ const EmotionalDiaryPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <DashboardFooter />
 
       {/* Estilos personalizados */}
       <style>{`
