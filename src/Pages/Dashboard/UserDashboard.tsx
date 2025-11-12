@@ -12,11 +12,13 @@ import {
 } from './components';
 
 interface User {
+  id: string;
   username: string;
-  email?: string;
+  email: string;
   is_psychologist: boolean;
   description?: string;
   profile_pic?: string;
+  profile_pic_url?: string;
 }
 
 interface UserStats {
@@ -38,40 +40,8 @@ export const UserDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔹 Fetch user info
-  useEffect(() => {
-    const fetchUserData = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) throw new Error('No access token found');
-
-        const response = await fetch('http://127.0.0.1:8000/api/users/me/', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch user data');
-        const data = await response.json();
-        setUser(data);
-      } catch (err: any) {
-        console.error('Error fetching user data:', err);
-        setError(err.message || 'Error desconocido');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  // 🔹 Refresh handler
-  const handleRefreshData = async () => {
-    setIsRefreshing(true);
+  // 🔹 Función centralizada para fetch de datos del usuario
+  const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) throw new Error('No access token found');
@@ -83,15 +53,33 @@ export const UserDashboard: React.FC = () => {
         },
       });
 
-      if (!response.ok) throw new Error('Failed to refresh user data');
+      if (!response.ok) throw new Error('Failed to fetch user data');
       const data = await response.json();
       setUser(data);
-      console.log('✅ Datos actualizados correctamente');
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-    } finally {
-      setIsRefreshing(false);
+      setError(null); // Limpiar errores previos si el fetch es exitoso
+    } catch (err: any) {
+      console.error('Error fetching user data:', err);
+      setError(err.message || 'Error desconocido');
     }
+  };
+
+  // 🔹 Fetch inicial al montar el componente
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setLoading(true);
+      await fetchUserData();
+      setLoading(false);
+    };
+
+    loadInitialData();
+  }, []);
+
+  // 🔹 Refresh handler optimizado
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    await fetchUserData();
+    setIsRefreshing(false);
+    console.log('✅ Datos actualizados correctamente');
   };
 
   // 🔹 Logout handler
@@ -118,7 +106,7 @@ export const UserDashboard: React.FC = () => {
       <div className="min-h-screen bg-[#1a1f35] flex flex-col items-center justify-center text-center space-y-4 text-[#ffe0db]">
         <p>{error ? `Error: ${error}` : 'No se pudieron cargar los datos del usuario 😕'}</p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={handleRefreshData}
           className="px-4 py-2 bg-[#9675bc]/40 hover:bg-[#9675bc]/60 rounded-lg transition-all"
         >
           Reintentar
@@ -137,16 +125,19 @@ export const UserDashboard: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-transparent via-[#9675bc]/3 to-transparent" />
 
       <div className="relative z-10 min-h-screen">
+        {/* ✅ Pasamos user al DashboardHeader */}
         <DashboardHeader
+          user={user}
           onRefresh={handleRefreshData}
           onLogout={handleLogout}
           isRefreshing={isRefreshing}
-          
         />
 
+        {/* ✅ Pasamos user al WelcomeSection */}
         <WelcomeSection user={user} />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          {/* ✅ Pasamos user al UserInfoCards */}
           <UserInfoCards user={user} />
 
           <StatisticsSection

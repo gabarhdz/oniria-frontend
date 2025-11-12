@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   LogOut,
   RefreshCw,
@@ -16,66 +16,34 @@ import { Link, useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '../../../components/NotificationCenter';
 
 interface User {
+  id: string;
   username: string;
   email?: string;
   is_psychologist: boolean;
   description?: string;
+  profile_pic?: string;
   profile_pic_url?: string;
 }
 
 interface DashboardHeaderProps {
+  user: User;
   onRefresh: () => void;
   onLogout: () => void;
   isRefreshing: boolean;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
+  user,
   onRefresh,
   onLogout,
   isRefreshing
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-          throw new Error('No access token found in localStorage');
-        }
-
-        const response = await fetch('http://127.0.0.1:8000/api/users/me/', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-
-        const data: User = await response.json();
-        setUser(data);
-      } catch (err) {
-        console.error(err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   const profileMenuItems = [
     { icon: User, label: 'Mi Perfil', action: () => navigate('/dashboard/profile/profile') },
@@ -94,6 +62,41 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const getUserInitials = (username: string): string =>
     username.split(' ').map(name => name.charAt(0)).join('').toUpperCase().slice(0, 2);
+
+  // 🔹 Función mejorada para manejar base64, URLs y paths
+  const getProfileImageUrl = (user: User): string | null => {
+    // Prioridad 1: profile_pic_url
+    if (user.profile_pic_url) {
+      // Si es base64, retornar directamente
+      if (user.profile_pic_url.startsWith('data:image')) {
+        return user.profile_pic_url;
+      }
+      // Si es URL completa, retornar directamente
+      if (user.profile_pic_url.startsWith('http://') || user.profile_pic_url.startsWith('https://')) {
+        return user.profile_pic_url;
+      }
+      // Si es path relativo, construir URL completa
+      const cleanPath = user.profile_pic_url.startsWith('/') ? user.profile_pic_url : `/${user.profile_pic_url}`;
+      return `http://127.0.0.1:8000${cleanPath}`;
+    }
+
+    // Prioridad 2: profile_pic
+    if (user.profile_pic) {
+      // Si es base64, retornar directamente
+      if (user.profile_pic.startsWith('data:image')) {
+        return user.profile_pic;
+      }
+      // Si es URL completa, retornar directamente
+      if (user.profile_pic.startsWith('http://') || user.profile_pic.startsWith('https://')) {
+        return user.profile_pic;
+      }
+      // Si es path relativo, construir URL completa
+      const cleanPath = user.profile_pic.startsWith('/') ? user.profile_pic : `/${user.profile_pic}`;
+      return `http://127.0.0.1:8000${cleanPath}`;
+    }
+
+    return null;
+  };
 
   const handleLogoutClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -140,18 +143,20 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       setImageError(true);
     };
 
+    const profileImageUrl = getProfileImageUrl(user);
+
     return (
       <div className={`${sizeClasses} ${ringClasses} rounded-full overflow-hidden bg-gradient-to-br from-oniria_purple/40 via-oniria_pink/30 to-oniria_lightpink/20 flex items-center justify-center relative`}>
-        {user?.profile_pic_url && !imageError ? (
+        {profileImageUrl && !imageError ? (
           <img
-            src={user.profile_pic_url}
+            src={profileImageUrl}
             alt={`Avatar de ${user.username}`}
             className="w-full h-full object-cover"
             onError={handleImageError}
           />
         ) : (
           <span className={`text-white font-semibold ${textSize} select-none`}>
-            {user ? getUserInitials(user.username) : '??'}
+            {getUserInitials(user.username)}
           </span>
         )}
       </div>
@@ -165,8 +170,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   }) => (
     <button
       onClick={onClick}
-      className={`group relative text-oniria_lightpink hover:text-white transition-all duration-500 ${isMobile ? 'w-full text-left py-4 px-6 rounded-2xl' : 'py-3 px-4 lg:px-5 xl:px-6 rounded-2xl'
-        } block overflow-hidden cursor-pointer`}
+      className={`group relative text-oniria_lightpink hover:text-white transition-all duration-500 ${
+        isMobile ? 'w-full text-left py-4 px-6 rounded-2xl' : 'py-3 px-4 lg:px-5 xl:px-6 rounded-2xl'
+      } block overflow-hidden cursor-pointer`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-oniria_lightpink/20 to-oniria_lightpink/5 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
 
@@ -233,9 +239,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="flex items-center space-x-3">
             <ProfileAvatar size="medium" />
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-white text-base sm:text-lg truncate">{user?.username}</h3>
+              <h3 className="font-semibold text-white text-base sm:text-lg truncate">{user.username}</h3>
               <p className="text-xs sm:text-sm text-oniria_pink/80 truncate">
-                {user?.is_psychologist ? 'Psicólogo' : 'Usuario'}
+                {user.is_psychologist ? 'Psicólogo' : 'Usuario'}
               </p>
             </div>
           </div>
@@ -303,28 +309,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     </div>
   );
 
-  if (loading) {
-    return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[60px] sm:h-[70px] md:h-[80px] lg:h-[90px] border-b border-oniria_purple/20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-oniria_purple"></div>
-      </header>
-    );
-  }
-
-  if (error) {
-    return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[60px] sm:h-[70px] md:h-[80px] lg:h-[90px] border-b border-oniria_purple/20 flex items-center justify-center">
-        <span className="text-red-500">Error al cargar los datos del usuario</span>
-      </header>
-    );
-  }
-
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-oniria_darkblue/90 backdrop-blur-xl text-oniria_lightpink h-[60px] sm:h-[70px] md:h-[80px] lg:h-[90px] border-b border-oniria_purple/20">
-        <div
-          className="flex justify-between items-center p-2 sm:p-3 lg:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8"
-        >
+        <div className="flex justify-between items-center p-2 sm:p-3 lg:p-4 h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8">
           {/* Logo y título */}
           <div className="relative flex-shrink-0 flex items-center ml-2 sm:ml-4 md:ml-6 lg:ml-8">
             <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 p-1 transition-transform duration-300 hover:scale-105">
@@ -346,7 +334,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           {/* Botones acción desktop */}
           <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4 mr-4 xl:mr-6 2xl:mr-8">
-            {/* Botón de conversciones */}
             <Link
               to="/conversaciones"
               className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
@@ -355,7 +342,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <MessageCircle className="w-5 h-5 xl:w-6 xl:h-6" />
             </Link>
 
-            {/* Botón de actualizar */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
@@ -365,15 +351,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <RefreshCw className={`w-5 h-5 xl:w-6 xl:h-6 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
 
-            {/* Notification Center - Desktop */}
             <NotificationCenter />
 
-            {/* Menú de perfil */}
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
-                title={`Perfil de ${user?.username}`}
+                title={`Perfil de ${user.username}`}
               >
                 <ProfileAvatar size="small" />
               </button>
@@ -384,8 +368,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     <div className="flex items-center space-x-3 xl:space-x-4">
                       <ProfileAvatar size="large" showRing={true} />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-white text-base xl:text-lg truncate">{user?.username}</h3>
-                        <p className="text-xs xl:text-sm text-oniria_pink/80 truncate">{user?.email || 'Sin email'}</p>
+                        <h3 className="font-semibold text-white text-base xl:text-lg truncate">{user.username}</h3>
+                        <p className="text-xs xl:text-sm text-oniria_pink/80 truncate">{user.email || 'Sin email'}</p>
                       </div>
                     </div>
                   </div>
@@ -411,7 +395,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               )}
             </div>
 
-            {/* Botón de cerrar sesión */}
             <button
               onClick={handleLogoutClick}
               className="flex items-center space-x-1.5 xl:space-x-2 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl bg-oniria_pink/20 hover:bg-oniria_pink/30 text-oniria_lightpink hover:text-white transition-all duration-300 transform hover:scale-105 backdrop-blur-xl border border-oniria_pink/30"
@@ -454,7 +437,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       {/* Modal de confirmación de logout */}
       <LogoutConfirmModal />
     </>
-
   );
 }
 
