@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   MessageCircle, Search, Clock, CheckCheck, Loader2, User, ArrowLeft, 
   Filter, Sparkles, Star, MoreVertical, Archive, Pin, Volume2, VolumeX, 
@@ -184,7 +185,7 @@ const TwinklingStars: React.FC<{ count?: number }> = ({ count = 30 }) => {
   );
 };
 
-// Componente de notificaciones de chat
+// Componente de notificaciones de chat CON PORTAL
 const ChatNotificationBell: React.FC<{
   notifications: ChatNotification[];
   onClear: (id: string) => void;
@@ -193,8 +194,33 @@ const ChatNotificationBell: React.FC<{
   const [soundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem('chat_notification_sound') !== 'false';
   });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const unreadCount = notifications.length;
+
+  // Calcular posición del dropdown
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX - 320 + rect.width,
+      });
+    }
+  }, [isOpen]);
+
+  // Cerrar con Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen]);
 
   const toggleSound = () => {
     const newValue = !soundEnabled;
@@ -203,8 +229,9 @@ const ChatNotificationBell: React.FC<{
   };
 
   return (
-    <div className="relative">
+    <>
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
         title="Notificaciones de chat"
@@ -224,102 +251,120 @@ const ChatNotificationBell: React.FC<{
         )}
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 max-h-96 bg-[#252c3e]/95 backdrop-blur-xl border border-[#ffe0db]/20 rounded-xl shadow-2xl overflow-hidden z-50">
-          {/* Header */}
-          <div className="p-4 border-b border-[#ffe0db]/20">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-bold text-[#ffe0db]">
-                Mensajes
-              </h3>
-              <button
-                onClick={toggleSound}
-                className={`p-1.5 rounded-lg transition-all ${
-                  soundEnabled 
-                    ? 'bg-emerald-500/20 hover:bg-emerald-500/30' 
-                    : 'bg-white/10 hover:bg-white/20'
-                }`}
-              >
-                {soundEnabled ? (
-                  <Volume2 className="w-4 h-4 text-emerald-400" />
-                ) : (
-                  <VolumeX className="w-4 h-4 text-[#ffe0db]/50" />
-                )}
-              </button>
+      {isOpen && createPortal(
+        <div className="fixed inset-0 z-[99999]">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0"
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Dropdown */}
+          <div 
+            className="absolute bg-[#252c3e]/95 backdrop-blur-xl border border-[#ffe0db]/20 rounded-2xl shadow-2xl overflow-hidden animate-dropdown-enter"
+            style={{
+              top: dropdownPosition.top,
+              left: Math.max(16, dropdownPosition.left),
+              width: 'min(380px, calc(100vw - 32px))',
+              maxHeight: '70vh',
+              zIndex: 99999
+            }}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-[#252c3e]/95 backdrop-blur-xl p-4 border-b border-[#ffe0db]/20 z-10">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-bold text-[#ffe0db]">
+                  Mensajes
+                </h3>
+                <button
+                  onClick={toggleSound}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    soundEnabled 
+                      ? 'bg-emerald-500/20 hover:bg-emerald-500/30' 
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  {soundEnabled ? (
+                    <Volume2 className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <VolumeX className="w-4 h-4 text-[#ffe0db]/50" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Notifications List */}
+            <div className="overflow-y-auto max-h-[calc(70vh-80px)] p-2">
+              {notifications.length > 0 ? (
+                notifications.map((notif, index) => (
+                  <div
+                    key={notif.id}
+                    className="p-3 mb-2 bg-[#ffe0db]/10 hover:bg-[#ffe0db]/20 rounded-lg transition-all cursor-pointer"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                    onClick={() => {
+                      window.location.href = `/chat/${notif.conversation_id}`;
+                    }}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        {notif.sender.profile_pic ? (
+                          <img
+                            src={notif.sender.profile_pic}
+                            alt={notif.sender.username}
+                            className="w-10 h-10 rounded-full border-2 border-[#f1b3be]/30"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#9675bc] to-[#f1b3be] flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                              {notif.sender.username.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-[#ffe0db] truncate">
+                          {notif.sender.username}
+                        </h4>
+                        <p className="text-xs text-[#ffe0db]/70 line-clamp-2">
+                          {notif.message.content}
+                        </p>
+                        <p className="text-xs text-[#ffe0db]/50 mt-1">
+                          {new Date(notif.created_at).toLocaleTimeString('es-ES', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClear(notif.id);
+                        }}
+                        className="flex-shrink-0 p-1 hover:bg-red-500/20 rounded-lg transition-all"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <MessageCircle className="w-12 h-12 text-[#f1b3be]/30 mx-auto mb-3" />
+                  <p className="text-[#ffe0db]/70 text-sm">
+                    No hay mensajes nuevos
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Notifications List */}
-          <div className="overflow-y-auto max-h-80 p-2">
-            {notifications.length > 0 ? (
-              notifications.map((notif, index) => (
-                <div
-                  key={notif.id}
-                  className="p-3 mb-2 bg-[#ffe0db]/10 hover:bg-[#ffe0db]/20 rounded-lg transition-all cursor-pointer"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                  onClick={() => {
-                    window.location.href = `/chat/${notif.conversation_id}`;
-                  }}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      {notif.sender.profile_pic ? (
-                        <img
-                          src={notif.sender.profile_pic}
-                          alt={notif.sender.username}
-                          className="w-10 h-10 rounded-full border-2 border-[#f1b3be]/30"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#9675bc] to-[#f1b3be] flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">
-                            {notif.sender.username.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-[#ffe0db] truncate">
-                        {notif.sender.username}
-                      </h4>
-                      <p className="text-xs text-[#ffe0db]/70 line-clamp-2">
-                        {notif.message.content}
-                      </p>
-                      <p className="text-xs text-[#ffe0db]/50 mt-1">
-                        {new Date(notif.created_at).toLocaleTimeString('es-ES', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onClear(notif.id);
-                      }}
-                      className="flex-shrink-0 p-1 hover:bg-red-500/20 rounded-lg transition-all"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-400" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <MessageCircle className="w-12 h-12 text-[#f1b3be]/30 mx-auto mb-3" />
-                <p className="text-[#ffe0db]/70 text-sm">
-                  No hay mensajes nuevos
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 };
-
 // Componente principal mejorado
 const EnhancedConversationsList: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
