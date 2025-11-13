@@ -550,7 +550,7 @@ const DreamAlert: React.FC<DreamAlertProps> = ({ type, message, title, onClose }
                 {/* Foto de perfil */}
                 <div className="group/field">
                   <label className="block text-sm font-semibold text-[#252c3e] mb-2">
-                    Foto del titular o credencial profesional
+                    Foto de perfil
                   </label>
                   <div className="relative">
                     <input
