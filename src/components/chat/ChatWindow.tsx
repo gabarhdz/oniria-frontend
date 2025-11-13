@@ -58,29 +58,37 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       setIsConnected(true);
     };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      switch (data.type) {
-        case 'chat_history':
-          setMessages(data.messages);
-          break;
-        
-        case 'new_message':
-          setMessages(prev => [...prev, data.message]);
-          break;
-        
-        case 'typing':
-          if (data.user_id !== currentUserId) {
-            setIsTyping(data.is_typing);
-          }
-          break;
-        
-        case 'error':
-          console.error('Error en chat:', data.message);
-          break;
+   ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  
+  switch (data.type) {
+    case 'chat_history':
+      setMessages(data.messages);
+      break;
+    
+    case 'new_message':
+      // ✅ SOLUCIÓN: Verificar que el mensaje no exista antes de agregarlo
+      setMessages(prev => {
+        const messageExists = prev.some(msg => msg.id === data.message.id);
+        if (messageExists) {
+          console.log('⚠️ Mensaje duplicado ignorado:', data.message.id);
+          return prev;
+        }
+        return [...prev, data.message];
+      });
+      break;
+    
+    case 'typing':
+      if (data.user_id !== currentUserId) {
+        setIsTyping(data.is_typing);
       }
-    };
+      break;
+    
+    case 'error':
+      console.error('Error en chat:', data.message);
+      break;
+  }
+};
 
     ws.onerror = (error) => {
       console.error('❌ Error en WebSocket:', error);
