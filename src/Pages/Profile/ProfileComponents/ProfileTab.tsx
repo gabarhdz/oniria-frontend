@@ -144,20 +144,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             <div className="mb-8">
               <h3 className="text-xl font-semibold text-[#ffe0db] mb-4 flex items-center">
                 <Heart className="w-5 h-5 text-[#f1b3be] mr-2" />
-                {viewOnly ? `El mundo onírico de ${user ? user.username: ''}` : 'Sobre mi mundo onírico'}
+                {viewOnly ? `El mundo noctirico de ${user ? user.username: ''}` : 'Sobre mi mundo Noctirico'}
               </h3>
               {isEditing && !viewOnly ? (
                 <textarea
                   value={editData?.description || ''}
                   onChange={(e) => setEditData(editData ? {...editData, description: e.target.value} : null)}
                   rows={6}
-                  placeholder="Cuéntanos sobre tus sueños, experiencias y conexión con el mundo onírico..."
+                  placeholder="Cuéntanos sobre tus problemas, experiencias y conexión con el mundo onírico..."
                   className="w-full bg-[#ffe0db]/10 backdrop-blur-sm border border-[#ffe0db]/20 rounded-xl px-4 py-3 text-[#ffe0db] placeholder-[#ffe0db]/50 focus:ring-2 focus:ring-[#f1b3be] focus:border-[#f1b3be] resize-none"
                   maxLength={1500}
                 />
               ) : (
                 <p className="text-[#ffe0db]/80 leading-relaxed">
-                  {(user ? user.description:  '')|| (viewOnly ? 'Este usuario no ha compartido su historia onírica aún...' : 'Aún no has compartido tu historia onírica...')}
+                  {(user ? user.description:  '')|| (viewOnly ? 'Este usuario no ha compartido su historia noctirica aún...' : 'Aún no has compartido tu historia noctirica...')}
                 </p>
               )}
             </div>
@@ -165,7 +165,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             {/* Estadísticas */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               {[
-                { label: 'Sueños Registrados', value: '47', icon: Moon, color: 'from-[#9675bc] to-indigo-500' },
+                { label: 'Momentos Registrados', value: '47', icon: Moon, color: 'from-[#9675bc] to-indigo-500' },
                 { label: 'Días Activo', value: '89', icon: Calendar, color: 'from-[#f1b3be] to-rose-500' },
                 { label: 'Análisis Completos', value: '23', icon: Star, color: 'from-amber-500 to-[#ffe0db]' }
               ].map((stat, index) => (
@@ -205,7 +205,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-[#ffe0db]/70">Tipo de Cuenta</span>
               <span className="text-[#f1b3be] font-medium">
-                {(user? user.is_psychologist: '') ? 'Psicólogo' : 'Soñador'}
+                {(user? user.is_psychologist: '') ? 'Psicólogo' : 'Usuario General'}
               </span>
             </div>
           </div>
@@ -219,7 +219,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           </h3>
           <div className="space-y-3">
             {[
-              { action: 'Sueño registrado', time: 'Hace 2 horas', color: 'text-[#9675bc]' },
+              { action: 'Momento registrado', time: 'Hace 2 horas', color: 'text-[#9675bc]' },
               { action: 'Análisis completado', time: 'Ayer', color: 'text-[#f1b3be]' },
               { action: 'Perfil actualizado', time: 'Hace 3 días', color: 'text-blue-400' }
             ].map((activity, index) => (
