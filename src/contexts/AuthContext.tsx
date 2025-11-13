@@ -9,6 +9,7 @@ interface User {
   username: string;
   email: string;
   is_psychologist: boolean;
+  is_superuser: boolean; // 👈 AGREGADO
   description?: string;
   profile_pic?: string;
 }
@@ -76,6 +77,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           username: response.data.username,
           email: response.data.email,
           is_psychologist: response.data.is_psychologist || false,
+          is_superuser: response.data.is_superuser || false, // 👈 AGREGADO
           description: response.data.description || '',
           profile_pic: response.data.profile_pic || null,
         };

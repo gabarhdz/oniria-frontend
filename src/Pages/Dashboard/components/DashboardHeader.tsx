@@ -10,7 +10,8 @@ import {
   HelpCircle,
   Menu,
   X,
-  MessageCircle
+  MessageCircle,
+  Crown // 👈 NUEVO ICONO
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '../../../components/NotificationCenter';
@@ -20,6 +21,7 @@ interface User {
   username: string;
   email?: string;
   is_psychologist: boolean;
+  is_superuser?: boolean; // 👈 NUEVO CAMPO
   description?: string;
   profile_pic?: string;
   profile_pic_url?: string;
@@ -45,6 +47,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const navigate = useNavigate();
 
+  // 👇 MENÚ CON OPCIÓN DE ADMIN
   const profileMenuItems = [
     { icon: User, label: 'Mi Perfil', action: () => navigate('/dashboard/profile/profile') },
     { icon: Settings, label: 'Configuración', action: () => console.log('Configuración') },
@@ -52,6 +55,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     { icon: darkMode ? Sun : Moon, label: darkMode ? 'Modo Claro' : 'Modo Oscuro', action: () => setDarkMode(!darkMode) },
     { icon: HelpCircle, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
+
+  // 👇 SI ES ADMIN, AGREGAR OPCIÓN
+  if (user.is_superuser) {
+    profileMenuItems.unshift({
+      icon: Crown,
+      label: 'Panel Admin',
+      action: () => navigate('/admin/psychologists')
+    });
+  }
 
   const navigationItems = [
     { label: 'Chatbot', path: '/chatbot' },
@@ -63,34 +75,25 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const getUserInitials = (username: string): string =>
     username.split(' ').map(name => name.charAt(0)).join('').toUpperCase().slice(0, 2);
 
-  // 🔹 Función mejorada para manejar base64, URLs y paths
   const getProfileImageUrl = (user: User): string | null => {
-    // Prioridad 1: profile_pic_url
     if (user.profile_pic_url) {
-      // Si es base64, retornar directamente
       if (user.profile_pic_url.startsWith('data:image')) {
         return user.profile_pic_url;
       }
-      // Si es URL completa, retornar directamente
       if (user.profile_pic_url.startsWith('http://') || user.profile_pic_url.startsWith('https://')) {
         return user.profile_pic_url;
       }
-      // Si es path relativo, construir URL completa
       const cleanPath = user.profile_pic_url.startsWith('/') ? user.profile_pic_url : `/${user.profile_pic_url}`;
       return `http://127.0.0.1:8000${cleanPath}`;
     }
 
-    // Prioridad 2: profile_pic
     if (user.profile_pic) {
-      // Si es base64, retornar directamente
       if (user.profile_pic.startsWith('data:image')) {
         return user.profile_pic;
       }
-      // Si es URL completa, retornar directamente
       if (user.profile_pic.startsWith('http://') || user.profile_pic.startsWith('https://')) {
         return user.profile_pic;
       }
-      // Si es path relativo, construir URL completa
       const cleanPath = user.profile_pic.startsWith('/') ? user.profile_pic : `/${user.profile_pic}`;
       return `http://127.0.0.1:8000${cleanPath}`;
     }
@@ -158,6 +161,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <span className={`text-white font-semibold ${textSize} select-none`}>
             {getUserInitials(user.username)}
           </span>
+        )}
+        {/* 👇 BADGE DE ADMIN */}
+        {user.is_superuser && (
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center border-2 border-white">
+            <Crown className="w-3 h-3 text-white" />
+          </div>
         )}
       </div>
     );
@@ -241,7 +250,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-white text-base sm:text-lg truncate">{user.username}</h3>
               <p className="text-xs sm:text-sm text-oniria_pink/80 truncate">
-                {user.is_psychologist ? 'Psicólogo' : 'Usuario'}
+                {user.is_superuser ? 'Administrador' : user.is_psychologist ? 'Psicólogo' : 'Usuario'}
               </p>
             </div>
           </div>
@@ -334,6 +343,18 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           {/* Botones acción desktop */}
           <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4 mr-4 xl:mr-6 2xl:mr-8">
+            {/* 👇 BOTÓN ADMIN - Solo visible para superusers */}
+            {user.is_superuser && (
+              <Link
+                to="/admin/psychologists"
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 rounded-xl text-white font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                title="Panel de Administración"
+              >
+                <Crown className="w-5 h-5" />
+                <span className="hidden xl:inline">Admin</span>
+              </Link>
+            )}
+
             <Link
               to="/conversaciones"
               className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-xl transition-all duration-300 transform hover:scale-105"
@@ -370,6 +391,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-white text-base xl:text-lg truncate">{user.username}</h3>
                         <p className="text-xs xl:text-sm text-oniria_pink/80 truncate">{user.email || 'Sin email'}</p>
+                        {user.is_superuser && (
+                          <div className="flex items-center space-x-1 mt-1">
+                            <Crown className="w-3 h-3 text-yellow-400" />
+                            <span className="text-xs text-yellow-400 font-medium">Administrador</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

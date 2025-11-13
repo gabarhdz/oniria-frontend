@@ -1,4 +1,4 @@
-// App.tsx - Updated with Profile Routes
+// App.tsx - Updated with Admin Route
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
@@ -14,6 +14,7 @@ import ProtectedRoute from './Pages/Home/Components/ProtectedRoute';
 import PsychologistSignUp from './Pages/SignUp/PyschologistSignUp';
 import PsychologistDashboard from './Pages/Dashboard/PyschologistDashboard';
 import PsychologistsPage from './Pages/Pyschologists/PyschologistPage';
+import AdminPsychologistPanel from './Pages/AdminPsychologistPanel/AdminPsychologistPanel'; 
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 import ConversationsList from './components/chat/ConversationList';
 import EmotionalDiaryPage from './Pages/EmotionalJournal/EmotionalJournal';
@@ -32,7 +33,6 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   
   return <>{children}</>;
 };
-
 
 // Pantalla de carga
 const LoadingScreen: React.FC = () => {
@@ -160,12 +160,12 @@ function App() {
             } 
           />
           <Route 
-          path="/dashboard/profile/view/:userId" 
+            path="/dashboard/profile/view/:userId" 
             element={
-          <ProtectedRoute>
-            <Profile viewOnly={true} />
-           </ProtectedRoute>
-          } 
+              <ProtectedRoute>
+                <Profile viewOnly={true} />
+              </ProtectedRoute>
+            } 
           />
           
           
@@ -207,13 +207,23 @@ function App() {
           />
           
           {/* Ruta protegida solo para psicólogos */}
-         <Route 
+          <Route 
             path="/psychologist" 
             element={
               <ProtectedRoute requiredRole="psychologist">
                 <PsychologistDashboard />
               </ProtectedRoute>
-           } 
+            } 
+          />
+
+          {/* 👇 NUEVA RUTA DE ADMINISTRACIÓN - Solo para superusers */}
+          <Route 
+            path="/admin/psychologists" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminPsychologistPanel />
+              </ProtectedRoute>
+            } 
           />
 
           {/* Ruta de la comunidad */}
@@ -243,7 +253,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
-           <Route 
+          <Route 
             path="/emotional-diary" 
             element={
               <ProtectedRoute>
@@ -251,6 +261,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          
           {/* Ruta 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
