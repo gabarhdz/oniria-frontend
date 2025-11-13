@@ -18,6 +18,8 @@ import AdminPsychologistPanel from './Pages/AdminPsychologistPanel/AdminPsycholo
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 import ConversationsList from './components/chat/ConversationList';
 import EmotionalDiaryPage from './Pages/EmotionalJournal/EmotionalJournal';
+import FormsManagement from './Pages/Forms/FormsManagement';
+import TakeFormPage from './Pages/Forms/TakeFormPage'; 
 
 // Componente para rutas públicas que redirige si ya está autenticado
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -140,6 +142,7 @@ function App() {
           <Route path="/login" element={<PublicRoute><LogIn /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/psychologist-signup" element={<PsychologistSignUp />} />
+          
          
           
           {/* Rutas protegidas para usuarios autenticados */}
@@ -216,7 +219,7 @@ function App() {
             } 
           />
 
-          {/* 👇 NUEVA RUTA DE ADMINISTRACIÓN - Solo para superusers */}
+         
           <Route 
             path="/admin/psychologists" 
             element={
@@ -224,6 +227,22 @@ function App() {
                 <AdminPsychologistPanel />
               </ProtectedRoute>
             } 
+          />
+          <Route
+            path="/forms/manage"
+            element={
+              <ProtectedRoute requiredRole='psychologist'>
+                <FormsManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms/take/:formId"
+            element={
+              <ProtectedRoute>
+                <TakeFormPage />
+              </ProtectedRoute>
+            }
           />
 
           {/* Ruta de la comunidad */}
