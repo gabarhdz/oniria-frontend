@@ -258,9 +258,9 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
   const statsCards = [
     {
       icon: <BookOpen className="w-7 h-7" />,
-      title: "Sueños Registrados",
+      title: "Pensamientos Registrados",
       value: userStats.dreamsLogged,
-      subtitle: "experiencias oníricas",
+      subtitle: "experiencias noctiricas",
       gradient: "from-[#9675bc] to-[#7c3aed]",
       change: { value: 15, isPositive: true }
     },
@@ -346,7 +346,7 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
                 className="text-4xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent"
                 style={{ fontFamily: 'var(--font-playfair, "Playfair Display", serif)' }}
               >
-                Tu Viaje Onírico
+                Tu Viaje en Noctiria
               </h2>
             </div>
             

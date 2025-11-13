@@ -1,4 +1,4 @@
-// src/hooks/useForms.ts
+// src/hooks/useForms.ts - VERSIÓN CORREGIDA
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import type {
@@ -197,16 +197,39 @@ export const useForms = () => {
     }
   }, []);
 
+  // 🔹 CORRECCIÓN: Endpoint separado para psicólogos y pacientes
   const getAssignedTests = useCallback(async (): Promise<DueTest[]> => {
     setIsLoading(true);
     setError(null);
     try {
+      // Este endpoint devuelve los tests que el PSICÓLOGO ha asignado
       const response = await axios.get(`${API_BASE}/assign-due-tests/`, {
         headers: getAuthHeaders()
       });
       return response.data;
     } catch (err: any) {
       const message = err.response?.data?.error || 'Error al obtener tests asignados';
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // 🔹 NUEVO: Endpoint para que PACIENTES vean sus tests pendientes
+  const getMyDueTests = useCallback(async (): Promise<DueTest[]> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log('🔍 Llamando a /my-due-tests/');
+      const response = await axios.get(`${API_BASE}/my-due-tests/`, {
+        headers: getAuthHeaders()
+      });
+      console.log('✅ Respuesta recibida:', response.data);
+      return response.data;
+    } catch (err: any) {
+      console.error('❌ Error en getMyDueTests:', err.response?.data || err);
+      const message = err.response?.data?.error || 'Error al obtener tus tests pendientes';
       setError(message);
       throw new Error(message);
     } finally {
@@ -233,22 +256,25 @@ export const useForms = () => {
 
   // ==================== RESPONSES ====================
 
-  const submitFormResponse = useCallback(async (data: SubmitFormData): Promise<FormResponse> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.post(`${API_BASE}/form-response/`, data, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Error al enviar respuestas';
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const submitFormResponse = useCallback(
+    async (data: SubmitFormData): Promise<FormResponse> => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await axios.post(`${API_BASE}/form-response/`, data, {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (err: any) {
+        const message = err.response?.data?.error || 'Error al enviar respuestas';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   const getFormResponses = useCallback(async (): Promise<FormResponse[]> => {
     setIsLoading(true);
@@ -288,7 +314,8 @@ export const useForms = () => {
     deleteForm,
     // Assignments
     assignTest,
-    getAssignedTests,
+    getAssignedTests,  // Para psicólogos
+    getMyDueTests,     // 🔹 NUEVO: Para pacientes
     getDueTest,
     // Responses
     submitFormResponse,

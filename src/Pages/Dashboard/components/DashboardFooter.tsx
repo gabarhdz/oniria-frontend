@@ -136,7 +136,8 @@ export const DashboardFooter: React.FC = () => {
     { 
       id: 'add', 
       icon: <Plus className="w-6 h-6" />, 
-      label: 'Agregar' 
+      label: 'Agregar' ,
+      to: '/emotional-diary' 
     },
     { 
       id: 'communities', 

@@ -1,4 +1,4 @@
-// src/Pages/Forms/TakeFormPage.tsx
+// src/Pages/Forms/TakeFormPage.tsx - VERSIÓN CORREGIDA
 import React, { useState, useEffect } from 'react';
 import {
   CheckCircle,
@@ -13,8 +13,13 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useForms } from '../../hooks/useForms';
-import type { Form, DueTest } from '../../types/forms';
+import type { Form, DueTest,SubmitFormData } from '../../types/forms';
 import { DashboardFooter } from '../Dashboard/components';
+import { useAuth } from '../../contexts/AuthContext';
+
+
+
+
 
 const TwinklingStars: React.FC<{ count?: number }> = ({ count = 30 }) => {
   const stars = Array.from({ length: count }, (_, i) => ({
@@ -47,14 +52,16 @@ const TwinklingStars: React.FC<{ count?: number }> = ({ count = 30 }) => {
 };
 
 const TakeFormPage: React.FC = () => {
+  const { user } = useAuth(); // 👈 Obtener usuario actual
   const [assignedTests, setAssignedTests] = useState<DueTest[]>([]);
   const [selectedTest, setSelectedTest] = useState<DueTest | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { isLoading, getAssignedTests, submitFormResponse } = useForms();
+  const { isLoading, getMyDueTests, submitFormResponse } = useForms();
 
   useEffect(() => {
     loadAssignedTests();
@@ -62,12 +69,33 @@ const TakeFormPage: React.FC = () => {
 
   const loadAssignedTests = async () => {
     try {
-      const tests = await getAssignedTests();
-      // Filtrar solo los pendientes (como paciente)
-      const myTests = tests.filter(t => !t.is_completed);
+      console.log('🔍 Cargando tests asignados...');
+      console.log('👤 Usuario actual:', user?.id, user?.username);
+      
+      const tests = await getMyDueTests();
+      console.log('📋 Tests recibidos del servidor:', tests);
+      
+      // 🔹 CORRECCIÓN: Filtrar tests donde el usuario actual es el paciente
+     const myTests = tests.filter(t => {
+  const patientId = typeof t.patient === 'object' ? t.patient.id : t.patient;
+  const userId = user?.id;
+
+  const isMyTest = patientId === userId;
+  const isPending = !t.is_completed; // asegúrate de que sea booleano
+
+  return isMyTest && isPending;
+});
+
+      
+      console.log('✅ Tests filtrados para mostrar:', myTests);
       setAssignedTests(myTests);
+      
+      if (myTests.length === 0) {
+        console.log('⚠️ No hay tests pendientes para mostrar');
+      }
     } catch (error) {
-      console.error('Error loading tests:', error);
+      console.error('❌ Error loading tests:', error);
+      setError('Error al cargar evaluaciones. Por favor, intenta nuevamente.');
     }
   };
 
@@ -90,44 +118,53 @@ const TakeFormPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!selectedTest) return;
+  
+const handleSubmit = async () => {
+  if (!selectedTest) return;
 
-    const allQuestionsAnswered = selectedTest.form.questions.every(
-      q => answers[q.id] !== undefined
-    );
+  const allQuestionsAnswered = selectedTest.form.questions.every(
+    q => answers[q.id] !== undefined
+  );
 
-    if (!allQuestionsAnswered) {
-      alert('Por favor responde todas las preguntas antes de enviar.');
-      return;
-    }
+  if (!allQuestionsAnswered) {
+    alert('Por favor responde todas las preguntas antes de enviar.');
+    return;
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      await submitFormResponse({
-        form: selectedTest.form.id,
-        answers: Object.entries(answers).map(([question, value]) => ({
-          question,
-          value
-        }))
-      });
+  try {
+    const payload: SubmitFormData = {
+      form: selectedTest.form.id,
+      due_test: selectedTest.id,
+      answers: selectedTest.form.questions.map(q => ({
+        question: q.id,  // 👈 ID exacto que Django espera
+        value: answers[q.id]
+      }))
+    };
 
-      setSubmitted(true);
-      setTimeout(() => {
-        setSelectedTest(null);
-        setAnswers({});
-        setCurrentQuestionIndex(0);
-        setSubmitted(false);
-        loadAssignedTests();
-      }, 3000);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Error al enviar el formulario. Intenta nuevamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    console.log('📤 Payload a enviar:', payload);
+
+    const response = await submitFormResponse(payload);
+
+    console.log('✅ Respuesta enviada exitosamente:', response);
+    setSubmitted(true);
+
+    setTimeout(() => {
+      setSelectedTest(null);
+      setAnswers({});
+      setCurrentQuestionIndex(0);
+      setSubmitted(false);
+      loadAssignedTests();
+    }, 3000);
+  } catch (error) {
+    console.error('❌ Error al enviar formulario:', error);
+    alert('Error al enviar el formulario. Intenta nuevamente.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const getProgress = () => {
     if (!selectedTest) return 0;
@@ -143,6 +180,28 @@ const TakeFormPage: React.FC = () => {
         <div className="text-center z-10">
           <Brain className="w-16 h-16 text-[#f1b3be] animate-spin mx-auto mb-4" />
           <p className="text-[#ffe0db] text-xl">Cargando evaluaciones...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
+        <TwinklingStars />
+        <div className="text-center z-10 p-8">
+          <AlertCircle className="w-24 h-24 text-red-400 mx-auto mb-6" />
+          <h2 className="text-4xl font-bold text-[#ffe0db] mb-4">Error</h2>
+          <p className="text-[#ffe0db]/80 text-xl mb-6">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              loadAssignedTests();
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] rounded-xl text-white font-medium"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
@@ -363,9 +422,18 @@ const TakeFormPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-[#ffe0db]">Evaluaciones Pendientes</h1>
-              <p className="text-[#f1b3be]">Completa los formularios asignados</p>
+              <p className="text-[#f1b3be]">Completa los formularios asignados por tu psicólogo</p>
             </div>
           </div>
+          
+          {/* Debug info (remover en producción) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-[#ffe0db]/60 bg-black/20 px-3 py-2 rounded-lg">
+              <p>Usuario: {user?.username}</p>
+              <p>ID: {user?.id}</p>
+              <p>Tests: {assignedTests.length}</p>
+            </div>
+          )}
         </div>
       </header>
 
@@ -380,6 +448,16 @@ const TakeFormPage: React.FC = () => {
             <p className="text-[#252c3e]/70">
               Tu psicólogo te asignará formularios cuando sea necesario
             </p>
+            
+            {/* Debug button (remover en producción) */}
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={loadAssignedTests}
+                className="mt-6 px-4 py-2 bg-[#9675bc] text-white rounded-lg text-sm"
+              >
+                🔄 Recargar (Debug)
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -394,8 +472,16 @@ const TakeFormPage: React.FC = () => {
                   <AlertCircle className="w-6 h-6 text-amber-500 animate-pulse" />
                 </div>
 
+                {test.form.description && (
+                  <p className="text-[#252c3e]/70 mb-4">{test.form.description}</p>
+                )}
+
                 {test.description && (
-                  <p className="text-[#252c3e]/70 mb-4">{test.description}</p>
+                  <div className="bg-[#9675bc]/10 rounded-xl p-4 mb-4">
+                    <p className="text-sm text-[#252c3e]/80">
+                      <strong>Nota del psicólogo:</strong> {test.description}
+                    </p>
+                  </div>
                 )}
 
                 <div className="space-y-3 mb-6">
@@ -410,6 +496,9 @@ const TakeFormPage: React.FC = () => {
                   <div className="flex items-center space-x-2 text-sm text-[#252c3e]/60">
                     <FileText className="w-4 h-4" />
                     <span>{test.form.questions.length} preguntas</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-[#9675bc]">
+                    <span className="font-mono font-bold">Código: {test.access_code}</span>
                   </div>
                 </div>
 
