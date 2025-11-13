@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Upload, User, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Shield, UserPlus, GraduationCap, FileText, Award, Building } from 'lucide-react';
+import { Upload, User, Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Shield, UserPlus, GraduationCap, FileText, Award, Building, Send } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
 
 // Componente de estrellas
 const TwinklingStars: React.FC<{ count?: number }> = ({ count = 25 }) => {
@@ -97,7 +98,8 @@ const DreamAlert: React.FC<DreamAlertProps> = ({ type, message, title, onClose }
   );
 };
 
-const PsychologistSignUp: React.FC = () => {
+
+  const PsychologistSignUp: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -106,7 +108,16 @@ const PsychologistSignUp: React.FC = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<string>('');
   const [showAlert, setShowAlert] = useState<AlertType | null>(null);
-  const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
+  const [universities] = useState([
+    'Universidad de Costa Rica',
+    'Universidad Nacional',
+    'Universidad Latina',
+    'ULACIT',
+    'Universidad Fidélitas',
+    'Universidad Autónoma de Centro América (UACA)',
+    'Universidad Veritas',
+    'Universidad Santa Paula',
+  ]);
 
   const {
     register,
@@ -123,29 +134,15 @@ const PsychologistSignUp: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Cargar universidades (solo para display en frontend)
-  useEffect(() => {
-    setUniversities([
-      { id: 1, name: 'Universidad de Costa Rica' },
-      { id: 2, name: 'Universidad Nacional' },
-      { id: 3, name: 'Universidad Latina' },
-      { id: 4, name: 'ULACIT' },
-      { id: 5, name: 'Universidad Fidélitas' },
-      { id: 6, name: 'Universidad Autónoma de Centro América (UACA)' },
-      { id: 7, name: 'Universidad Veritas' },
-      { id: 8, name: 'Universidad Santa Paula' },
-    ]);
-  }, []);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
         setShowAlert({
           type: 'error',
           title: 'Formato de archivo inválido',
-          message: 'Por favor selecciona un archivo de imagen válido (PNG, JPG, JPEG, etc.)'
+          message: 'Por favor selecciona una imagen o PDF válido'
         });
         return;
       }
@@ -154,7 +151,7 @@ const PsychologistSignUp: React.FC = () => {
         setShowAlert({
           type: 'error',
           title: 'Archivo demasiado grande',
-          message: 'El archivo seleccionado excede el límite de 5MB. Por favor selecciona una imagen más pequeña.'
+          message: 'El archivo excede el límite de 5MB'
         });
         return;
       }
@@ -178,7 +175,7 @@ const PsychologistSignUp: React.FC = () => {
       setShowAlert({
         type: 'error',
         title: 'Error en la validación',
-        message: 'Las contraseñas no coinciden. Por favor verifica que ambas contraseñas sean idénticas.'
+        message: 'Las contraseñas no coinciden'
       });
       return;
     }
@@ -186,57 +183,49 @@ const PsychologistSignUp: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
+      // Paso 1: Crear cuenta de usuario normal
+      const userFormData = new FormData();
+      userFormData.append('username', data.username);
+      userFormData.append('email', data.email);
+      userFormData.append('password', data.password);
+      userFormData.append('is_psychologist', 'false'); // Usuario normal por ahora
       
-      // Datos básicos del usuario
-      formData.append('username', data.username);
-      formData.append('email', data.email);
-      formData.append('password', data.password);
-      formData.append('is_psychologist', 'true');
-      
-      // Descripción profesional
-      if (data.professional_description) {
-        formData.append('description', data.professional_description);
-      }
-      
-      // Foto de perfil
       if (selectedFile) {
-        formData.append('profile_pic', selectedFile);
+        userFormData.append('profile_pic', selectedFile);
       }
 
-      // Paso 1: Crear el usuario
-      const userResponse = await axios.post('http://127.0.0.1:8000/api/users/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 60000,
-      });
+      const userResponse = await axios.post(
+        'http://127.0.0.1:8000/api/users/',
+        userFormData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 60000,
+        }
+      );
 
       console.log('✅ Usuario creado:', userResponse.data);
 
-      // Paso 2: Hacer login para obtener el token
-      const loginResponse = await axios.post('http://127.0.0.1:8000/api/auth/jwt/create/', {
-        username: data.username,
-        password: data.password
-      });
+      // Paso 2: Hacer login para obtener token
+      const loginResponse = await axios.post(
+        'http://127.0.0.1:8000/api/auth/jwt/create/',
+        {
+          username: data.username,
+          password: data.password
+        }
+      );
 
       const accessToken = loginResponse.data.access;
-      console.log('✅ Token obtenido');
+      localStorage.setItem('access_token', accessToken);
 
-      // Paso 3: Crear el perfil de psicólogo usando el token
-      // Enviamos el nombre de la universidad en lugar del ID
-      const universityName = universities.find(u => u.id === parseInt(data.university))?.name || '';
-      
-      const psychologistData = {
-        university: universityName,  // Enviamos el nombre en lugar del ID
-        description: data.professional_description || '',
+      // Paso 3: Enviar solicitud de conversión a psicólogo
+      const applicationData = {
+        university_name: data.university,
+        professional_description: data.professional_description || 'Psicólogo profesional',
       };
 
-      console.log('📤 Enviando datos de psicólogo:', psychologistData);
-
       await axios.post(
-        `http://127.0.0.1:8000/api/psychologists/psychologists/`,
-        psychologistData,
+        'http://127.0.0.1:8000/api/psychologists/applications/',
+        applicationData,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -245,12 +234,12 @@ const PsychologistSignUp: React.FC = () => {
         }
       );
 
-      console.log('✅ Perfil de psicólogo creado');
+      console.log('✅ Solicitud de psicólogo enviada');
 
       setShowAlert({
         type: 'success',
-        title: '¡Bienvenido a Noctiria!',
-        message: `¡Hola Dr(a). ${userResponse.data.username}! Tu cuenta profesional ha sido creada exitosamente.\n\nAhora puedes iniciar sesión y comenzar a ayudar a otros en su viaje onírico.`
+        title: '¡Solicitud Enviada!',
+        message: `¡Hola ${userResponse.data.username}! Tu cuenta ha sido creada y tu solicitud para convertirte en psicólogo ha sido enviada.\n\nUn administrador revisará tu solicitud pronto.`
       });
       
       reset();
@@ -258,34 +247,23 @@ const PsychologistSignUp: React.FC = () => {
       
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 3000);
 
     } catch (err: any) {
-      console.error('❌ Error de registro:', err);
+      console.error('❌ Error:', err);
       
-      let errorMessage = 'Ha ocurrido un error inesperado durante el registro.';
+      let errorMessage = 'Ha ocurrido un error durante el proceso.';
       
       if (err?.response?.data) {
         const data = err.response.data;
-        console.error('Error data:', data);
         
         if (data.email) {
           errorMessage = '💫 Este email ya está registrado.\n\n¿Ya tienes una cuenta? Intenta iniciar sesión.';
         } else if (data.username) {
-          errorMessage = '🌙 Este nombre de usuario ya está en uso.\n\nElige un nombre único para tu perfil profesional.';
-        } else if (data.password) {
-          errorMessage = `Contraseña: ${Array.isArray(data.password) ? data.password.join(', ') : data.password}`;
+          errorMessage = '🌙 Este nombre de usuario ya está en uso.';
         } else if (data.error) {
           errorMessage = data.error;
-        } else {
-          try {
-            errorMessage = Object.values(data).flat().join('\n');
-          } catch {
-            errorMessage = JSON.stringify(data);
-          }
         }
-      } else if (err?.message) {
-        errorMessage = err.message;
       }
       
       setShowAlert({
@@ -336,18 +314,18 @@ const PsychologistSignUp: React.FC = () => {
           </div>
           
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent">
-            Registro Profesional
+            Solicitud de Psicólogo
           </h1>
           <p className="text-xl text-[#ffe0db]/90 mb-4">
-            Únete como psicólogo certificado en Noctiria
+            Solicita convertirte en psicólogo certificado en Noctiria
           </p>
           <div className="flex items-center justify-center space-x-2 text-[#f1b3be]/80">
-            <Shield className="w-5 h-5 animate-pulse" />
-            <span className="text-sm">Cuenta profesional verificada</span>
+            <Send className="w-5 h-5 animate-pulse" />
+            <span className="text-sm">Tu solicitud será revisada por un administrador</span>
           </div>
         </div>
 
-        {/* Formulario */}
+        {/* Formulario - Mantener igual pero cambiar el texto del botón */}
         <div className="relative group">
           <div className={`absolute inset-0 bg-gradient-to-r from-[#9675bc]/10 via-[#f1b3be]/10 to-[#ffe0db]/10 rounded-3xl blur-xl transition-all duration-500 ${
             focusedField ? 'opacity-80 scale-105' : 'opacity-40'
@@ -435,7 +413,8 @@ const PsychologistSignUp: React.FC = () => {
                   >
                     <option value="">Selecciona tu universidad</option>
                     {universities.map((uni) => (
-                      <option key={uni.id} value={uni.id}>{uni.name}</option>
+                      <option key={uni} value={uni}>{uni}</option>
+                      
                     ))}
                   </select>
                   {errors.university && (
@@ -571,7 +550,7 @@ const PsychologistSignUp: React.FC = () => {
                 {/* Foto de perfil */}
                 <div className="group/field">
                   <label className="block text-sm font-semibold text-[#252c3e] mb-2">
-                    Foto de perfil profesional
+                    Foto del titular o credencial profesional
                   </label>
                   <div className="relative">
                     <input
@@ -602,7 +581,8 @@ const PsychologistSignUp: React.FC = () => {
                 </div>
               </div>
 
-              {/* Botón de registro */}
+             
+              {/* Botón de envío actualizado */}
               <div className="pt-6">
                 <button
                   type="submit"
@@ -612,12 +592,12 @@ const PsychologistSignUp: React.FC = () => {
                   {isLoading ? (
                     <div className="flex items-center justify-center space-x-3">
                       <Loader2 className="w-6 h-6 animate-spin" />
-                      <span>Creando cuenta profesional...</span>
+                      <span>Enviando solicitud...</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center space-x-3">
-                      <UserPlus className="w-6 h-6" />
-                      <span>Registrarme como psicólogo</span>
+                      <Send className="w-6 h-6" />
+                      <span>Enviar Solicitud de Psicólogo</span>
                       <Award className="w-6 h-6" />
                     </div>
                   )}
@@ -627,7 +607,7 @@ const PsychologistSignUp: React.FC = () => {
               {/* Link a login */}
               <div className="text-center pt-4">
                 <p className="text-sm text-[#252c3e]/80">
-                  ¿Ya tienes una cuenta profesional?{' '}
+                  ¿Ya tienes una cuenta?{' '}
                   <Link
                     to="/login"
                     className="font-semibold text-[#9675bc] hover:text-[#214d72] transition-colors duration-300"
