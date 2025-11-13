@@ -213,7 +213,7 @@ const PsychologistsPage: React.FC = () => {
     const fetchPsychologists = async () => {
       try {
         setLoading(true);
-        const res = await fetch('http://127.0.0.1:8000/api/psychologists/', {
+        const res = await fetch('http://127.0.0.1:8000/api/users/psychologist/', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             'Content-Type': 'application/json',
