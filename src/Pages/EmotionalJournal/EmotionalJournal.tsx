@@ -1,3 +1,4 @@
+// src/Pages/EmotionalJournal/EmotionalJournal.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Calendar,
@@ -22,8 +23,12 @@ import {
   Award,
   Zap,
   Eye,
-  Lock
+  Lock,
+  ClipboardCheck, // 👈 NUEVO ICONO
+  FileText // 👈 NUEVO ICONO
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // 👈 IMPORTAR
+import { useAuth } from '../../contexts/AuthContext'; // 👈 IMPORTAR
 import { DashboardFooter } from '../Dashboard/components';
 
 // ==================== TIPOS ====================
@@ -108,6 +113,10 @@ const MoodIcon: React.FC<{ mood: string; size?: number }> = ({ mood, size = 24 }
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const EmotionalDiaryPage: React.FC = () => {
+  // 👇 HOOKS NUEVOS
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
   // Estados principales
   const [entries, setEntries] = useState<EmotionalEntry[]>([]);
   const [stats, setStats] = useState<EmotionalStats | null>(null);
@@ -191,7 +200,6 @@ const EmotionalDiaryPage: React.FC = () => {
 
   const handleCreateEntry = async () => {
     try {
-      // Aquí iría la llamada real a la API
       const newEntryData: EmotionalEntry = {
         id: Date.now().toString(),
         ...newEntry,
@@ -205,7 +213,6 @@ const EmotionalDiaryPage: React.FC = () => {
       setShowNewEntryModal(false);
       resetForm();
       
-      // Recargar stats
       await loadStats();
     } catch (error) {
       console.error('Error creando entrada:', error);
@@ -263,6 +270,15 @@ const EmotionalDiaryPage: React.FC = () => {
     return matchesSearch && matchesMood;
   });
 
+  // 👇 FUNCIÓN PARA MANEJAR NAVEGACIÓN A FORMULARIOS
+  const handleFormsNavigation = () => {
+    if (user?.is_psychologist) {
+      navigate('/forms/manage');
+    } else {
+      navigate('/forms/take');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#1a1f35] via-[#2a3f5f] to-[#4a5d7a] flex items-center justify-center">
@@ -295,13 +311,34 @@ const EmotionalDiaryPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => setShowNewEntryModal(true)}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Nueva Entrada</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* 👇 BOTÓN CONDICIONAL DE FORMULARIOS */}
+            <button
+              onClick={handleFormsNavigation}
+              className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-[#ffe0db] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#ffe0db] rounded-xl text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg"
+              title={user?.is_psychologist ? 'Gestionar Formularios' : 'Mis Evaluaciones'}
+            >
+              {user?.is_psychologist ? (
+                <>
+                  <ClipboardCheck className="w-5 h-5" />
+                  <span className="hidden sm:inline">Gestionar Formularios</span>
+                </>
+              ) : (
+                <>
+                  <FileText className="w-5 h-5" />
+                  <span className="hidden sm:inline">Mis Evaluaciones</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={() => setShowNewEntryModal(true)}
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#9675bc] to-[#f1b3be] hover:from-[#f1b3be] hover:to-[#9675bc] rounded-xl text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Nueva Entrada</span>
+            </button>
+          </div>
         </div>
       </header>
 

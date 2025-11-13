@@ -216,8 +216,8 @@ export const ActionsSection: React.FC = () => {
   const actions = [
     {
       icon: <BookOpen className="w-7 h-7" />,
-      title: "Diario de Sueños",
-      description: "Registra y explora tus experiencias oníricas más profundas con IA avanzada",
+      title: "Diario de Pensamientos",
+      description: "Registra y explora tus experiencias en Noctiria más profundas con IA avanzada",
       gradient: "from-[#9675bc] to-[#7c3aed]",
       onClick: () => {
         console.log('Navegando a diario de sueños...');
@@ -227,7 +227,7 @@ export const ActionsSection: React.FC = () => {
     {
       icon: <Brain className="w-7 h-7" />,
       title: "Análisis Emocional",
-      description: "Descubre los patrones emocionales y psicológicos ocultos en tus sueños",
+      description: "Descubre los patrones emocionales y psicológicos ocultos en tus pensamientos",
       gradient: "from-[#f1b3be] to-[#ec4899]",
       onClick: () => {
          window.location.href = '/emotional-diary';
@@ -235,8 +235,8 @@ export const ActionsSection: React.FC = () => {
     },
     {
       icon: <Award className="w-7 h-7" />,
-      title: "Logros Oníricos",
-      description: "Celebra tus hitos como explorador de sueños y consciencia",
+      title: "Logros Noctiricos",
+      description: "Celebra tus hitos como explorador de emociones y consciencia",
       gradient: "from-[#ffe0db] to-[#f97316]",
       onClick: () => {
         console.log('Navegando a logros...');
@@ -246,7 +246,7 @@ export const ActionsSection: React.FC = () => {
     {
       icon: <Settings className="w-7 h-7" />,
       title: "Configuración Avanzada",
-      description: "Personaliza tu experiencia de análisis onírico en Noctiria",
+      description: "Personaliza tu experiencia de análisis en Noctiria",
       gradient: "from-[#214d72] to-[#0f172a]",
       onClick: () => {
         console.log('Navegando a configuración...');

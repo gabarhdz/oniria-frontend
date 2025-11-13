@@ -21,7 +21,7 @@ interface User {
   username: string;
   email?: string;
   is_psychologist: boolean;
-  is_superuser?: boolean; // 👈 NUEVO CAMPO
+  is_superuser?: boolean; 
   description?: string;
   profile_pic?: string;
   profile_pic_url?: string;
@@ -67,7 +67,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const navigationItems = [
     { label: 'Chatbot', path: '/chatbot' },
-    { label: 'Análisis', path: '/analysis' },
+    { label: 'Análisis', path: '/emotional-diary' },
     { label: 'Psicólogos', path: '/psychologists' },
     { label: 'Comunidad', path: '/communities' },
   ];

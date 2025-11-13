@@ -76,10 +76,10 @@ export interface CreateFormData {
 }
 
 export interface AssignTestData {
-  patient: string;
-  form: string;
-  date: string;
-  description?: string;
+  form: string;        // UUID del formulario
+  patient: string;     // UUID del paciente
+  date: string;        // ISO string de la fecha
+  description?: string; // Descripción opcional
 }
 
 export interface SubmitFormData {
@@ -88,4 +88,5 @@ export interface SubmitFormData {
     question: string;
     value: number;
   }[];
+   due_test: string; 
 }

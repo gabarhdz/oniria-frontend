@@ -246,14 +246,14 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
   const cards = [
     {
       icon: <User className="w-6 h-6 text-white" />,
-      title: "Nombre de Soñador",
+      title: "Nombre de Usuario",
       value: user.username,
       gradient: "from-[#9675bc]/40 to-[#7c3aed]/40",
       isSpecial: user.is_psychologist
     },
     {
       icon: <Mail className="w-6 h-6 text-white" />,
-      title: "Correo Onírico",
+      title: "Correo Noctirico",
       value: user.email,
       gradient: "from-[#f1b3be]/40 to-[#ec4899]/40"
     },
@@ -323,13 +323,13 @@ export const UserInfoCards: React.FC<UserInfoCardsProps> = ({ user }) => {
                 className="text-3xl font-bold bg-gradient-to-r from-[#ffe0db] via-[#f1b3be] to-[#9675bc] bg-clip-text text-transparent"
                 style={{ fontFamily: 'var(--font-playfair, "Playfair Display", serif)' }}
               >
-                Perfil del Soñador
+                Perfil del Usuario
               </h2>
             </div>
             
             {/* Subtitle */}
             <p className="text-lg text-[#ffe0db]/80 max-w-xl leading-relaxed">
-              Tu identidad única en el mundo de los sueños y emociones
+              Tu identidad única en el mundo de los sentimientos y emociones
             </p>
             
             {/* Special user indicator - SIN animación */}

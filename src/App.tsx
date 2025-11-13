@@ -1,4 +1,4 @@
-// App.tsx - Updated with Admin Route
+// src/App.tsx - Actualizado con rutas de formularios
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './App.css';
@@ -18,6 +18,9 @@ import AdminPsychologistPanel from './Pages/AdminPsychologistPanel/AdminPsycholo
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 import ConversationsList from './components/chat/ConversationList';
 import EmotionalDiaryPage from './Pages/EmotionalJournal/EmotionalJournal';
+// 👇 IMPORTAR COMPONENTES DE FORMULARIOS
+import TakeFormPage from './Pages/Forms/TakeFormPage';
+import FormsManagement from './Pages/Forms/FormsManagement';
 
 // Componente para rutas públicas que redirige si ya está autenticado
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -216,7 +219,7 @@ function App() {
             } 
           />
 
-          {/* 👇 NUEVA RUTA DE ADMINISTRACIÓN - Solo para superusers */}
+          {/* Ruta de administración - Solo para superusers */}
           <Route 
             path="/admin/psychologists" 
             element={
@@ -245,6 +248,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          {/* Ruta de psicólogos */}
           <Route 
             path="/psychologists" 
             element={
@@ -253,11 +258,34 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          
+          {/* Ruta del diario emocional */}
           <Route 
             path="/emotional-diary" 
             element={
               <ProtectedRoute>
                 <EmotionalDiaryPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* 👇 RUTAS DE FORMULARIOS NUEVAS */}
+          {/* Ruta para pacientes - Tomar formularios asignados */}
+          <Route 
+            path="/forms/take" 
+            element={
+              <ProtectedRoute>
+                <TakeFormPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Ruta para psicólogos - Gestionar formularios */}
+          <Route 
+            path="/forms/manage" 
+            element={
+              <ProtectedRoute requiredRole="psychologist">
+                <FormsManagement />
               </ProtectedRoute>
             } 
           />

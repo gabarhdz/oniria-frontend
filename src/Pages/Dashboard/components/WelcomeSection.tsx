@@ -392,7 +392,7 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user }) => {
               <div className="flex items-center space-x-2 bg-gradient-to-r from-[#f1b3be]/10 to-[#9675bc]/10 px-4 py-2 rounded-full border border-[#f1b3be]/20 backdrop-blur-sm hover:border-[#f1b3be]/40 transition-all duration-300 group">
                 <Eye className="w-4 h-4 text-[#f1b3be]" />
                 <span className="text-sm font-semibold group-hover:text-white transition-colors duration-300">
-                  Explorador de Sueños
+                  Explorador de Emociones
                 </span>
               </div>
             )}
