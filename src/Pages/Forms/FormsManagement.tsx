@@ -403,8 +403,11 @@ const FormsManagement: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setSelectedTest(test)}
+
+
                       className="p-2 rounded-lg bg-[#9675bc]/20 text-[#9675bc] hover:bg-[#9675bc]/30 transition-all"
                     >
+                    
                       <Eye className="w-5 h-5" />
                     </button>
                   </div>
