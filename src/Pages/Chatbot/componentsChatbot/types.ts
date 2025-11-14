@@ -17,9 +17,11 @@ export interface UserData {
   id: string;
   username: string;
   email: string;
+  is_psychologist?: boolean;
+  description?: string;
   profile_pic?: string;
+  profile_pic_url?: string; // Agregar este campo
 }
-
 export interface OrbProps {
   isActive: boolean;
   size?: 'small' | 'medium' | 'large';

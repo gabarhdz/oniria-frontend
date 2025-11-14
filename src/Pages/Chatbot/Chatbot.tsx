@@ -15,7 +15,7 @@ import {
 import type {
   Message,
   Conversation,
-  UserData
+  UserData,
 } from './componentsChatbot/index';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
@@ -30,20 +30,35 @@ const OniriaChatbot: React.FC = () => {
   const [showSidebar, setShowSidebar] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const [user, setUser] = React.useState<UserData | null>(null);
 
-  const getUserData = (): UserData | null => {
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      try {
-        return JSON.parse(userData);
-      } catch {
-        return null;
-      }
+  React.useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch('http://127.0.0.1:8000/api/users/me/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      const data = await response.json();
+
+      setUser(data);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching user data:', err);
+      setError(err.message || 'Error desconocido');
     }
-    return null;
   };
 
-  const user = getUserData();
+  fetchUser();
+}, []);
+
 
   React.useEffect(() => {
     const savedConversations = localStorage.getItem('noctiria_conversations');

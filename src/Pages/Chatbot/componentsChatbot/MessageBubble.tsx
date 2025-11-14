@@ -24,12 +24,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           <div className="relative w-12 h-12 sm:w-14 sm:h-14">
             <Orb isActive={isLoading && index === messagesLength - 1} size="small" />
           </div>
-        ) : user?.profile_pic ? (
-          <img
-            src={user.profile_pic}
-            alt={user.username}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-oniria_pink/50 shadow-lg"
-          />
+          ) : (user?.profile_pic || user?.profile_pic_url) ? (
+            <img
+              src={user.profile_pic_url || user.profile_pic || ''}
+              alt={user.username}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-oniria_pink/50 shadow-lg"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                console.error('Error loading profile pic');
+              }}
+            />
         ) : (
           <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-oniria_pink to-oniria_lightpink rounded-full flex items-center justify-center shadow-lg border-2 border-oniria_pink/50">
             <span className="text-white font-bold text-lg">
