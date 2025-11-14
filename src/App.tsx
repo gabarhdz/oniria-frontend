@@ -18,6 +18,7 @@ import AdminPsychologistPanel from './Pages/AdminPsychologistPanel/AdminPsycholo
 import { Loader2, Crown, Home, Moon } from 'lucide-react';
 import ConversationsList from './components/chat/ConversationList';
 import EmotionalDiaryPage from './Pages/EmotionalJournal/EmotionalJournal';
+import ViewResponses from './Pages/Forms/ViewResponses';
 // 👇 IMPORTAR COMPONENTES DE FORMULARIOS
 import TakeFormPage from './Pages/Forms/TakeFormPage';
 import FormsManagement from './Pages/Forms/FormsManagement';
@@ -289,6 +290,15 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          <Route 
+          path="/forms/responses" 
+          element={
+         <ProtectedRoute requiredRole="psychologist">
+          <ViewResponses />
+         </ProtectedRoute>
+        } 
+        />
           
           {/* Ruta 404 */}
           <Route path="*" element={<NotFound />} />

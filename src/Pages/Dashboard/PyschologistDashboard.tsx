@@ -112,6 +112,7 @@ const QuickActionCard: React.FC<QuickActionCardProps> = ({ icon: Icon, title, de
           <h3 className="font-bold text-lg text-[#252c3e] mb-1">{title}</h3>
           <p className="text-sm text-[#252c3e]/70">{description}</p>
         </div>
+        
       </div>
     </button>
   );
@@ -349,5 +350,5 @@ const PsychologistDashboard: React.FC = () => {
     </div>
   );
 };
-
+1
 export default PsychologistDashboard;

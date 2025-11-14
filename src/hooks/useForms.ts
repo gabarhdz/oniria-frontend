@@ -277,21 +277,21 @@ export const useForms = () => {
   );
 
   const getFormResponses = useCallback(async (): Promise<FormResponse[]> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`${API_BASE}/form-response/`, {
-        headers: getAuthHeaders()
-      });
-      return response.data;
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Error al obtener respuestas';
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  setIsLoading(true);
+  setError(null);
+  try {
+    const response = await axios.get(`${API_BASE}/my-form-responses/`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (err: any) {
+    const message = err.response?.data?.error || 'Error al obtener respuestas';
+    setError(message);
+    throw new Error(message);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -319,6 +319,7 @@ export const useForms = () => {
     getDueTest,
     // Responses
     submitFormResponse,
-    getFormResponses
+    getFormResponses,
+    
   };
 };
